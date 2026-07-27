@@ -13,6 +13,7 @@ class DetectionService:
 
     def __init__(self, confidence_threshold: float = 0.50):
         self.confidence_threshold = confidence_threshold
+        self.target_classes = {"knife"}
 
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu"
@@ -67,6 +68,9 @@ class DetectionService:
             class_id = int(label)
             class_name = self.categories[class_id]
 
+            if class_name not in self.target_classes: 
+                continue
+
             x1, y1, x2, y2 = [
                 int(value) for value in box.tolist()
             ]
@@ -100,12 +104,25 @@ def test_first_frame(video_path: str):
             f"OpenCV could not open: {video_file}"
         )
 
+    total_frames = int(
+        capture.get(cv2.CAP_PROP_FRAME_COUNT)
+    )
+
+    middle_frame = total_frames // 2
+
+    capture.set(
+        cv2.CAP_PROP_POS_FRAMES,
+        middle_frame,
+    )
+
     success, frame = capture.read()
     capture.release()
 
+    print(f"Testing frame: {middle_frame}")
+
     if not success or frame is None:
         raise RuntimeError(
-            "OpenCV could not read the first video frame."
+            "OpenCV could not read the selected video frame."
         )
 
     detector = DetectionService(
@@ -129,5 +146,5 @@ def test_first_frame(video_path: str):
 
 if __name__ == "__main__":
     test_first_frame(
-        "samples/test_10s_general.mp4"
+        "samples/test_10s_knife.mp4"
     )
