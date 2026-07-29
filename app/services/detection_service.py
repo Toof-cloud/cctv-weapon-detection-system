@@ -143,8 +143,100 @@ def test_first_frame(video_path: str):
             f"box={detection['box']}"
         )
 
+def scan_video_for_knives(video_path: str):
+    """Scans multiple video frames for knife detections."""
+
+    video_file = Path(video_path)
+
+    if not video_file.exists():
+        raise FileNotFoundError(
+            f"Video was not found: {video_file}"
+        )
+
+    capture = cv2.VideoCapture(str(video_file))
+
+    if not capture.isOpened():
+        raise RuntimeError(
+            f"OpenCV could not open: {video_file}"
+        )
+
+    fps = capture.get(cv2.CAP_PROP_FPS)
+    total_frames = int(
+        capture.get(cv2.CAP_PROP_FRAME_COUNT)
+    )
+
+    if fps <= 0:
+        capture.release()
+        raise RuntimeError(
+            "The video has an invalid frame rate."
+        )
+
+    duration = total_frames / fps
+
+    print(f"Video: {video_file.name}")
+    print(f"FPS: {fps:.2f}")
+    print(f"Total frames: {total_frames}")
+    print(f"Duration: {duration:.2f} seconds")
+
+    detector = DetectionService(
+        confidence_threshold=0.25
+    )
+
+    # Analyze approximately five frames per second.
+    analysis_fps = 5
+    frame_interval = max(
+        1,
+        round(fps / analysis_fps),
+    )
+
+    frame_number = 0
+    analyzed_frames = 0
+    total_detections = 0
+
+    while frame_number < total_frames:
+        capture.set(
+            cv2.CAP_PROP_POS_FRAMES,
+            frame_number,
+        )
+
+        success, frame = capture.read()
+
+        if not success or frame is None:
+            print(
+                f"Could not read frame {frame_number}."
+            )
+            break
+
+        detections = detector.detect_frame(frame)
+        timestamp = frame_number / fps
+        analyzed_frames += 1
+
+        print(
+            f"Frame {frame_number:04d} | "
+            f"{timestamp:05.2f}s | "
+            f"{len(detections)} knife detection(s)"
+        )
+
+        for detection in detections:
+            total_detections += 1
+
+            print(
+                f"  Knife: "
+                f"{detection['confidence']:.2%} | "
+                f"Box: {detection['box']}"
+            )
+
+        frame_number += frame_interval
+
+    capture.release()
+
+    print()
+    print("Scan completed.")
+    print(f"Analyzed frames: {analyzed_frames}")
+    print(f"Total knife detections: {total_detections}")
+
 
 if __name__ == "__main__":
-    test_first_frame(
+     scan_video_for_knives(
         "samples/test_10s_knife.mp4"
     )
