@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import csv
 import cv2
 import torch
 from torchvision.models.detection import (
@@ -392,6 +393,7 @@ def process_video(
     frame_number = 0
     analyzed_frames = 0
     total_detections = 0
+    detection_records = []
 
     while True:
         success, frame = capture.read()
@@ -421,6 +423,27 @@ def process_video(
                 )
 
                 for detection in detections:
+                    x1, y1, x2, y2 = detection["box"]
+                    detection_records.append(
+                        {
+                            "frame_number": frame_number,
+                            "timestamp_seconds": round(
+                                timestamp,
+                                2,
+                            ),
+                            "class_name": detection[
+                                "class_name"
+                            ],
+                            "confidence": round(
+                                detection["confidence"],
+                                4,
+                            ),
+                            "x1": x1,
+                            "y1": y1,
+                            "x2": x2,
+                            "y2": y2,
+                        }
+                    )
                     print(
                         f"  Knife: "
                         f"{detection['confidence']:.2%} | "
@@ -470,6 +493,42 @@ def process_video(
     capture.release()
     writer.release()
 
+    reports_dir = Path(
+        "outputs/reports"
+    )
+    reports_dir.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+    csv_path = (
+        reports_dir
+        / f"{input_file.stem}_detections.csv"
+    )
+
+    with open(
+        csv_path,
+        mode="w",
+        newline="",
+        encoding="utf-8",
+    ) as csv_file:
+        writer_csv = csv.DictWriter(
+            csv_file,
+            fieldnames=[
+                "frame_number",
+                "timestamp_seconds",
+                "class_name",
+                "confidence",
+                "x1",
+                "y1",
+                "x2",
+                "y2",
+            ],
+        )
+        writer_csv.writeheader()
+        writer_csv.writerows(
+            detection_records
+        )
+
     if not output_file.exists():
         raise RuntimeError(
             "Processing finished, but the output "
@@ -485,6 +544,7 @@ def process_video(
     print(f"Knife detections: {total_detections}")
     print(f"Output size: {output_size:,} bytes")
     print(f"Output saved to: {output_file}")
+    print(f"CSV report saved to: {csv_path}")
 
     return {
         "input_path": str(input_file),
