@@ -86,6 +86,68 @@ class DetectionService:
 
         return detections
 
+def draw_detections(frame, detections):
+    """Draws knife bounding boxes and labels on a video frame."""
+
+    for detection in detections:
+        x1, y1, x2, y2 = detection["box"]
+        confidence = detection["confidence"]
+
+        label = f"Potential knife {confidence:.1%}"
+
+        # Red bounding box in OpenCV BGR format.
+        color = (0, 0, 255)
+
+        cv2.rectangle(
+            frame,
+            (x1, y1),
+            (x2, y2),
+            color,
+            2,
+        )
+
+        # Calculate the text background size.
+        text_size, baseline = cv2.getTextSize(
+            label,
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.55,
+            2,
+        )
+
+        text_width, text_height = text_size
+
+        # Keep the label inside the frame.
+        label_y = max(
+            text_height + baseline + 5,
+            y1,
+        )
+
+        cv2.rectangle(
+            frame,
+            (
+                x1,
+                label_y - text_height - baseline - 5,
+            ),
+            (
+                x1 + text_width + 8,
+                label_y,
+            ),
+            color,
+            -1,
+        )
+
+        cv2.putText(
+            frame,
+            label,
+            (x1 + 4, label_y - baseline - 2),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.55,
+            (255, 255, 255),
+            2,
+            cv2.LINE_AA,
+        )
+
+    return frame
 
 def test_first_frame(video_path: str):
     """Reads one video frame and tests Faster R-CNN inference."""
@@ -235,8 +297,214 @@ def scan_video_for_knives(video_path: str):
     print(f"Analyzed frames: {analyzed_frames}")
     print(f"Total knife detections: {total_detections}")
 
+def process_video(
+    input_path: str,
+    output_path: str,
+    confidence_threshold: float = 0.50,
+    analysis_fps: int = 5,
+):
+    """Processes a complete video and saves an annotated MP4."""
+
+    input_file = Path(input_path)
+    output_file = Path(output_path)
+
+    if not input_file.exists():
+        raise FileNotFoundError(
+            f"Input video was not found: {input_file}"
+        )
+
+    # Create the output directory if it does not exist.
+    output_file.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    capture = cv2.VideoCapture(str(input_file))
+
+    if not capture.isOpened():
+        raise RuntimeError(
+            f"OpenCV could not open: {input_file}"
+        )
+
+    fps = capture.get(cv2.CAP_PROP_FPS)
+    total_frames = int(
+        capture.get(cv2.CAP_PROP_FRAME_COUNT)
+    )
+    width = int(
+        capture.get(cv2.CAP_PROP_FRAME_WIDTH)
+    )
+    height = int(
+        capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    )
+
+    if fps <= 0:
+        capture.release()
+        raise RuntimeError(
+            "The input video has an invalid frame rate."
+        )
+
+    if width <= 0 or height <= 0:
+        capture.release()
+        raise RuntimeError(
+            "The input video has invalid dimensions."
+        )
+
+    duration = total_frames / fps
+
+    print("Starting video processing")
+    print(f"Input: {input_file}")
+    print(f"Output: {output_file}")
+    print(f"Resolution: {width} x {height}")
+    print(f"FPS: {fps:.2f}")
+    print(f"Total frames: {total_frames}")
+    print(f"Duration: {duration:.2f} seconds")
+    print(
+        f"Visible confidence threshold: "
+        f"{confidence_threshold:.2f}"
+    )
+
+    # mp4v provides broad compatibility for an initial MP4 output.
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+
+    writer = cv2.VideoWriter(
+        str(output_file),
+        fourcc,
+        fps,
+        (width, height),
+    )
+
+    if not writer.isOpened():
+        capture.release()
+        raise RuntimeError(
+            f"Could not create output video: {output_file}"
+        )
+
+    detector = DetectionService(
+        confidence_threshold=confidence_threshold
+    )
+
+    # Analyze approximately the requested number of frames per second.
+    frame_interval = max(
+        1,
+        round(fps / analysis_fps),
+    )
+
+    frame_number = 0
+    analyzed_frames = 0
+    total_detections = 0
+
+    while True:
+        success, frame = capture.read()
+
+        if not success:
+            break
+
+        timestamp = frame_number / fps
+
+        # Only selected frames undergo Faster R-CNN inference.
+        if frame_number % frame_interval == 0:
+            detections = detector.detect_frame(frame)
+
+            analyzed_frames += 1
+            total_detections += len(detections)
+
+            frame = draw_detections(
+                frame,
+                detections,
+            )
+
+            if detections:
+                print(
+                    f"Frame {frame_number:04d} | "
+                    f"{timestamp:05.2f}s | "
+                    f"{len(detections)} detection(s)"
+                )
+
+                for detection in detections:
+                    print(
+                        f"  Knife: "
+                        f"{detection['confidence']:.2%} | "
+                        f"Box: {detection['box']}"
+                    )
+
+        # Add the frame number and timestamp to every output frame.
+        timestamp_label = (
+            f"Frame {frame_number} | "
+            f"Time {timestamp:.2f}s"
+        )
+
+        cv2.putText(
+            frame,
+            timestamp_label,
+            (12, height - 15),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.50,
+            (255, 255, 255),
+            2,
+            cv2.LINE_AA,
+        )
+
+        writer.write(frame)
+        frame_number += 1
+
+        if total_frames > 0:
+            progress = (
+                frame_number / total_frames
+            ) * 100
+
+            # Print progress at approximately every 10%.
+            progress_interval = max(
+                1,
+                total_frames // 10,
+            )
+
+            if (
+                frame_number % progress_interval == 0
+                or frame_number == total_frames
+            ):
+                print(
+                    f"Progress: "
+                    f"{min(progress, 100):.1f}%"
+                )
+
+    capture.release()
+    writer.release()
+
+    if not output_file.exists():
+        raise RuntimeError(
+            "Processing finished, but the output "
+            "video was not created."
+        )
+
+    output_size = output_file.stat().st_size
+
+    print()
+    print("Video processing completed.")
+    print(f"Frames written: {frame_number}")
+    print(f"Frames analyzed: {analyzed_frames}")
+    print(f"Knife detections: {total_detections}")
+    print(f"Output size: {output_size:,} bytes")
+    print(f"Output saved to: {output_file}")
+
+    return {
+        "input_path": str(input_file),
+        "output_path": str(output_file),
+        "fps": fps,
+        "width": width,
+        "height": height,
+        "total_frames": frame_number,
+        "analyzed_frames": analyzed_frames,
+        "total_detections": total_detections,
+        "duration_seconds": duration,
+    }
 
 if __name__ == "__main__":
-     scan_video_for_knives(
-        "samples/test_10s_knife.mp4"
+    process_video(
+        input_path="samples/test_10s_knife.mp4",
+        output_path=(
+            "outputs/videos/"
+            "test_10s_knife_detected.mp4"
+        ),
+        confidence_threshold=0.50,
+        analysis_fps=5,
     )
