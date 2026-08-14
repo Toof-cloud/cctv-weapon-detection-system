@@ -1,32 +1,48 @@
 from pathlib import Path
+import sys
 
 import csv
 import cv2
 import torch
-from torchvision.models.detection import (
-    FasterRCNN_ResNet50_FPN_V2_Weights,
-    fasterrcnn_resnet50_fpn_v2,
-)
 
+ROOT_DIR = Path(__file__).resolve().parents[2]
+
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from dataset_analysis.build_model import get_model
+
+MODEL_PATH = ROOT_DIR / "best_weapon_detector.pth"
 
 class DetectionService:
     """Loads Faster R-CNN and performs object detection on video frames."""
 
     def __init__(self, confidence_threshold: float = 0.50):
         self.confidence_threshold = confidence_threshold
-        self.target_classes = {"knife"}
+        self.target_classes = {"handgun", "knife"}
 
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu"
         )
 
-        self.weights = FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT
-        self.categories = self.weights.meta["categories"]
-        self.preprocess = self.weights.transforms()
+        self.categories = {
+            1: "handgun",
+            2: "knife",
+        }
 
-        self.model = fasterrcnn_resnet50_fpn_v2(
-            weights=self.weights
+        self.model = get_model(num_classes=3)
+
+        if not MODEL_PATH.exists():
+            raise FileNotFoundError(
+                f"Model checkpoint was not found: {MODEL_PATH}"
+            )
+
+        state_dict = torch.load(
+            MODEL_PATH,
+            map_location=self.device,
         )
+
+        self.model.load_state_dict(state_dict)
 
         self.model.to(self.device)
         self.model.eval()
@@ -47,8 +63,6 @@ class DetectionService:
         image_tensor = torch.from_numpy(rgb_frame)
         image_tensor = image_tensor.permute(2, 0, 1)
         image_tensor = image_tensor.float() / 255.0
-
-        image_tensor = self.preprocess(image_tensor)
         image_tensor = image_tensor.to(self.device)
 
         with torch.inference_mode():
@@ -67,9 +81,12 @@ class DetectionService:
                 continue
 
             class_id = int(label)
-            class_name = self.categories[class_id]
+            class_name = self.categories.get(
+                class_id,
+                "unknown",
+            )
 
-            if class_name not in self.target_classes: 
+            if class_name not in self.target_classes:
                 continue
 
             x1, y1, x2, y2 = [
@@ -88,13 +105,16 @@ class DetectionService:
         return detections
 
 def draw_detections(frame, detections):
-    """Draws knife bounding boxes and labels on a video frame."""
+    """Draws weapon bounding boxes and labels on a video frame."""
 
     for detection in detections:
         x1, y1, x2, y2 = detection["box"]
         confidence = detection["confidence"]
 
-        label = f"Potential knife {confidence:.1%}"
+        label = (
+            f"{detection['class_name']} "
+            f"{confidence:.1%}"
+        )
 
         # Red bounding box in OpenCV BGR format.
         color = (0, 0, 255)
@@ -196,7 +216,7 @@ def test_first_frame(video_path: str):
 
     print(f"Frame dimensions: {frame.shape}")
     print(
-        f"Detections above threshold: {len(detections)}"
+        f"Weapon detections above threshold: {len(detections)}"
     )
 
     for detection in detections:
@@ -206,8 +226,8 @@ def test_first_frame(video_path: str):
             f"box={detection['box']}"
         )
 
-def scan_video_for_knives(video_path: str):
-    """Scans multiple video frames for knife detections."""
+def scan_video_for_weapons(video_path: str):
+    """Scans multiple video frames for weapon detections."""
 
     video_file = Path(video_path)
 
@@ -277,14 +297,14 @@ def scan_video_for_knives(video_path: str):
         print(
             f"Frame {frame_number:04d} | "
             f"{timestamp:05.2f}s | "
-            f"{len(detections)} knife detection(s)"
+            f"{len(detections)} weapon detection(s)"
         )
 
         for detection in detections:
             total_detections += 1
 
             print(
-                f"  Knife: "
+                f"  {detection['class_name']}: "
                 f"{detection['confidence']:.2%} | "
                 f"Box: {detection['box']}"
             )
@@ -296,7 +316,13 @@ def scan_video_for_knives(video_path: str):
     print()
     print("Scan completed.")
     print(f"Analyzed frames: {analyzed_frames}")
-    print(f"Total knife detections: {total_detections}")
+    print(f"Total weapon detections: {total_detections}")
+
+
+def scan_video_for_knives(video_path: str):
+    """Backward-compatible alias for scan_video_for_weapons."""
+
+    return scan_video_for_weapons(video_path)
 
 def process_video(
     input_path: str,
@@ -445,7 +471,7 @@ def process_video(
                         }
                     )
                     print(
-                        f"  Knife: "
+                        f"  {detection['class_name']}: "
                         f"{detection['confidence']:.2%} | "
                         f"Box: {detection['box']}"
                     )
@@ -541,7 +567,7 @@ def process_video(
     print("Video processing completed.")
     print(f"Frames written: {frame_number}")
     print(f"Frames analyzed: {analyzed_frames}")
-    print(f"Knife detections: {total_detections}")
+    print(f"Weapon detections: {total_detections}")
     print(f"Output size: {output_size:,} bytes")
     print(f"Output saved to: {output_file}")
     print(f"CSV report saved to: {csv_path}")
@@ -560,11 +586,11 @@ def process_video(
 
 if __name__ == "__main__":
     process_video(
-        input_path="samples/test_10s_knife.mp4",
+        input_path="samples/handgun_test-video.mp4",
         output_path=(
             "outputs/videos/"
-            "test_10s_knife_detected.mp4"
+            "handgun_detected_short-video.mp4"
         ),
-        confidence_threshold=0.50,
-        analysis_fps=5,
+        confidence_threshold=0.70,
+        analysis_fps=15,
     )
