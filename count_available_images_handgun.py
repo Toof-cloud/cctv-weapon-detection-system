@@ -5,8 +5,8 @@ for split in ["train", "validation", "test"]:
         "open-images-v6",
         split=split,
         label_types=["detections"],
-        classes=["Knife"],
-        dataset_name=f"knife-{split}",
+        classes=["Handgun"],
+        dataset_name=f"handgun-{split}",
     )
 
-    print(f"{split}: {len(dataset)}")
+    print(split, len(dataset))
