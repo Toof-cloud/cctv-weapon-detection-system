@@ -12,14 +12,22 @@ if str(ROOT_DIR) not in sys.path:
 
 from dataset_analysis.build_model import get_model
 
-MODEL_PATH = ROOT_DIR / "best_weapon_detector.pth"
+DEFAULT_MODEL_CANDIDATES = [
+    ROOT_DIR / "best_weapon_detector_retrained.pth",
+    ROOT_DIR / "best_weapon_detector.pth",
+]
 
 class DetectionService:
     """Loads Faster R-CNN and performs object detection on video frames."""
 
-    def __init__(self, confidence_threshold: float = 0.50):
+    def __init__(
+        self,
+        confidence_threshold: float = 0.50,
+        model_path: str | Path | None = None,
+    ):
         self.confidence_threshold = confidence_threshold
         self.target_classes = {"handgun", "knife"}
+        self.model_path = self._resolve_model_path(model_path)
 
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu"
@@ -32,13 +40,13 @@ class DetectionService:
 
         self.model = get_model(num_classes=3)
 
-        if not MODEL_PATH.exists():
+        if not self.model_path.exists():
             raise FileNotFoundError(
-                f"Model checkpoint was not found: {MODEL_PATH}"
+                f"Model checkpoint was not found: {self.model_path}"
             )
 
         state_dict = torch.load(
-            MODEL_PATH,
+            self.model_path,
             map_location=self.device,
         )
 
@@ -47,10 +55,28 @@ class DetectionService:
         self.model.to(self.device)
         self.model.eval()
 
+        print(f"Loaded model: {self.model_path.name}")
         print(f"Detection device: {self.device}")
 
         if self.device.type == "cuda":
             print(f"GPU: {torch.cuda.get_device_name(0)}")
+
+    @staticmethod
+    def _resolve_model_path(model_path: str | Path | None = None) -> Path:
+        if model_path is not None:
+            path = Path(model_path)
+            if not path.is_absolute():
+                path = (ROOT_DIR / path).resolve()
+            return path
+
+        for candidate in DEFAULT_MODEL_CANDIDATES:
+            if candidate.exists():
+                return candidate
+
+        searched = ", ".join(str(p) for p in DEFAULT_MODEL_CANDIDATES)
+        raise FileNotFoundError(
+            f"No model checkpoint found. Tried: {searched}"
+        )
 
     def detect_frame(self, frame):
         """Runs inference on one OpenCV frame."""
@@ -103,6 +129,235 @@ class DetectionService:
             )
 
         return detections
+
+    def detect_frames(
+        self,
+        frames_directory: str,
+        csv_output_path: str = None,
+    ):
+        """Run Faster R-CNN on all PNG frames in a directory."""
+
+        frames_dir = Path(frames_directory)
+
+        if not frames_dir.exists():
+            raise FileNotFoundError(
+                f"Frames directory not found: {frames_dir}"
+            )
+
+        frame_paths = sorted(
+            frames_dir.glob("*.png")
+        )
+
+        if not frame_paths:
+            raise RuntimeError(
+                "No PNG frames found."
+            )
+
+        detections_report = []
+
+        print(
+            f"Processing {len(frame_paths)} frames..."
+        )
+
+        for frame_path in frame_paths:
+            frame = cv2.imread(
+                str(frame_path)
+            )
+
+            if frame is None:
+                continue
+
+            detections = self.detect_frame(
+                frame
+            )
+
+            if detections:
+                print(
+                    f"{frame_path.name}: "
+                    f"{len(detections)} detection(s)"
+                )
+
+            for detection in detections:
+                x1, y1, x2, y2 = detection["box"]
+                detections_report.append(
+                    {
+                        "frame_name": frame_path.name,
+                        "class_name": detection["class_name"],
+                        "confidence": round(
+                            detection["confidence"],
+                            4,
+                        ),
+                        "x1": x1,
+                        "y1": y1,
+                        "x2": x2,
+                        "y2": y2,
+                    }
+                )
+
+        print(
+            f"Total detections: "
+            f"{len(detections_report)}"
+        )
+
+        if csv_output_path:
+            csv_file = Path(
+                csv_output_path
+            )
+            csv_file.parent.mkdir(
+                parents=True,
+                exist_ok=True,
+            )
+
+            with open(
+                csv_file,
+                "w",
+                newline="",
+                encoding="utf-8",
+            ) as file:
+                writer = csv.DictWriter(
+                    file,
+                    fieldnames=[
+                        "frame_name",
+                        "class_name",
+                        "confidence",
+                        "x1",
+                        "y1",
+                        "x2",
+                        "y2",
+                    ],
+                )
+                writer.writeheader()
+                writer.writerows(
+                    detections_report
+                )
+
+            print(
+                f"CSV saved to: {csv_file}"
+            )
+
+        return detections_report
+
+    def detect_and_annotate_frames(
+        self,
+        frames_directory: str,
+        annotated_directory: str,
+        csv_output_path: str = None,
+    ):
+        """Detect weapons, draw boxes, and save annotated PNG frames."""
+
+        frames_dir = Path(frames_directory)
+        annotated_dir = Path(annotated_directory)
+
+        if not frames_dir.exists():
+            raise FileNotFoundError(
+                f"Frames directory not found: {frames_dir}"
+            )
+
+        frame_paths = sorted(
+            frames_dir.glob("*.png")
+        )
+
+        if not frame_paths:
+            raise RuntimeError(
+                "No PNG frames found."
+            )
+
+        annotated_dir.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        for old_frame in annotated_dir.glob("*.png"):
+            old_frame.unlink()
+
+        detections_report = []
+
+        print(
+            f"Annotating {len(frame_paths)} frames..."
+        )
+
+        for frame_path in frame_paths:
+            frame = cv2.imread(
+                str(frame_path)
+            )
+
+            if frame is None:
+                continue
+
+            detections = self.detect_frame(
+                frame
+            )
+            annotated_frame = draw_detections(
+                frame,
+                detections,
+            )
+
+            output_path = annotated_dir / frame_path.name
+            if not cv2.imwrite(
+                str(output_path),
+                annotated_frame,
+            ):
+                raise RuntimeError(
+                    f"Could not write annotated frame: {output_path}"
+                )
+
+            for detection in detections:
+                x1, y1, x2, y2 = detection["box"]
+                detections_report.append(
+                    {
+                        "frame_name": frame_path.name,
+                        "class_name": detection["class_name"],
+                        "confidence": round(
+                            detection["confidence"],
+                            4,
+                        ),
+                        "x1": x1,
+                        "y1": y1,
+                        "x2": x2,
+                        "y2": y2,
+                    }
+                )
+
+        print(
+            f"Total detections: "
+            f"{len(detections_report)}"
+        )
+
+        if csv_output_path:
+            csv_file = Path(csv_output_path)
+            csv_file.parent.mkdir(
+                parents=True,
+                exist_ok=True,
+            )
+
+            with open(
+                csv_file,
+                "w",
+                newline="",
+                encoding="utf-8",
+            ) as file:
+                writer = csv.DictWriter(
+                    file,
+                    fieldnames=[
+                        "frame_name",
+                        "class_name",
+                        "confidence",
+                        "x1",
+                        "y1",
+                        "x2",
+                        "y2",
+                    ],
+                )
+                writer.writeheader()
+                writer.writerows(
+                    detections_report
+                )
+
+            print(
+                f"CSV saved to: {csv_file}"
+            )
+
+        return detections_report
 
 def draw_detections(frame, detections):
     """Draws weapon bounding boxes and labels on a video frame."""
@@ -586,11 +841,11 @@ def process_video(
 
 if __name__ == "__main__":
     process_video(
-        input_path="samples/handgun_test-video.mp4",
+        input_path="samples/evaluation_video.mp4",
         output_path=(
             "outputs/videos/"
-            "handgun_detected_short-video.mp4"
+            "Knife_test_3(newmodel).mp4"
         ),
-        confidence_threshold=0.70,
-        analysis_fps=15,
+        confidence_threshold=0.50,
+        analysis_fps=25,
     )

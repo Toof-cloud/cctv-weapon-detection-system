@@ -7,22 +7,30 @@ env/
 __pycache__/
 *.py[cod]
 
-# VS Code
-.vscode/
+# VS Code (track settings only)
+.vscode/*
+!.vscode/settings.json
 
-# Model weights
+# Model weights (large binaries)
 *.pt
 *.pth
 *.ckpt
 *.onnx
 
-# Videos
+# Videos and archives
 *.mp4
 *.avi
 *.mov
 *.mkv
+*.webm
+*.zip
+*.tar
+*.gz
 
-# Datasets and generated files
+# Generated pipeline outputs & extracted frames
+outputs/
+
+# Datasets and image collections
 data/*
 !data/README.md
 
@@ -32,5 +40,13 @@ models/*
 samples/*
 !samples/README.md
 
-outputs/videos/*
-outputs/reports/*
+dataset_analysis/3rd_Model_Dataset/
+removed_images/
+review_batch/
+archive/
+
+# Large dump files (> 100MB exceeds GitHub push limits)
+CHAT_CONTEXT/full_repository_dump.txt
+CHAT_CONTEXT/repo_file_inventory.csv
+CHAT_CONTEXT/repository_structure.md
+CHAT_CONTEXT/repository_structure.txt

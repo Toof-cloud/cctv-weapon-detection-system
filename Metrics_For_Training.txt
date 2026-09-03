@@ -1,0 +1,56 @@
+! Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+! .\.venv\Scripts\Activate.ps1
+
+* Model 1 Metrics (Baseline - Open Images)
+Checkpoint: best_weapon_detector.pth
+Train images: 681
+Validation images: 85
+Test images: 86
+Batch size: 2
+Confidence threshold: 0.50
+IoU threshold: 0.50
+Precision: 0.659420
+Recall: 0.710938
+F1: 0.684211
+AP(Handgun): 0.759953
+AP(Knife): 0.651640
+mAP@0.5: 0.705797
+TP: 91
+FP: 47
+FN: 37
+
+* Model 2 Metrics (Cleaned Open Images)
+Checkpoint: best_weapon_detector_retrained.pth
+Train images: 681
+Validation images: 85
+Test images: 86
+Batch size: 2
+Confidence threshold: 0.50
+IoU threshold: 0.50
+Precision: 0.769231
+Recall: 0.703125
+F1: 0.734694
+AP(Handgun): 0.752293
+AP(Knife): 0.663856
+mAP@0.5: 0.708075
+TP: 90
+FP: 27
+FN: 38
+
+* Model 3 Metrics (3rd Model Dataset)
+Checkpoint: best_weapon_detector_third_model.pth
+Train images: 1596
+Validation images: 342
+Test images: 343
+Batch size: 2
+Confidence threshold: 0.50
+IoU threshold: 0.50
+Precision: 0.481400
+Recall: 0.582011
+F1: 0.526946
+AP(Handgun): 0.096947
+AP(Knife): 0.836480
+mAP@0.5: 0.466714
+TP: 220
+FP: 237
+FN: 158

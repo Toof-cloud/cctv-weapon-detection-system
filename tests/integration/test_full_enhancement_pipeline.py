@@ -9,4 +9,4 @@ enhancer.enhance_video(
     output_video_path="outputs/videos/enhanced_test.mp4",
 )
 
-print("Pipeline completed.")
+print("Pipeline completed.")find ~/thesis -name "*.pth" 2>/dev/null

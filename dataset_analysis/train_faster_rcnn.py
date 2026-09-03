@@ -94,7 +94,7 @@ for epoch in range(num_epochs):
 
         torch.save(
             model.state_dict(),
-            "best_weapon_detector.pth",
+            "best_weapon_detector_retrained.pth",
         )
 
         print(
