@@ -91,8 +91,6 @@ def resolve_model_path(model_arg: str | None) -> str | Path | None:
     value = str(model_arg).strip().lower()
     if value in {"auto", "default"}:
         return None
-    if value in {"third", "3rd", "third_model", "best_third"}:
-        return ROOT_DIR / "best_weapon_detector_third_model.pth"
     if value in {"retrained", "best_retrained", "new"}:
         return ROOT_DIR / "best_weapon_detector_retrained.pth"
     if value in {"original", "baseline", "best"}:

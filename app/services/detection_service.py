@@ -13,10 +13,12 @@ if str(ROOT_DIR) not in sys.path:
 from dataset_analysis.build_model import get_model
 
 DEFAULT_MODEL_CANDIDATES = [
-    ROOT_DIR / "best_weapon_detector_third_model.pth",
+    ROOT_DIR / "best_weapon_detector_sixth_model.pth",
+    ROOT_DIR / "best_weapon_detector_fifth_model.pth",
     ROOT_DIR / "best_weapon_detector_retrained.pth",
     ROOT_DIR / "best_weapon_detector.pth",
 ]
+
 
 class DetectionService:
     """Loads Faster R-CNN and performs object detection on video frames."""

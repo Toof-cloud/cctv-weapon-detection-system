@@ -50,3 +50,7 @@ CHAT_CONTEXT/full_repository_dump.txt
 CHAT_CONTEXT/repo_file_inventory.csv
 CHAT_CONTEXT/repository_structure.md
 CHAT_CONTEXT/repository_structure.txt
+
+# Scratch diagnostic files
+scratch/
+

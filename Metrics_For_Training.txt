@@ -54,3 +54,57 @@ mAP@0.5: 0.466714
 TP: 220
 FP: 237
 FN: 158
+
+* Model 4 Metrics (Sanitized & Balanced Dataset)
+Checkpoint: best_weapon_detector_fourth_model.pth
+Train images: 1553
+Validation images: 333
+Test images: 333
+Batch size: 2
+Confidence threshold: 0.50
+IoU threshold: 0.50
+Precision: 0.670623
+Recall: 0.599469
+F1: 0.633053
+AP(Handgun): 0.127583
+AP(Knife): 0.913288
+mAP@0.5: 0.520436
+TP: 226
+FP: 111
+FN: 151
+
+* Model 5 Metrics (CCTV-Gun USRT + Clean Knife + Negative Samples)
+Checkpoint: best_weapon_detector_fifth_model.pth
+Train images: 1653
+Validation images: 354
+Test images: 356
+Batch size: 2
+Confidence threshold: 0.50
+IoU threshold: 0.50
+Precision: 0.853723
+Recall: 0.909348
+F1: 0.880658
+AP(Handgun): 0.859718
+AP(Knife): 0.897765
+mAP@0.5: 0.878741
+TP: 321
+FP: 55
+FN: 32
+
+* Model 6 Metrics (VIRAT CCTV Negatives + Surveillance-Augmented Knives + USRT Guns)
+Checkpoint: best_weapon_detector_sixth_model.pth
+Train images: 1765
+Validation images: 378
+Test images: 380
+Batch size: 2
+Confidence threshold: 0.50
+IoU threshold: 0.50
+Precision: 0.751708
+Recall: 0.934844
+F1: 0.833333
+AP(Handgun): 0.917726
+AP(Knife): 0.926775
+mAP@0.5: 0.922251
+TP: 330
+FP: 109
+FN: 23

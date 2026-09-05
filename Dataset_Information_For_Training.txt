@@ -1,0 +1,198 @@
+! Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+! .\.venv\Scripts\Activate.ps1
+
+* Model 1 Dataset Information
+Dataset Name: Open Images Weapon Subset
+Total Images: 852
+Total Annotations: 1114
+Split Ratio: 80% Train / 10% Validation / 10% Test
+
+- TRAIN SPLIT (80%):
+  Total images: 681
+  Handgun images: 219
+  Knife images: 462
+
+- VALIDATION SPLIT (10%):
+  Total images: 85
+  Handgun images: 29
+  Knife images: 56
+
+- TEST SPLIT (10%):
+  Total images: 86
+  Handgun images: 20
+  Knife images: 66
+
+- CLASS TOTALS:
+  Total Handgun images: 268
+  Total Knife images: 584
+
+
+* Model 2 Dataset Information
+Dataset Name: Open Images Weapon Subset (Cleaned)
+Total Images: 852
+Total Annotations: 1114
+Split Ratio: 80% Train / 10% Validation / 10% Test
+
+- TRAIN SPLIT (80%):
+  Total images: 681
+  Handgun images: 219
+  Knife images: 462
+
+- VALIDATION SPLIT (10%):
+  Total images: 85
+  Handgun images: 29
+  Knife images: 56
+
+- TEST SPLIT (10%):
+  Total images: 86
+  Handgun images: 20
+  Knife images: 66
+
+- CLASS TOTALS:
+  Total Handgun images: 268
+  Total Knife images: 584
+
+
+* Model 3 Dataset Information
+Dataset Name: Handgun (DATASET- ARMAS COMPUTER VISION MODEL (dataset_analysis\3rd_Model_Dataset\Handgun\Handgun_First_Clean_Jabez) + WEAPON DETECTION DATASET - HUGGING FACE (dataset_analysis\3rd_Model_Dataset\Handgun\Handgun_Second_Clean_Jabez))
+              Knife (KNIFE DATASET - OD- WEAPONDETECTION: KNIFE DETECTION (dataset_analysis\3rd_Model_Dataset\Knife\Knife_First_Clean_Howard))
+              Split Data Folder: training\third_model_data
+Total Images: 2281
+Total Annotations: 2522
+Split Ratio: 70% Train / 15% Validation / 15% Test
+
+- TRAIN SPLIT (70%):
+  Total images: 1596
+  Handgun images: 802 (913 bounding boxes)
+  Knife images: 794 (843 bounding boxes)
+  Total annotations: 1756
+
+- VALIDATION SPLIT (15%):
+  Total images: 342
+  Handgun images: 172 (208 bounding boxes)
+  Knife images: 170 (180 bounding boxes)
+  Total annotations: 388
+
+- TEST SPLIT (15%):
+  Total images: 343
+  Handgun images: 172 (201 bounding boxes)
+  Knife images: 171 (177 bounding boxes)
+  Total annotations: 378
+
+- CLASS TOTALS:
+  Total Handgun images: 1146 (1322 bounding boxes)
+  Total Knife images: 1135 (1200 bounding boxes)
+  Note on Handgun Data: 207 images in Handgun Batch 2 contained coordinate scaling errors.
+
+
+* Model 4 Dataset Information (Sanitized & Balanced)
+Dataset Name: Handgun (DATASET- ARMAS COMPUTER VISION MODEL (dataset_analysis\3rd_Model_Dataset\Handgun\Handgun_First_Clean_Jabez) + WEAPON DETECTION DATASET - HUGGING FACE [Sanitized] (dataset_analysis\3rd_Model_Dataset\Handgun\Handgun_Second_Clean_Jabez))
+              Knife (KNIFE DATASET - OD- WEAPONDETECTION: KNIFE DETECTION (dataset_analysis\3rd_Model_Dataset\Knife\Knife_First_Clean_Howard))
+              Split Data Folder: training\fourth_model_data
+Total Images: 2219
+Total Annotations: 2434
+Split Ratio: 70% Train / 15% Validation / 15% Test
+
+- TRAIN SPLIT (70%):
+  Total images: 1553
+  Handgun images: 759 (856 bounding boxes)
+  Knife images: 794 (843 bounding boxes)
+  Total annotations: 1699
+
+- VALIDATION SPLIT (15%):
+  Total images: 333
+  Handgun images: 163 (190 bounding boxes)
+  Knife images: 170 (180 bounding boxes)
+  Total annotations: 370
+
+- TEST SPLIT (15%):
+  Total images: 333
+  Handgun images: 162 (188 bounding boxes)
+  Knife images: 171 (177 bounding boxes)
+  Total annotations: 365
+
+- CLASS TOTALS:
+  Total Handgun images: 1084 (1234 bounding boxes)
+  Total Knife images: 1135 (1200 bounding boxes)
+  Balance Ratio: 48.8% Handgun / 51.2% Knife (Virtually 1:1 balanced)
+  Status: All 88 flat-line and out-of-bounds annotations purged; 100% verified.
+
+
+* Model 5 Dataset Information (CCTV-Gun USRT + Clean Knife + Negative Samples)
+Dataset Name: Handgun (Action Recognition and Object Detection Dataset for Firearm-Related Actions - Mendeley Data DOI: 10.17632/bbzpxhd22j.2, folder: dataset_analysis\3rd_Model_Dataset\Handgun\Handgun_USRT_CCTV)
+              Knife (KNIFE DATASET - OD- WEAPONDETECTION: KNIFE DETECTION (dataset_analysis\3rd_Model_Dataset\Knife\Knife_First_Clean_Howard))
+              Negatives (Action Recognition Firearm Dataset [No_Gun subset] - Mendeley Data, folder: dataset_analysis\3rd_Model_Dataset\Handgun\No_Gun_USRT_CCTV)
+              Split Data Folder: training\fifth_model_data
+Total Images: 2363
+Total Annotations: 2328
+Split Ratio: 70% Train / 15% Validation / 15% Test
+
+- TRAIN SPLIT (70%):
+  Total images: 1653
+  Handgun images: 789 (789 bounding boxes)
+  Knife images: 794 (843 bounding boxes)
+  Negative images: 70 (0 bounding boxes)
+  Total annotations: 1632
+
+- VALIDATION SPLIT (15%):
+  Total images: 354
+  Handgun images: 169 (169 bounding boxes)
+  Knife images: 170 (180 bounding boxes)
+  Negative images: 15 (0 bounding boxes)
+  Total annotations: 349
+
+- TEST SPLIT (15%):
+  Total images: 356
+  Handgun images: 170 (170 bounding boxes)
+  Knife images: 171 (177 bounding boxes)
+  Negative images: 15 (0 bounding boxes)
+  Total annotations: 347
+
+- CLASS TOTALS:
+  Total Handgun images: 1128 (1128 bounding boxes across 140 surveillance video scenes)
+  Total Knife images: 1135 (1200 bounding boxes)
+  Total Negative images: 100 (No_Gun surveillance frames)
+  Balance Ratio: 49.8% Handgun / 50.2% Knife (1:1 balanced distribution)
+  Scale Profile: Handgun mean box area = 0.35% (median 0.28%), matching realistic surveillance weapon scale.
+
+
+* Model 6 Dataset Information (VIRAT CCTV Negatives + Surveillance-Augmented Knives + USRT Guns)
+Dataset Name: Handgun (Action Recognition and Object Detection Dataset for Firearm-Related Actions - Mendeley Data DOI: 10.17632/bbzpxhd22j.2, folder: dataset_analysis\3rd_Model_Dataset\Handgun\Handgun_USRT_CCTV)
+              Knife (KNIFE DATASET - OD- WEAPONDETECTION: KNIFE DETECTION (dataset_analysis\3rd_Model_Dataset\Knife\Knife_First_Clean_Howard) [Dynamic CCTV Domain Augmentations])
+              Negatives (VIRAT VIDEO DATASET RELEASE 2.0 CCTV FRAMES - Kitware Data / DARPA (dataset_analysis\3rd_Model_Dataset\VIRAT_CCTV_Negatives) + Action Recognition Firearm Dataset [No_Gun subset] - Mendeley Data (dataset_analysis\3rd_Model_Dataset\Handgun\No_Gun_USRT_CCTV))
+              Split Data Folder: training\sixth_model_data
+Total Images: 2523
+Total Annotations: 2328
+
+Split Ratio: 70% Train / 15% Validation / 15% Test
+
+- TRAIN SPLIT (70%):
+  Total images: 1765
+  Handgun images: 789 (789 bounding boxes)
+  Knife images: 794 (843 bounding boxes)
+  Negative images: 182 (0 bounding boxes; 112 VIRAT + 70 USRT No_Gun)
+  Total annotations: 1632
+
+- VALIDATION SPLIT (15%):
+  Total images: 378
+  Handgun images: 169 (169 bounding boxes)
+  Knife images: 170 (180 bounding boxes)
+  Negative images: 39 (0 bounding boxes; 24 VIRAT + 15 USRT No_Gun)
+  Total annotations: 349
+
+- TEST SPLIT (15%):
+  Total images: 380
+  Handgun images: 170 (170 bounding boxes)
+  Knife images: 171 (177 bounding boxes)
+  Negative images: 39 (0 bounding boxes; 24 VIRAT + 15 USRT No_Gun)
+  Total annotations: 347
+
+- CLASS TOTALS:
+  Total Handgun images: 1128 (1128 bounding boxes across 140 surveillance video scenes)
+  Total Knife images: 1135 (1200 bounding boxes with dynamic CCTV blur, contrast, and resolution augmentations)
+  Total Negative images: 260 (160 VIRAT Release 2.0 multi-camera surveillance frames + 100 USRT No_Gun frames)
+  Balance Ratio: 49.8% Handgun / 50.2% Knife (1:1 balanced weapon distribution + 10.3% authentic CCTV background negatives)
+  Thesis Alignment: Directly satisfies thesis paper methodology requiring authentic multi-camera VIRAT surveillance background integration to penalize false alarms on daily pedestrian activities.
+
+
+

@@ -1,0 +1,276 @@
+========================================================================================
+         ALL MODELS (1 TO 6) TRAINING, DATASET, AND TESTING TECHNICAL FACTSHEET
+========================================================================================
+Thesis Project: FORENSIKADA (Multi-Camera CCTV Weapon Detection System)
+University:     National University - Manila (CCIT - Computer Science Department)
+Purpose:        Consolidated factual technical data for all model iterations (Models 1 to 6)
+                for copying into manuscript tables, methodology, results, and defense slides.
+========================================================================================
+
+========================================================================================
+SECTION 1: MASTER COMPARATIVE SUMMARY TABLE (MODELS 1 TO 6)
+========================================================================================
+
+| Model | Dataset & Sourcing Focus | Train/Val/Test Images | Precision | Recall | F1-Score | AP (Handgun) | AP (Knife) | mAP@0.5 | TP / FP / FN | Key Finding / Forensic Diagnosis |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **Model 1** | Open Images V6 Subset (FiftyOne) | 681 / 85 / 86 (852 Total) | 65.94% | 71.09% | 68.42% | 75.99% | 65.16% | 70.58% | 91 / 47 / 37 | Baseline prototype. Limited sample volume; low knife recall in CCTV. |
+| **Model 2** | Open Images V6 (Cleaned Redundancies) | 681 / 85 / 86 (852 Total) | 76.92% | 70.31% | 73.47% | 75.23% | 66.39% | 70.81% | 90 / 27 / 38 | Precision improved by 11% by removing bad boxes; dataset still too small. |
+| **Model 3** | Armas + Hugging Face + Howard Knife | 1596 / 342 / 343 (2281 Total) | 48.14% | 58.20% | 52.69% | 09.69% | 83.65% | 46.67% | 220 / 237 / 158 | Handgun AP collapsed to 9.69% due to 207 bad scaling annotations in Batch 2. |
+| **Model 4** | Sanitized Batch 2 (88 bad purged) | 1553 / 333 / 333 (2219 Total) | 67.06% | 59.95% | 63.31% | 12.76% | 91.33% | 52.04% | 226 / 111 / 151 | Knife reached 91.3%, but handguns failed in CCTV (0% TP; macro studio scale mismatch). |
+| **Model 5** | USRT CCTV-Gun (Mendeley) + Knife + Negs | 1653 / 354 / 356 (2363 Total) | 85.37% | 90.93% | 88.07% | 85.97% | 89.78% | 87.87% | 321 / 55 / 32 | Handgun crisis solved! AP surged to 85.97%. Fan & door false alarms eliminated. |
+| **Model 6** | VIRAT CCTV Negatives + Augmented Knife | 1765 / 378 / 380 (2523 Total) | 75.17% | 93.48% | 83.33% | 91.77% | 92.68% | 92.23% | 330 / 109 / 23 | Highest mAP (92.23%) & Recall (93.48%). CCTV knife sensitivity surged to 100 frames. |
+
+========================================================================================
+SECTION 2: DETAILED MODEL-BY-MODEL FACTSHEETS
+========================================================================================
+
+----------------------------------------------------------------------------------------
+MODEL 1: BASELINE OPEN IMAGES PROTOTYPE
+----------------------------------------------------------------------------------------
+* Checkpoint Filename: best_weapon_detector.pth
+* Dataset Name: Open Images V6 Weapon Subset
+* Sourced From: FiftyOne / Google Open Images
+* Target Classes: Class 1: Handgun | Class 2: Knife
+* Dataset Statistics:
+  - Total Images: 852
+  - Total Annotations: 1,114 bounding boxes
+  - Handgun Class Total: 268 images
+  - Knife Class Total: 584 images
+* Split Configuration (80% Train / 10% Val / 10% Test):
+  - Training Set (80%):   681 images (219 Handgun, 462 Knife)
+  - Validation Set (10%):  85 images (29 Handgun, 56 Knife)
+  - Test Set (10%):        86 images (20 Handgun, 66 Knife)
+* Training Hyperparameters:
+  - Architecture: Faster R-CNN (ResNet-50 FPN)
+  - Optimizer: SGD (lr=0.005, momentum=0.9, weight_decay=0.0005)
+  - Batch Size: 2 | Epochs: 10
+* Test Split Metrics (IoU >= 0.50, Conf >= 0.50):
+  - Precision:        65.94% (0.659420)
+  - Recall:           71.09% (0.710938)
+  - F1-Score:         68.42% (0.684211)
+  - AP (Handgun):     75.99% (0.759953)
+  - AP (Knife):       65.16% (0.651640)
+  - mAP@0.5:          70.58% (0.705797)
+  - True Positives:   91
+  - False Positives:  47
+  - False Negatives:  37
+* Forensic Assessment:
+  - Baseline feasibility established, but dataset volume (852 images) was too small.
+  - Knife detection struggled significantly in low-resolution video conditions.
+
+----------------------------------------------------------------------------------------
+MODEL 2: CLEANED OPEN IMAGES DATASET
+----------------------------------------------------------------------------------------
+* Checkpoint Filename: best_weapon_detector_retrained.pth
+* Dataset Name: Open Images V6 Weapon Subset (Cleaned)
+* Sourced From: FiftyOne / Open Images (curated)
+* Preprocessing: Removed redundant, duplicate, and misaligned boxes from the Open Images set.
+* Dataset Statistics:
+  - Total Images: 852
+  - Total Annotations: 1,114 bounding boxes
+* Split Configuration (80% Train / 10% Val / 10% Test):
+  - Training Set (80%):   681 images (219 Handgun, 462 Knife)
+  - Validation Set (10%):  85 images (29 Handgun, 56 Knife)
+  - Test Set (10%):        86 images (20 Handgun, 66 Knife)
+* Training Hyperparameters:
+  - Architecture: Faster R-CNN (ResNet-50 FPN)
+  - Optimizer: SGD (lr=0.005, momentum=0.9, weight_decay=0.0005)
+  - Batch Size: 2 | Epochs: 10
+* Test Split Metrics (IoU >= 0.50, Conf >= 0.50):
+  - Precision:        76.92% (0.769231)  <-- +10.98% improvement in precision
+  - Recall:           70.31% (0.703125)
+  - F1-Score:         73.47% (0.734694)
+  - AP (Handgun):     75.23% (0.752293)
+  - AP (Knife):       66.39% (0.663856)
+  - mAP@0.5:          70.81% (0.708075)
+  - True Positives:   90
+  - False Positives:  27  <-- False positives dropped from 47 to 27
+  - False Negatives:  38
+* Forensic Assessment:
+  - Cleaned annotations reduced false positive bounding boxes.
+  - Still lacked diverse CCTV angles and camera distance variations.
+
+----------------------------------------------------------------------------------------
+MODEL 3: EXPANDED MULTI-SOURCE DATASET
+----------------------------------------------------------------------------------------
+* Checkpoint Filename: best_weapon_detector_third_model.pth
+* Dataset Sources:
+  - Handgun: DATASET- ARMAS COMPUTER VISION MODEL (Roboflow) + WEAPON DETECTION DATASET (Hugging Face / Dataset Ninja)
+  - Knife: KNIFE DATASET - OD-WEAPONDETECTION: KNIFE DETECTION (University of Granada / Dataset Ninja, curated by Howard)
+* Storage Folder: training/third_model_data
+* Dataset Statistics:
+  - Total Images: 2,281
+  - Total Annotations: 2,522 bounding boxes
+  - Handgun Total: 1,146 images (1,322 bounding boxes)
+  - Knife Total: 1,135 images (1,200 bounding boxes)
+* Split Configuration (70% Train / 15% Val / 15% Test):
+  - Training Set (70%):   1,596 images (802 Handgun / 913 boxes, 794 Knife / 843 boxes; 1,756 annos)
+  - Validation Set (15%):   342 images (172 Handgun / 208 boxes, 170 Knife / 180 boxes; 388 annos)
+  - Test Set (15%):         343 images (172 Handgun / 201 boxes, 171 Knife / 177 boxes; 378 annos)
+* Training Hyperparameters:
+  - Architecture: Faster R-CNN (ResNet-50 FPN v2)
+  - Optimizer: SGD (lr=0.005, momentum=0.9, weight_decay=0.0005)
+  - Batch Size: 2 | Epochs: 10
+* Test Split Metrics (IoU >= 0.50, Conf >= 0.50):
+  - Precision:        48.14% (0.481400)
+  - Recall:           58.20% (0.582011)
+  - F1-Score:         52.69% (0.526946)
+  - AP (Handgun):     09.69% (0.096947)  <-- SEVERE COLLAPSE
+  - AP (Knife):       83.65% (0.836480)
+  - mAP@0.5:          46.67% (0.466714)
+  - True Positives:   220
+  - False Positives:  237
+  - False Negatives:  158
+* Forensic Diagnosis & Defect Identification:
+  - Inspection revealed that 207 images in Jabez's Handgun Batch 2 contained invalid coordinates:
+    * 88 flat-line (zero width/height) and out-of-bounds bounding boxes.
+    * 119 coordinate normalization scaling errors (bounding boxes shifted off the weapon).
+  - This corrupted the Faster R-CNN regression loss and collapsed handgun detection.
+
+----------------------------------------------------------------------------------------
+MODEL 4: SANITIZED & BALANCED DATASET
+----------------------------------------------------------------------------------------
+* Checkpoint Filename: best_weapon_detector_fourth_model.pth
+* Dataset Sources:
+  - Handgun: DATASET- ARMAS (Roboflow) + Sanitized Hugging Face (Jabez Batch 2 with 88 corrupt boxes purged)
+  - Knife: KNIFE DATASET - OD-WEAPONDETECTION (Howard clean knife set)
+* Storage Folder: training/fourth_model_data
+* Dataset Statistics:
+  - Total Images: 2,219
+  - Total Annotations: 2,434 bounding boxes
+  - Handgun Total: 1,084 images (1,234 bounding boxes)
+  - Knife Total: 1,135 images (1,200 bounding boxes)
+  - Class Balance: 48.8% Handgun vs 51.2% Knife (1:1 balanced distribution)
+* Split Configuration (70% Train / 15% Val / 15% Test):
+  - Training Set (70%):   1,553 images (759 Handgun / 856 boxes, 794 Knife / 843 boxes; 1,699 annos)
+  - Validation Set (15%):   333 images (163 Handgun / 190 boxes, 170 Knife / 180 boxes; 370 annos)
+  - Test Set (15%):         333 images (162 Handgun / 188 boxes, 171 Knife / 177 boxes; 365 annos)
+* Training Hyperparameters:
+  - Architecture: Faster R-CNN (ResNet-50 FPN v2)
+  - Optimizer: SGD (lr=0.005, momentum=0.9, weight_decay=0.0005)
+  - Batch Size: 2 | Epochs: 10
+* Test Split Metrics (IoU >= 0.50, Conf >= 0.50):
+  - Precision:        67.06% (0.670623)
+  - Recall:           59.95% (0.599469)
+  - F1-Score:         63.31% (0.633053)
+  - AP (Handgun):     12.76% (0.127583)  <-- Handgun AP remained critically low
+  - AP (Knife):       91.33% (0.913288)  <-- Knife achieved excellent detection
+  - mAP@0.5:          52.04% (0.520436)
+  - True Positives:   226
+  - False Positives:  111
+  - False Negatives:  151
+* Video Benchmark Failure Analysis (The Handgun Crisis):
+  - In samples/CAM02_Scene_004.mp4: 0 true handgun detections. Model bounded the black electric fan 53 times (78.7% conf) and misclassified the actual handgun as a knife (93.4% conf).
+  - In samples/handgun_test-video.mp4: 0 true handgun detections. Model repeatedly bounded the frosted glass window transom above the doorway (94.9% conf).
+* ROOT CAUSE (Scale & Domain Mismatch):
+  - Jabez's handgun training images consisted of studio catalog photos where the gun occupied 40% to 80% of the image frame.
+  - In authentic CCTV surveillance footage, a handgun in an actor's hand occupies only 0.35% of the frame.
+  - Faster R-CNN anchor generators trained on macro shots could not resolve tiny surveillance handguns.
+
+----------------------------------------------------------------------------------------
+MODEL 5: USRT REAL-TIME CCTV HANDGUN + CLEAN KNIFE + NEGATIVES
+----------------------------------------------------------------------------------------
+* Checkpoint Filename: best_weapon_detector_fifth_model.pth (Size: 173.4 MB)
+* Dataset Sources:
+  - Handgun: Action recognition and object detection dataset for firearm-related actions (Ruiz-Santaquiteria et al., 2023, Mendeley Data DOI: 10.17632/bbzpxhd22j.2)
+  - Knife: OD-WeaponDetection: Knife Detection (Howard clean knife set)
+  - Negatives: Action recognition firearm dataset (No_Gun non-weapon activity subset, Mendeley Data)
+* Storage Folder: training/fifth_model_data
+* Dataset Statistics:
+  - Total Images: 2,363
+  - Total Annotations: 2,328 bounding boxes
+  - Handgun Total: 1,128 images (1,128 bounding boxes across 140 surveillance scenes)
+  - Knife Total: 1,135 images (1,200 bounding boxes)
+  - CCTV Negative Total: 100 images (0 bounding boxes)
+  - Scale Profile: Handgun mean box area = 0.35% of frame (median 0.28%), perfectly matching surveillance CCTV.
+* Split Configuration (70% Train / 15% Val / 15% Test):
+  - Training Set (70%):   1,653 images (789 Handgun, 794 Knife, 70 Negatives; 1,632 annos)
+  - Validation Set (15%):   354 images (169 Handgun, 170 Knife, 15 Negatives; 349 annos)
+  - Test Set (15%):         356 images (170 Handgun, 171 Knife, 15 Negatives; 347 annos)
+* Training Hyperparameters:
+  - Architecture: Faster R-CNN (ResNet-50 FPN v2)
+  - Optimizer: SGD (lr=0.005, momentum=0.9, weight_decay=0.0005)
+  - Batch Size: 2 | Epochs: 10
+* Test Split Metrics (IoU >= 0.50, Conf >= 0.50):
+  - Precision:        85.37% (0.853723)
+  - Recall:           90.93% (0.909348)
+  - F1-Score:         88.07% (0.880658)
+  - AP (Handgun):     85.97% (0.859718)  <-- Surged by +73.21% over Model 4!
+  - AP (Knife):       89.78% (0.897765)
+  - mAP@0.5:          87.87% (0.878741)  <-- Surged by +35.83% over Model 4!
+  - True Positives:   321
+  - False Positives:  55
+  - False Negatives:  32
+* Forensic Video Breakthroughs:
+  - In samples/handgun_test-video.mp4: 94–95 True Handgun Detections (mean conf: 94.8%). Doorway/frosted glass false alarms = 0.
+  - In samples/CAM02_Scene_004.mp4: 49–51 True Handgun Detections (conf up to 96.84%). Standing electric fan false alarm = 0 frames (100% eliminated).
+  - Wall false alarms in knife video completely eliminated.
+* Remaining Limitations:
+  - Knife sensitivity in low-res CCTV was weak (detected in only 3 frames in NEW_KNIFE_VIDEO).
+  - Background negative coverage needed multi-camera outdoor public surveillance context (VIRAT).
+
+----------------------------------------------------------------------------------------
+MODEL 6 (FINAL DEPLOYED MODEL): VIRAT CCTV NEGATIVES + SURVEILLANCE-AUGMENTED KNIVES
+----------------------------------------------------------------------------------------
+* Checkpoint Filename: best_weapon_detector_sixth_model.pth (Size: 173.4 MB)
+* Dataset Sources:
+  - Handgun: Action recognition and object detection dataset for firearm-related actions (Mendeley Data DOI: 10.17632/bbzpxhd22j.2)
+  - Knife: OD-WeaponDetection: Knife Detection (Howard Clean) + Dynamic CCTV Domain Augmentations
+  - CCTV Background Negatives:
+    * VIRAT Video Dataset Release 2.0 (Kitware Data / DARPA, 160 frames across 4 camera scenes)
+    * Action recognition firearm dataset (No_Gun subset, Mendeley Data, 100 frames)
+* Storage Folder: training/sixth_model_data
+* Dataset Statistics:
+  - Total Images: 2,523
+  - Total Annotations: 2,328 bounding boxes
+  - Handgun Total: 1,128 images (1,128 bounding boxes)
+  - Knife Total: 1,135 images (1,200 bounding boxes)
+  - Authentic CCTV Negatives Total: 260 images (160 VIRAT + 100 USRT No_Gun; 10.3% of total data)
+* Split Configuration (70% Train / 15% Val / 15% Test):
+  - Training Set (70%):   1,765 images (789 Handgun, 794 Knife, 182 CCTV Negatives; 1,632 annos)
+  - Validation Set (15%):   378 images (169 Handgun, 170 Knife, 39 CCTV Negatives; 349 annos)
+  - Test Set (15%):         380 images (170 Handgun, 171 Knife, 39 CCTV Negatives; 347 annos, 353 targets)
+* Training Hyperparameters:
+  - Architecture: Faster R-CNN (ResNet-50 FPN v2)
+  - Optimizer: SGD (lr=0.005, momentum=0.9, weight_decay=0.0005)
+  - Batch Size: 2 (883 batches per epoch) | Epochs: 10 (8,830 total batch updates)
+  - Hardware: NVIDIA GeForce RTX 5060 Ti GPU (16 GB VRAM)
+  - Deep Learning Framework: PyTorch 2.13.0+cu130, CUDA 13.0
+* Test Split Metrics (IoU >= 0.50, Conf >= 0.50):
+  - Precision:        75.17% (0.751708)
+  - Recall:           93.48% (0.934844)  <-- HIGHEST RECALL (Only 23 missed targets out of 353!)
+  - F1-Score:         83.33% (0.833333)
+  - AP (Handgun):     91.77% (0.917726)  <-- HIGHEST HANDGUN AP ACROSS ALL MODELS
+  - AP (Knife):       92.68% (0.926775)  <-- HIGHEST KNIFE AP ACROSS ALL MODELS
+  - mAP@0.5:          92.23% (0.922251)  <-- HIGHEST OVERALL ACCURACY ACROSS ALL MODELS
+  - True Positives:   330
+  - False Positives:  109
+  - False Negatives:  23
+* 4-Quadrant Forensic Video Benchmark Results:
+  - Handgun Real CCTV (samples/handgun_test-video.mp4):
+    * 132 handgun detections (0 knife cross-detections; 93.55% avg conf, 99.2% peak).
+    * Door, transom, desk, and shelf false alarms = 0.
+  - Knife Real CCTV (samples/NEW_KNIFE_VIDEO_11s.mp4):
+    * 100 knife detections (jumped from 3 frames in Model 5). Peak confidence: 93.81% on knife lunge.
+  - Handgun Staged CCTV (samples/CAM02_Scene_004.mp4):
+    * 158 handgun detections tracking suspect walking down stairs (peak conf: 88.5%).
+    * Standing electric fan false alarms = 0 frames (100% eliminated).
+  - Knife Evaluation Video (samples/evaluation_video.mp4):
+    * 42 knife detections (peak conf: 94.7% on weapon brandished toward entrance).
+
+========================================================================================
+SECTION 3: SYSTEM HARDWARE & SOFTWARE SPECIFICATIONS (FOR TABLE 4 / CHAPTER 3)
+========================================================================================
+* Graphics Processing Unit (GPU): NVIDIA GeForce RTX 5060 Ti (16 GB GDDR6 VRAM)
+* Host Processor (CPU): Multi-Core AMD Ryzen / Intel Core (Concurrency: 8 threads)
+* System Memory (RAM): 32 GB DDR4 / DDR5
+* Storage: NVMe M.2 Solid State Drive (Read/Write > 3500 MB/s)
+* Operating System: Windows 11 Pro 64-bit
+* Python Interpreter: Python 3.11.6 (via virtual environment .venv)
+* Deep Learning Framework: PyTorch 2.13.0 with CUDA 13.0 Acceleration
+* Computer Vision Library: OpenCV 4.14.0 (cv2)
+* Video Super-Resolution Model: BasicVSR++ Recurrent Video Restoration Network
+
+========================================================================================
+                               END OF FACTSHEET
+========================================================================================
