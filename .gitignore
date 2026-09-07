@@ -54,3 +54,6 @@ CHAT_CONTEXT/repository_structure.txt
 # Scratch diagnostic files
 scratch/
 
+# Generated dataset folders
+training/seventh_model_data/
+

@@ -13,6 +13,7 @@ if str(ROOT_DIR) not in sys.path:
 from dataset_analysis.build_model import get_model
 
 DEFAULT_MODEL_CANDIDATES = [
+    ROOT_DIR / "best_weapon_detector_seventh_model.pth",
     ROOT_DIR / "best_weapon_detector_sixth_model.pth",
     ROOT_DIR / "best_weapon_detector_fifth_model.pth",
     ROOT_DIR / "best_weapon_detector_retrained.pth",
@@ -41,7 +42,8 @@ class DetectionService:
             2: "knife",
         }
 
-        self.model = get_model(num_classes=3)
+        is_seventh = "seventh" in self.model_path.name.lower()
+        self.model = get_model(num_classes=3, small_anchors=is_seventh)
 
         if not self.model_path.exists():
             raise FileNotFoundError(
@@ -81,7 +83,7 @@ class DetectionService:
             f"No model checkpoint found. Tried: {searched}"
         )
 
-    def detect_frame(self, frame):
+    def detect_frame(self, frame, min_threshold: float | None = None):
         """Runs inference on one OpenCV frame."""
 
         rgb_frame = cv2.cvtColor(
@@ -102,11 +104,12 @@ class DetectionService:
         scores = prediction["scores"].detach().cpu()
 
         detections = []
+        effective_threshold = self.confidence_threshold if min_threshold is None else min_threshold
 
         for box, label, score in zip(boxes, labels, scores):
             confidence = float(score)
 
-            if confidence < self.confidence_threshold:
+            if confidence < effective_threshold:
                 continue
 
             class_id = int(label)
@@ -362,20 +365,31 @@ class DetectionService:
 
         return detections_report
 
-def draw_detections(frame, detections):
+def draw_detections(frame, detections, draw_suppressed: bool = False):
     """Draws weapon bounding boxes and labels on a video frame."""
 
+    # Distinct class colors (BGR)
+    class_colors = {
+        "handgun": (0, 0, 255),       # Red
+        "knife": (0, 165, 255),        # Amber / Orange
+    }
+
     for detection in detections:
+        status = detection.get("status", "CONFIRMED_ALERT")
+        if status == "SUPPRESSED" and not draw_suppressed:
+            continue
+
         x1, y1, x2, y2 = detection["box"]
         confidence = detection["confidence"]
+        class_name = detection["class_name"]
 
-        label = (
-            f"{detection['class_name']} "
-            f"{confidence:.1%}"
-        )
-
-        # Red bounding box in OpenCV BGR format.
-        color = (0, 0, 255)
+        if status == "SUPPRESSED":
+            color = (160, 160, 160)
+            reason = detection.get("rejection_reason", "FILTERED")
+            label = f"[FILTERED] {class_name.upper()} {confidence:.1%}"
+        else:
+            color = class_colors.get(class_name, (0, 0, 255))
+            label = f"{class_name.upper()} {confidence:.1%}"
 
         cv2.rectangle(
             frame,

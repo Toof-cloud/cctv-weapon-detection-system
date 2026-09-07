@@ -108,3 +108,23 @@ mAP@0.5: 0.922251
 TP: 330
 FP: 109
 FN: 23
+
+* Model 7 Metrics (Hard Negative Mining: Bare Hands/Rails + Small RPN Anchors + Cosine Annealing)
+Checkpoint: best_weapon_detector_seventh_model.pth
+Train images: 1838
+Validation images: 393
+Test images: 397 (341 Weapon, 56 Hard Negative)
+Batch size: 2
+Epochs: 15 (Cosine Annealing LR: 0.005 -> 1e-5)
+Confidence threshold: 0.50
+IoU threshold: 0.50
+Precision: 0.704846
+Recall: 0.906516
+F1: 0.793061
+AP(Handgun): 0.869788
+AP(Knife): 0.881026
+mAP@0.5: 0.875407
+TP: 320
+FP: 134
+FN: 33
+Negative Image Rejection Rate: 48/56 (85.7%)

@@ -13,9 +13,14 @@ ROOT_DIR = Path(__file__).resolve().parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
+from app.services.cctv_intelligence import CCTVIntelligenceFilter
 from app.services.detection_service import DetectionService, draw_detections
+from app.services.multi_camera_service import CameraInputConfig, MultiCameraService
+from app.services.report_service import ReportService
 from app.services.video_enhancement_service import VideoEnhancementService
 from app.services.video_service import VideoService
+from app.utils.timestamps import format_timestamp
+
 
 
 def ensure_directory(path: Path) -> Path:
@@ -42,25 +47,44 @@ def generate_forensic_summary(csv_path: Path, summary_path: Path) -> dict:
         rows = list(reader)
 
     total_detections = len(rows)
-    class_counts = {}
-    for row in rows:
-        label = row["class_name"]
-        class_counts[label] = class_counts.get(label, 0) + 1
+    confirmed_rows = [
+        r for r in rows
+        if r.get("validation_status", r.get("status", "")) in ("CONFIRMED_ALERT", "VALIDATED_TEMPORAL")
+    ]
+    suppressed_rows = [
+        r for r in rows
+        if r not in confirmed_rows
+    ]
 
-    total_confidence = 0.0
-    for row in rows:
-        total_confidence += float(row["confidence"])
+    confirmed_counts = {}
+    total_confirmed_conf = 0.0
+    for row in confirmed_rows:
+        label = row.get("object_label", row.get("class_name", "weapon"))
+        confirmed_counts[label] = confirmed_counts.get(label, 0) + 1
+        conf_val = float(row.get("confidence_score", row.get("confidence", 0.0)))
+        total_confirmed_conf += conf_val
 
-    avg_confidence = (total_confidence / total_detections) if total_detections else 0.0
+    avg_confirmed_conf = (total_confirmed_conf / len(confirmed_rows)) if confirmed_rows else 0.0
     first_event_time = None
-    if rows:
+    if confirmed_rows:
+        first_event_time = min(float(r["timestamp_seconds"]) for r in confirmed_rows)
+    elif rows:
         first_event_time = min(float(r["timestamp_seconds"]) for r in rows)
 
+    suppression_counts = {}
+    for row in suppressed_rows:
+        reason = row.get("rejection_reason", "UNKNOWN")
+        cat = reason.split("(")[0].strip() if "(" in reason else reason
+        suppression_counts[cat] = suppression_counts.get(cat, 0) + 1
+
     summary = {
-        "total_detections": total_detections,
-        "class_counts": class_counts,
-        "average_confidence": round(avg_confidence, 4),
+        "total_evaluated_records": total_detections,
+        "confirmed_alerts": len(confirmed_rows),
+        "suppressed_traps": len(suppressed_rows),
+        "class_counts": confirmed_counts,
+        "average_confidence": round(avg_confirmed_conf, 4),
         "first_event_time_seconds": first_event_time,
+        "suppression_reasons": suppression_counts,
         "report_path": str(csv_path),
     }
 
@@ -68,16 +92,24 @@ def generate_forensic_summary(csv_path: Path, summary_path: Path) -> dict:
     lines.append("CCTV Weapon Detection Forensic Summary")
     lines.append("=" * 52)
     lines.append(f"Generated at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    lines.append(f"Total detections: {total_detections}")
-    lines.append(f"Average confidence: {avg_confidence:.4f}")
-    lines.append(f"First event time: {first_event_time if first_event_time is not None else 'N/A'} s")
+    lines.append(f"Total evaluated proposals: {total_detections}")
+    lines.append(f"Confirmed Security Alerts: {len(confirmed_rows)}")
+    lines.append(f"Suppressed Environmental Traps: {len(suppressed_rows)}")
+    lines.append(f"Average confidence (confirmed alerts): {avg_confirmed_conf:.4f}")
+    lines.append(f"First confirmed threat time: {first_event_time if first_event_time is not None else 'N/A'} s")
     lines.append("")
-    lines.append("Detected classes:")
-    if class_counts:
-        for label, count in sorted(class_counts.items()):
+    lines.append("Confirmed threat classes:")
+    if confirmed_counts:
+        for label, count in sorted(confirmed_counts.items()):
             lines.append(f"- {label}: {count}")
     else:
-        lines.append("- No detections")
+        lines.append("- No confirmed threats")
+
+    if suppression_counts:
+        lines.append("")
+        lines.append("Suppressed environmental background traps (audit):")
+        for cat, count in sorted(suppression_counts.items()):
+            lines.append(f"- {cat}: {count}")
 
     summary_path.parent.mkdir(parents=True, exist_ok=True)
     summary_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -91,6 +123,12 @@ def resolve_model_path(model_arg: str | None) -> str | Path | None:
     value = str(model_arg).strip().lower()
     if value in {"auto", "default"}:
         return None
+    if value in {"seventh", "model7", "seven"}:
+        return ROOT_DIR / "best_weapon_detector_seventh_model.pth"
+    if value in {"sixth", "model6", "six"}:
+        return ROOT_DIR / "best_weapon_detector_sixth_model.pth"
+    if value in {"fifth", "model5", "five"}:
+        return ROOT_DIR / "best_weapon_detector_fifth_model.pth"
     if value in {"retrained", "best_retrained", "new"}:
         return ROOT_DIR / "best_weapon_detector_retrained.pth"
     if value in {"original", "baseline", "best"}:
@@ -110,6 +148,9 @@ def detect_video_with_model(
     analysis_fps: int = 5,
     save_detected_frames: bool = True,
     csv_output_path: str | Path | None = None,
+    enable_cctv_intelligence: bool = True,
+    enable_temporal_consistency: bool = True,
+    camera_id: str = "CAM-01",
 ):
     input_file = Path(input_path)
     output_file = Path(output_path)
@@ -154,9 +195,26 @@ def detect_video_with_model(
         model_path=model_path,
     )
 
+    cctv_filter = None
+    if enable_cctv_intelligence:
+        print("[CCTV Intelligence] Activated: Centroid Motion Tracker + MobileNetV3 Person Proximity Gate + Geometric Area Filter + Temporal Consistency")
+        cctv_filter = CCTVIntelligenceFilter(
+            device=detector.device,
+            enable_person_gating=True,
+            enable_motion_filtering=True,
+            enable_geometric_filtering=True,
+            enable_temporal_consistency=enable_temporal_consistency,
+            min_temporal_hits=2,
+            class_thresholds={
+                "handgun": max(0.50, confidence_threshold),
+                "knife": max(0.65, confidence_threshold + 0.15),
+            },
+        )
+
     frame_interval = max(1, round(fps / analysis_fps))
     frame_number = 0
     analyzed_frames = 0
+
     total_detections = 0
     detection_records = []
 
@@ -168,37 +226,63 @@ def detect_video_with_model(
         timestamp = frame_number / fps
 
         if frame_number % frame_interval == 0:
-            detections = detector.detect_frame(frame)
-            analyzed_frames += 1
-            total_detections += len(detections)
-            frame = draw_detections(frame, detections)
+            if cctv_filter is not None:
+                raw_detections = detector.detect_frame(frame, min_threshold=0.35)
+                confirmed_detections, audit_records = cctv_filter.process_frame(
+                    frame, raw_detections, frame_idx=analyzed_frames
+                )
+                active_detections = confirmed_detections
+                evaluated_to_log = audit_records
+            else:
+                raw_detections = detector.detect_frame(frame)
+                active_detections = raw_detections
+                evaluated_to_log = [
+                    {**d, "status": "CONFIRMED_ALERT", "rejection_reason": ""}
+                    for d in raw_detections
+                ]
 
-            if detections:
+            analyzed_frames += 1
+            total_detections += len(active_detections)
+            frame = draw_detections(frame, active_detections)
+
+            if active_detections:
                 if save_detected_frames:
                     saved_frame_path = detected_frames_dir / f"frame_{frame_number:06d}_detected.png"
                     if not cv2.imwrite(str(saved_frame_path), frame):
                         raise RuntimeError(f"Could not save detected frame: {saved_frame_path}")
 
-                print(f"Frame {frame_number:04d} | {timestamp:05.2f}s | {len(detections)} detection(s)")
-                for detection in detections:
-                    x1, y1, x2, y2 = detection["box"]
-                    detection_records.append(
-                        {
-                            "frame_number": frame_number,
-                            "timestamp_seconds": round(timestamp, 2),
-                            "class_name": detection["class_name"],
-                            "confidence": round(detection["confidence"], 4),
-                            "x1": x1,
-                            "y1": y1,
-                            "x2": x2,
-                            "y2": y2,
-                        }
-                    )
+                print(f"Frame {frame_number:04d} | {timestamp:05.2f}s | {len(active_detections)} confirmed alert(s)")
+                for detection in active_detections:
                     print(
                         f"  {detection['class_name']}: {detection['confidence']:.2%} | Box: {detection['box']}"
                     )
 
-        timestamp_label = f"Frame {frame_number} | Time {timestamp:.2f}s"
+            for rec in evaluated_to_log:
+                x1, y1, x2, y2 = rec["box"]
+                detection_records.append(
+                    {
+                        "source_video": input_file.name,
+                        "frame_number": frame_number,
+                        "timestamp_seconds": round(timestamp, 3),
+                        "timestamp_formatted": format_timestamp(timestamp),
+                        "camera_id": camera_id,
+                        "object_label": rec["class_name"],
+                        "class_name": rec["class_name"],
+                        "confidence_score": round(rec["confidence"], 4),
+                        "confidence": round(rec["confidence"], 4),
+                        "bounding_box": f"[{x1}, {y1}, {x2}, {y2}]",
+                        "x1": x1,
+                        "y1": y1,
+                        "x2": x2,
+                        "y2": y2,
+                        "status": rec.get("status", "CONFIRMED_ALERT"),
+                        "validation_status": rec.get("validation_status") or rec.get("status", "CONFIRMED_ALERT"),
+                        "rejection_reason": rec.get("rejection_reason", "") or "",
+                        "temporal_track_id": rec.get("temporal_track_id"),
+                    }
+                )
+
+        timestamp_label = f"{camera_id} | Frame {frame_number} | Time {timestamp:.2f}s"
         cv2.putText(
             frame,
             timestamp_label,
@@ -229,13 +313,57 @@ def detect_video_with_model(
     )
     csv_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(csv_path, mode="w", newline="", encoding="utf-8") as csv_file:
-        writer_csv = csv.DictWriter(
-            csv_file,
-            fieldnames=["frame_number", "timestamp_seconds", "class_name", "confidence", "x1", "y1", "x2", "y2"],
-        )
-        writer_csv.writeheader()
-        writer_csv.writerows(detection_records)
+    # Reconcile temporal consistency across whole video
+    if cctv_filter and enable_temporal_consistency:
+        detection_records = cctv_filter.reconcile_video_records(detection_records, min_hits=2)
+
+    # Export via ReportService (CSV, JSON, HTML, PDF)
+    report_service = ReportService(output_dir=csv_path.parent)
+    report_service.export_csv(
+        records=detection_records,
+        output_path=csv_path,
+        default_source_video=input_file.name,
+        default_camera_id=camera_id,
+    )
+
+    case_metadata = {
+        "case_id": f"CCTV-{input_file.stem}",
+        "analyst_name": "FORENSIKADA Automated Forensic System",
+        "model_version": detector.model_path.name if detector.model_path else "Model 7 Faster R-CNN",
+        "cameras": [
+            {
+                "camera_id": camera_id,
+                "filename": input_file.name,
+                "path": str(input_file.resolve()),
+                "resolution": f"{width}x{height}",
+                "fps": round(fps, 2),
+                "duration_seconds": round(duration, 2),
+                "total_frames": total_frames,
+            }
+        ],
+    }
+
+    report_service.export_json(
+        records=detection_records,
+        case_metadata=case_metadata,
+        output_path=csv_path.with_suffix(".json"),
+        default_source_video=input_file.name,
+        default_camera_id=camera_id,
+    )
+    report_service.export_html_report(
+        records=detection_records,
+        case_metadata=case_metadata,
+        output_path=csv_path.parent / f"{input_file.stem}_forensic_report.html",
+        default_source_video=input_file.name,
+        default_camera_id=camera_id,
+    )
+    report_service.export_pdf_report(
+        records=detection_records,
+        case_metadata=case_metadata,
+        output_path=csv_path.parent / f"{input_file.stem}_forensic_report.pdf",
+        default_source_video=input_file.name,
+        default_camera_id=camera_id,
+    )
 
     if not output_file.exists():
         raise RuntimeError("Processing finished, but the output video was not created.")
@@ -244,9 +372,12 @@ def detect_video_with_model(
     print("Video processing completed.")
     print(f"Frames written: {frame_number}")
     print(f"Frames analyzed: {analyzed_frames}")
-    print(f"Weapon detections: {total_detections}")
+    print(f"Confirmed weapon alerts: {sum(1 for r in detection_records if r.get('status') == 'CONFIRMED_ALERT')}")
+    print(f"Total evaluated records: {len(detection_records)}")
     print(f"Output saved to: {output_file}")
     print(f"CSV report saved to: {csv_path}")
+    print(f"Forensic PDF report saved to: {csv_path.parent / f'{input_file.stem}_forensic_report.pdf'}")
+
     if save_detected_frames:
         print(f"Detected frame images saved to: {detected_frames_dir}")
 
@@ -272,6 +403,7 @@ def run_full_pipeline(
     confidence_threshold: float = 0.50,
     analysis_fps: int = 5,
     enable_enhancement: bool = True,
+    enable_cctv_intelligence: bool = True,
 ) -> dict:
     # *Video Upload
     input_video = Path(video_path).expanduser().resolve()
@@ -316,6 +448,7 @@ def run_full_pipeline(
             analysis_fps=analysis_fps,
             save_detected_frames=True,
             csv_output_path=output_root / f"forensic_detections_{label}.csv",
+            enable_cctv_intelligence=enable_cctv_intelligence,
         )
         summary_path = output_root / f"forensic_summary_{label}.txt"
         summary = generate_forensic_summary(
@@ -379,7 +512,10 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run the full CCTV weapon detection pipeline: upload -> enhancement -> detection -> forensic report."
     )
-    parser.add_argument("--video", type=str, required=True, help="Path to the CCTV input video.")
+    parser.add_argument("--video", "--camera1", type=str, default=None, help="Path to the primary CCTV input video (Camera 1).")
+    parser.add_argument("--cam1-id", type=str, default="CAM-01", help="Identifier for Camera 1 (default: CAM-01).")
+    parser.add_argument("--camera2", type=str, default=None, help="Path to an optional secondary CCTV input video (Camera 2).")
+    parser.add_argument("--cam2-id", type=str, default="CAM-02", help="Identifier for Camera 2 (default: CAM-02).")
     parser.add_argument(
         "--output",
         type=str,
@@ -390,7 +526,7 @@ def parse_args() -> argparse.Namespace:
         "--model",
         type=str,
         default="auto",
-        help="Detection checkpoint to use: auto, retrained, original, or full path to a .pth file.",
+        help="Detection checkpoint to use: auto, seventh, sixth, fifth, or path to .pth.",
     )
     parser.add_argument(
         "--confidence",
@@ -409,19 +545,57 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Skip the WSL BasicVSR++ enhancement step and run detection directly on the source video.",
     )
+    parser.add_argument(
+        "--no-cctv-intelligence",
+        action="store_true",
+        help="Disable CCTV intelligence filters (motion tracking, person proximity gating, and geometric filters).",
+    )
+    parser.add_argument(
+        "--no-temporal-consistency",
+        action="store_true",
+        help="Disable temporal consistency tracklet persistence and smoothing.",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    result = run_full_pipeline(
-        video_path=args.video,
-        output_dir=args.output,
-        model_path=resolve_model_path(args.model),
-        confidence_threshold=args.confidence,
-        analysis_fps=args.fps,
-        enable_enhancement=not args.no_enhancement,
-    )
-    print("\n[4/4] Full pipeline finished successfully.")
-    print(f"Model used: {result['selected_model']}")
-    print(f"Result summary: {result['summary']}")
+
+    primary_video = args.video
+    if not primary_video:
+        raise ValueError("Please provide at least one input video via --video or --camera1.")
+
+    if args.camera2:
+        print("\n" + "=" * 76)
+        print("          MULTI-CAMERA SURVEILLANCE PIPELINE ACTIVATED (2 CAMERAS)          ")
+        print("=" * 76)
+        cam_configs = [
+            CameraInputConfig(camera_id=args.cam1_id, video_path=primary_video),
+            CameraInputConfig(camera_id=args.cam2_id, video_path=args.camera2),
+        ]
+        mc_service = MultiCameraService(
+            output_dir=args.output,
+            confidence_threshold=args.confidence,
+            analysis_fps=args.fps,
+            enable_cctv_intelligence=not args.no_cctv_intelligence,
+            enable_temporal_consistency=not args.no_temporal_consistency,
+            model_path=resolve_model_path(args.model),
+        )
+        result = mc_service.process_cameras(cam_configs)
+        print("\n[Finished] Multi-camera surveillance pipeline completed successfully.")
+        print(f"Unified Forensic CSV: {result['unified_csv']}")
+        print(f"Unified Forensic PDF: {result['unified_pdf']}")
+    else:
+        result = run_full_pipeline(
+            video_path=primary_video,
+            output_dir=args.output,
+            model_path=resolve_model_path(args.model),
+            confidence_threshold=args.confidence,
+            analysis_fps=args.fps,
+            enable_enhancement=not args.no_enhancement,
+            enable_cctv_intelligence=not args.no_cctv_intelligence,
+        )
+        print("\n[4/4] Full pipeline finished successfully.")
+        print(f"Model used: {result['selected_model']}")
+        print(f"Result summary: {result['summary']}")
+

@@ -19,6 +19,9 @@ SECTION 1: MASTER COMPARATIVE SUMMARY TABLE (MODELS 1 TO 6)
 | **Model 4** | Sanitized Batch 2 (88 bad purged) | 1553 / 333 / 333 (2219 Total) | 67.06% | 59.95% | 63.31% | 12.76% | 91.33% | 52.04% | 226 / 111 / 151 | Knife reached 91.3%, but handguns failed in CCTV (0% TP; macro studio scale mismatch). |
 | **Model 5** | USRT CCTV-Gun (Mendeley) + Knife + Negs | 1653 / 354 / 356 (2363 Total) | 85.37% | 90.93% | 88.07% | 85.97% | 89.78% | 87.87% | 321 / 55 / 32 | Handgun crisis solved! AP surged to 85.97%. Fan & door false alarms eliminated. |
 | **Model 6** | VIRAT CCTV Negatives + Augmented Knife | 1765 / 378 / 380 (2523 Total) | 75.17% | 93.48% | 83.33% | 91.77% | 92.68% | 92.23% | 330 / 109 / 23 | Highest mAP (92.23%) & Recall (93.48%). CCTV knife sensitivity surged to 100 frames. |
+| **Model 7** | Hard Negative Mining (Bare Hands/Rails) + Small Anchors + Cosine LR | 1838 / 393 / 397 (2628 Total) | 70.48% | 90.65% | 79.31% | 86.98% | 88.10% | 87.54% | 320 / 134 / 33 | 85.7% hard negative rejection. Trained with small anchors ((8, 16, 32, 64, 128)) and 15-epoch cosine schedule. |
+
+
 
 ========================================================================================
 SECTION 2: DETAILED MODEL-BY-MODEL FACTSHEETS
@@ -258,8 +261,57 @@ MODEL 6 (FINAL DEPLOYED MODEL): VIRAT CCTV NEGATIVES + SURVEILLANCE-AUGMENTED KN
   - Knife Evaluation Video (samples/evaluation_video.mp4):
     * 42 knife detections (peak conf: 94.7% on weapon brandished toward entrance).
 
+----------------------------------------------------------------------------------------
+MODEL 7 (HARD NEGATIVE MINING + SMALL ANCHORS + COSINE ANNEALING):
+----------------------------------------------------------------------------------------
+* Checkpoint Filename: best_weapon_detector_seventh_model.pth (Target Checkpoint)
+* Dataset Sources:
+  - Handgun: USRT Firearm Action Recognition Dataset (Ruiz-Santaquiteria et al., 2023, Mendeley Data DOI: 10.17632/bbzpxhd22j.2)
+  - Knife: OD-WeaponDetection (Howard Clean) + Dynamic CCTV Domain Augmentations (motion blur, lens blur, sensor downsampling, contrast jitter) + Synthetic Infrared / Night-Vision phosphor mode simulation (p=0.25, Herrmann et al., 2018)
+  - Authentic CCTV Hard Negatives:
+    * Bare hands, clenched fists, and empty-handed moving pedestrians (curated from USRT No_Gun action videos & surveillance sequences)
+    * Architectural railings, entrance stairs, and domestic indoor scene structures (curated from VIRAT Release 2.0 & domestic CCTV sequences)
+    * Total Authentic Negatives: 365 images (Zero-box annotations: teaches the model that humans moving with bare hands/fists = background)
+* Storage Folder: training/seventh_model_data
+* Dataset Statistics:
+  - Total Images: 2,628
+  - Total Annotations: 2,328 bounding boxes
+  - Handgun Total: 1,128 images (1,128 bounding boxes)
+  - Knife Total: 1,135 images (1,200 bounding boxes)
+  - Authentic CCTV Hard Negatives Total: 365 images (13.9% of total dataset)
+* Split Configuration (70% Train / 15% Val / 15% Test):
+  - Training Set (70%):   1,838 images (789 Handgun, 794 Knife, 255 Hard Negatives; 1,632 annos)
+  - Validation Set (15%):   393 images (169 Handgun, 170 Knife, 54 Hard Negatives; 349 annos)
+  - Test Set (15%):         397 images (170 Handgun, 171 Knife, 56 Hard Negatives; 347 annos, 353 targets)
+* Training Hyperparameters & Pipeline Enhancements:
+  - Architecture: Faster R-CNN (ResNet-50 FPN v2)
+  - RPN Small-Scale Anchors: sizes=((8,), (16,), (32,), (64,), (128,)), aspect_ratios=((0.5, 1.0, 2.0),) * 5 (Lin et al., CVPR 2017)
+  - Optimizer: SGD (lr=0.005, momentum=0.9, weight_decay=0.0005)
+  - Learning Rate Schedule: Cosine Annealing LR (T_max=15 epochs, eta_min=1e-5; Loshchilov & Hutter, ICLR 2017)
+  - Concurrency & CPU Throttling: Explicit thread capping (--threads 8, torch.set_num_threads(8), OMP_NUM_THREADS=8) to prevent CPU 100% saturation on Windows.
+  - Batch Size: 2 (919 batches per epoch) | Epochs: 15 (13,785 total batch updates)
+  - Checkpoint Save Policy: Saves best_weapon_detector_seventh_model.pth on validation loss improvement + latest_weapon_detector_seventh_model.pth every epoch for crash recovery.
+* Test Split Metrics (IoU >= 0.50, Conf >= 0.50 on 397 Held-Out Images):
+  - Precision:        70.48% (0.704846)
+  - Recall:           90.65% (0.906516)
+  - F1-Score:         79.31% (0.793061)
+  - AP (Handgun):     86.98% (0.869788)
+  - AP (Knife):       88.10% (0.881026)
+  - mAP@0.5:          87.54% (0.875407)
+  - True Positives:   320
+  - False Positives:  134
+  - False Negatives:  33
+  - Hard Negative Rejection Specificity: 48/56 images (85.71% complete zero-alarm rate on negative scenes)
+  - Best Validation Loss: 0.0497 (Epoch 4)
+* Primary Research Objective:
+  - Weight-level elimination of the 2 remaining person-attached edge cases:
+    1. Bare clenched fists misclassified as handguns in CCTV range (via bare-hand negative mining; Shrivastava et al., CVPR 2016).
+    2. Elongated barrel shadows misclassified as knives (via small-scale anchor tuning and linear object negative mining).
+
+
 ========================================================================================
 SECTION 3: SYSTEM HARDWARE & SOFTWARE SPECIFICATIONS (FOR TABLE 4 / CHAPTER 3)
+
 ========================================================================================
 * Graphics Processing Unit (GPU): NVIDIA GeForce RTX 5060 Ti (16 GB GDDR6 VRAM)
 * Host Processor (CPU): Multi-Core AMD Ryzen / Intel Core (Concurrency: 8 threads)
@@ -270,6 +322,216 @@ SECTION 3: SYSTEM HARDWARE & SOFTWARE SPECIFICATIONS (FOR TABLE 4 / CHAPTER 3)
 * Deep Learning Framework: PyTorch 2.13.0 with CUDA 13.0 Acceleration
 * Computer Vision Library: OpenCV 4.14.0 (cv2)
 * Video Super-Resolution Model: BasicVSR++ Recurrent Video Restoration Network
+
+========================================================================================
+SECTION 4: VIDEO INPUT REQUIREMENTS OF THE SYSTEM
+========================================================================================
+Reference Standard: Philippine CCTV Technical Reference (Resolution: 720p / 1280×720 @ 30 FPS)
+System Input Component: OpenCV VideoCapture (cv2) — decodes any codec/container
+                        supported by the host system's FFmpeg/GStreamer backend.
+========================================================================================
+
+OVERVIEW
+--------
+The system does not enforce rigid fixed thresholds for most video parameters. Instead, the
+conditions below define what is minimally sufficient for the pipeline to function and for
+detection to have a reasonable chance of succeeding. Parameters marked "No Fixed Maximum"
+are bounded only by available hardware resources (VRAM, RAM, storage, and processing time).
+
+VIDEO REQUIREMENTS TABLE
+------------------------
++--------------------+-------------------------------------+------------------+--------------------------------------------+
+| Requirement        | Minimum (Practical Reference)       | Maximum          | Technical Defense / Justification          |
++--------------------+-------------------------------------+------------------+--------------------------------------------+
+| Resolution         | 720p (1280 x 720 pixels)            | No fixed maximum | 720p is the floor reference aligned with   |
+|                    |                                     |                  | the Philippine CCTV technical standard.    |
+|                    |                                     |                  | Higher resolution preserves more visual    |
+|                    |                                     |                  | information for distant and small objects. |
+|                    |                                     |                  | Resolution alone does not guarantee        |
+|                    |                                     |                  | detection; object visibility (distance,    |
+|                    |                                     |                  | angle, lighting) determines actual         |
+|                    |                                     |                  | detection performance.                     |
++--------------------+-------------------------------------+------------------+--------------------------------------------+
+| Frame Rate (FPS)   | 30 FPS (practical reference)        | No fixed maximum | 30 FPS is the baseline supported by the   |
+|                    |                                     |                  | Philippine CCTV technical reference.       |
+|                    |                                     |                  | Higher FPS increases processing workload   |
+|                    |                                     |                  | because more frames are analyzed per       |
+|                    |                                     |                  | second. The system's frame_interval        |
+|                    |                                     |                  | parameter controls how many frames are     |
+|                    |                                     |                  | actually submitted to the detector,        |
+|                    |                                     |                  | allowing workload to scale with hardware.  |
++--------------------+-------------------------------------+------------------+--------------------------------------------+
+| Video Format /     | Any format decodable by             | No fixed maximum | The system uses OpenCV VideoCapture,       |
+| Container          | OpenCV (via FFmpeg/GStreamer).       |                  | which supports common surveillance         |
+|                    | Common formats: MP4, AVI, MKV,      |                  | containers and codecs (H.264, H.265/HEVC,  |
+|                    | MOV, TS (transport stream)          |                  | MJPEG, MPEG-4). The binding condition is   |
+|                    |                                     |                  | successful frame extraction. If OpenCV     |
+|                    |                                     |                  | can decode the stream, the system can      |
+|                    |                                     |                  | process it.                                |
++--------------------+-------------------------------------+------------------+--------------------------------------------+
+| Video Duration     | No fixed minimum                    | No fixed maximum | Duration is treated as a computational     |
+|                    |                                     |                  | workload factor, not a correctness         |
+|                    |                                     |                  | constraint. Long recordings can be         |
+|                    |                                     |                  | processed in segments. The forensic CSV    |
+|                    |                                     |                  | output preserves frame number, timestamp   |
+|                    |                                     |                  | (seconds), and camera source identifiers   |
+|                    |                                     |                  | across all segment outputs.                |
++--------------------+-------------------------------------+------------------+--------------------------------------------+
+| File Size          | No fixed minimum                    | No fixed maximum | File size is a function of resolution,     |
+|                    |                                     |                  | frame rate, codec, compression level, and  |
+|                    |                                     |                  | duration. The practical limit is available |
+|                    |                                     |                  | storage and memory on the processing       |
+|                    |                                     |                  | machine. No fixed file size threshold is   |
+|                    |                                     |                  | imposed by the detection pipeline.         |
++--------------------+-------------------------------------+------------------+--------------------------------------------+
+| Compression        | Processable / decodable by          | No fixed maximum | Compression level is relevant because      |
+| (Codec Quality)    | OpenCV without frame read failure   |                  | excessive H.264/H.265 compression          |
+|                    |                                     |                  | introduces macroblocking and ringing       |
+|                    |                                     |                  | artifacts. These reduce useful visual      |
+|                    |                                     |                  | information and can degrade detection.     |
+|                    |                                     |                  | The BasicVSR++ super-resolution module     |
+|                    |                                     |                  | mitigates compression artifact impact      |
+|                    |                                     |                  | before detection inference.                |
++--------------------+-------------------------------------+------------------+--------------------------------------------+
+| Object Visibility  | Object must be sufficiently         | N/A              | Detection performance is influenced by:    |
+| (Environmental     | visible for detection analysis      |                  |  - Camera-to-subject distance              |
+| Conditions)        |                                     |                  |  - Ambient lighting conditions             |
+|                    |                                     |                  |  - Motion blur (camera shake / fast motion)|
+|                    |                                     |                  |  - Sensor noise and compression artifacts  |
+|                    |                                     |                  |  - Partial occlusion of the weapon         |
+|                    |                                     |                  |  - Camera mounting angle and field of view |
+|                    |                                     |                  |  - Relative size of weapon in the frame    |
+|                    |                                     |                  | Objects that are completely occluded,       |
+|                    |                                     |                  | outside the camera's field of view, or     |
+|                    |                                     |                  | rendered invisible by extreme low-light    |
+|                    |                                     |                  | conditions cannot be detected by any       |
+|                    |                                     |                  | computer vision system.                    |
++--------------------+-------------------------------------+------------------+--------------------------------------------+
+
+TECHNICAL NOTES FOR MANUSCRIPT (CHAPTER 3 - SYSTEM DESIGN / CONSTRAINTS)
+---------------------------------------------------------------------------
+1. The 720p / 30 FPS reference is grounded in the Philippine CCTV Technical Reference
+   Standard, establishing an empirically supported baseline for domestic surveillance
+   system integration.
+
+2. The system does not reject videos below 720p; lower-resolution inputs can still be
+   processed, but detection performance degrades proportionally with the loss of visual
+   information. This is consistent with the object visibility condition above.
+
+3. Temporal parameters (frame rate, duration) are handled by the system's configurable
+   frame_interval parameter (default: analyzes approximately 5 frames per second regardless
+   of source FPS), which decouples detection throughput from the raw source frame rate.
+
+4. BasicVSR++ recurrent video super-resolution is applied upstream of the Faster R-CNN
+   detector to partially restore visual information degraded by compression and low
+   resolution, reducing the effective minimum resolution requirement in practice.
+
+6. Forensic Record Generation: The system complies with the thesis requirements for Howard (UI)
+   and Tyrone (Prototype) by exporting structured and traceable detection records conforming to 8 standard
+   fields: source_video, frame_number, timestamp_seconds, camera_id, object_label, bounding_box,
+   confidence_score, and validation_status.
+
+7. Multi-Camera Integration: Dual-stream ingestion supporting CAM-01 and CAM-02 with isolated spatial
+   tracking and chronological timeline reconciliation.
+
+8. Temporal Consistency Filtering: Suppresses single-frame transient false proposals (SUPPRESSED_TEMPORAL_FLICKER)
+   and smooths target class labels using tracklet majority voting.
+
+========================================================================================
+SECTION 4: FORENSIC RECORD GENERATION & MULTI-CAMERA ARCHITECTURE SPECIFICATION
+========================================================================================
+
+A. FORENSIC-ORIENTED DETECTION RECORD SPECIFICATION (HOWARD & TYRONE COMPLIANCE)
+--------------------------------------------------------------------------------
+To maintain complete evidentiary traceability under forensic computing standards,
+every detection record produced by FORENSIKADA contains the following 8 fields:
+
+1. source_video (str):
+   Exact filename of the surveillance video feed (e.g., "CAM02_Scene_004.mp4").
+2. frame_number (int):
+   Exact zero-indexed integer index of the analyzed video frame.
+3. timestamp_seconds (float):
+   Timeline offset in seconds from the start of the video (formatted as HH:MM:SS.mmm).
+4. camera_id (str):
+   Surveillance camera identifier (e.g., "CAM-01", "CAM-02").
+5. object_label (str):
+   Classified weapon category ("handgun" or "knife").
+6. bounding_box (str / list):
+   Pixel coordinates in standard [x1, y1, x2, y2] format.
+7. confidence_score (float):
+   Detection confidence score between 0.0 and 1.0 (e.g., 0.8742).
+8. validation_status (str):
+   Status flag: "CONFIRMED_ALERT" (actionable threat) or "SUPPRESSED" (with reason:
+   STATIC_BACKGROUND_TRAP, NO_PERSON_PROXIMITY, GEOMETRIC_OVERSIZED, SUPPRESSED_TEMPORAL_FLICKER).
+
+B. MULTI-CAMERA INTEGRATION ARCHITECTURE
+----------------------------------------
+1. Accepts two simultaneous camera streams (e.g., CAM-01 Entrance, CAM-02 Hallway).
+2. Runs independent spatial tracking state machines (CentroidMotionTracker) per camera ID
+   to prevent cross-camera coordinate pollution.
+3. Interleaves all detected incidents into a single, unified chronological timeline sorted
+   strictly by timestamp_seconds.
+4. Generates evidentiary crop images organized into per-camera subdirectories:
+   - outputs/.../crops/CAM-01/
+   - outputs/.../crops/CAM-02/
+
+C. TEMPORAL CONSISTENCY FILTER SPECIFICATION
+--------------------------------------------
+1. Tracklet Matching: Associating frame-level bounding boxes across time using spatial
+   centroid Euclidean distance gating (max_distance = 60 px).
+2. Flicker Suppression: Suppresses transient detections that occur for fewer than 2 consecutive
+   frames (min_hits = 2). Detections failing this condition are marked SUPPRESSED_TEMPORAL_FLICKER.
+3. Majority Voting: Reconciles label identity within a sustained tracklet to prevent rapid
+   weapon classification hopping between handgun and knife.
+4. End-of-Video Reconciliation: Retroactively elevates sustained multi-frame detections once
+   a tracklet crosses the required persistence threshold.
+
+
+
+========================================================================================
+SECTION 5: POST-DETECTOR SURVEILLANCE INTELLIGENCE & ANTHROPOMETRIC FEASIBILITY VALIDATION
+========================================================================================
+
+A. THEORETICAL FOUNDATION: OVERCOMING 2D CONVOLUTIONAL SCALE AMNESIA
+-------------------------------------------------------------------
+Standard 2D Convolutional Neural Networks (including Faster R-CNN) operate on local pixel gradients
+without intrinsic 3D depth, physical scale, or anatomical awareness. Consequently, distant background
+fixtures (staircase stringers, table borders, door molding, backpack straps) frequently produce
+high-confidence weapon proposals when their 2D silhouettes match weapon aspect ratios.
+
+Rather than indefinitely retraining network weights on an intractable variety of environmental textures,
+FORENSIKADA integrates a post-detector Surveillance Intelligence Layer enforcing:
+1. Kinematic Motion Tracking (CentroidMotionTracker): Stationary objects with displacement < 30 px
+   over >= 10 frames are classified as STATIC_BACKGROUND_TRAP.
+2. Anatomical Reach Envelope: Valid handheld weapons must fall within human arm manipulation range
+   (rel_y in [0.20, 0.80] relative to upright torso height; relaxed to 1.15 when person is bottom-truncated
+   by camera edge).
+3. Anthropometric Scale Constraints:
+   - Area Ratio: Weapon area <= 20% of associated person bounding box area.
+   - Width Ratio: Weapon width <= 75% of person torso width.
+   - Height Ratio: Weapon height <= 45% of effective person dimension (perspective-safe: max(p_h, p_w)).
+4. Aspect-Ratio Smartphone Gating: Objects with aspect_ratio < 0.50 (height > 2x width) associated with
+   hand locations are recognized as vertical smartphones and suppressed.
+
+B. EMPIRICAL STRESS-TEST RESULTS ON UNCONSTRAINED SURVEILLANCE FOOTAGE
+---------------------------------------------------------------------
+| Surveillance Video Clip | Scene Description / Environmental Challenge | Raw Detector Output | With Surveillance Intelligence | Forensic Diagnostic Result |
+| :--- | :--- | :---: | :---: | :--- |
+| **`test_10s_negative.mp4`** | Empty office/room with tables and chairs (classic trap) | 24 raw proposals | **0 confirmed alerts (100% Clean)** | 13 NO_PERSON_IN_SCENE, 11 BELOW_CLASS_THRESHOLD. Zero false alarms. |
+| **`test_10s_knife.mp4`** | Distant indoor surveillance footage | 1 raw proposal | **0 confirmed alerts (100% Clean)** | 1 BELOW_CLASS_THRESHOLD. Zero false alarms. |
+| **`test_10s_general.mp4`** | Authentic store robbery with armed assailant & complex shelves | 138 raw proposals | **7 confirmed alerts (100% Handgun)** | 22/22 shelf knife hallucinations eliminated by ANTHROPOMETRIC_SCALE_VIOLATION; 100% pure handgun track. |
+| **`CAM01 & CAM02 Scene 004`** | Dual-camera staged incident with staircase & furniture | 143 raw proposals | **Clean weapon alerts; 0 knife alarms** | All oversized staircase railing proposals suppressed via GEOMETRIC_OVERSIZED and ANTHROPOMETRIC gating. |
+
+========================================================================================
+SECTION 6: FUTURE WORK RECOMMENDATIONS (PROPOSED MODEL 8 ITERATION)
+========================================================================================
+For future research iterations beyond the initial thesis deployment:
+1. Anchor Scale Rebalancing: Incorporate intermediate anchor scales ((16,), (32,), (64,), (128,), (256,))
+   to optimize feature pyramid matching between macro surveillance handguns and micro concealed blades.
+2. Loss Formulation: Integrate Quality Focal Loss (QFL) to couple localization quality with classification
+   scores, reducing raw proposal volume directly at the RPN level before post-filtering.
+3. Multi-View Epipolar Geometry: Leverage multi-camera homography and calibration matrices for 3D world-space
+   coordinate triangulation across overlapping camera views.
 
 ========================================================================================
                                END OF FACTSHEET
