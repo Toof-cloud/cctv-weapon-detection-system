@@ -128,3 +128,53 @@ TP: 320
 FP: 134
 FN: 33
 Negative Image Rejection Rate: 48/56 (85.7%)
+
+* Model 8 Metrics (Balanced RPN Anchors + Sanitized Negatives + Specular Jitter)
+Checkpoint: best_weapon_detector_eighth_model.pth
+Dataset: CCTV Multi-Source Sanitized Dataset (USRT + Howard Knife + VIRAT Public Negatives + Phone Distractors)
+Train images: 2095
+Validation images: 260
+Test images: 265 (228 Weapon, 37 Pure CCTV Negative)
+Total images: 2620 (2685 annotation records)
+Anchor configuration: Balanced Scales ((16,), (32,), (64,), (128,), (256,))
+Augmentations: Specular highlight/metal tone jitter (+-25%), CCTV motion/lens blur, downsampling (0.5x-0.75x), synthetic IR
+Batch size: 2
+Epochs: 12 (Cosine Annealing LR: 0.005 -> 1e-5)
+Confidence threshold: 0.50
+IoU threshold: 0.50
+Precision: 0.811808 (81.18%)
+Recall: 0.924370 (92.44%)
+F1: 0.864440 (86.44%)
+AP(Handgun): 0.940203 (94.02%)
+AP(Knife): 0.882200 (88.22%)
+mAP@0.5: 0.911201 (91.12%)
+TP: 220
+FP: 51
+FN: 18
+Negative Image Rejection Rate (Zero-Alarm): 31/37 (83.78%)
+Status: Completed (RTX 5060 Ti GPU, 8 CPU thread limit)
+
+* Model 9 Metrics (Surveillance Hard Negatives + 1D Directional Motion Blur PSF)
+Checkpoint: best_weapon_detector_ninth_model.pth
+Dataset: CCTV Multi-Source Hard Negative & Motion-Blurred Dataset (USRT + Howard Knife + 505 CCTV Negatives)
+Train images: 2214
+Validation images: 275
+Test images: 279 (228 Weapon, 51 Pure CCTV Negative)
+Total images: 2768 (2833 annotation records)
+Anchor configuration: Balanced Scales ((16,), (32,), (64,), (128,), (256,))
+Augmentations: 1D Directional Motion Blur (PSF kernel 5-11px), Specular highlight/metal tone jitter (+-25%), CCTV downsampling (0.5x-0.75x), synthetic IR
+Batch size: 2
+Epochs: 12 (Cosine Annealing LR: 0.005 -> 1e-5)
+Confidence threshold: 0.50
+IoU threshold: 0.50
+Precision: 0.886400 (88.64%)
+Recall: 0.933000 (93.30%)
+F1: 0.909000 (90.90%)
+AP(Handgun): 0.935890 (93.59%)
+AP(Knife): 0.919100 (91.91%)
+mAP@0.5: 0.927500 (92.75%)
+TP: 222 (107 Handgun, 115 Knife)
+FP: 29 (10 Handgun, 19 Knife)
+FN: 16 (7 Handgun, 9 Knife)
+Negative Image Rejection Rate (Zero-Alarm): 47/51 (92.16%)
+Status: Completed (RTX 5060 Ti GPU, 8 CPU thread limit)

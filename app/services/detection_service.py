@@ -13,6 +13,8 @@ if str(ROOT_DIR) not in sys.path:
 from dataset_analysis.build_model import get_model
 
 DEFAULT_MODEL_CANDIDATES = [
+    ROOT_DIR / "best_weapon_detector_ninth_model.pth",
+    ROOT_DIR / "best_weapon_detector_eighth_model.pth",
     ROOT_DIR / "best_weapon_detector_seventh_model.pth",
     ROOT_DIR / "best_weapon_detector_sixth_model.pth",
     ROOT_DIR / "best_weapon_detector_fifth_model.pth",
@@ -42,18 +44,28 @@ class DetectionService:
             2: "knife",
         }
 
-        is_seventh = "seventh" in self.model_path.name.lower()
-        self.model = get_model(num_classes=3, small_anchors=is_seventh)
+        model_name = self.model_path.name.lower()
+        if "ninth" in model_name or "eighth" in model_name:
+            self.model = get_model(num_classes=3, anchor_scales=(16, 32, 64, 128, 256))
+        elif "seventh" in model_name:
+            self.model = get_model(num_classes=3, small_anchors=True)
+        else:
+            self.model = get_model(num_classes=3, small_anchors=False)
+
 
         if not self.model_path.exists():
             raise FileNotFoundError(
                 f"Model checkpoint was not found: {self.model_path}"
             )
 
-        state_dict = torch.load(
+        checkpoint = torch.load(
             self.model_path,
             map_location=self.device,
         )
+        if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint:
+            state_dict = checkpoint["model_state_dict"]
+        else:
+            state_dict = checkpoint
 
         self.model.load_state_dict(state_dict)
 

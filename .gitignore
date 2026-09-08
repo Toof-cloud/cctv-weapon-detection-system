@@ -55,5 +55,10 @@ CHAT_CONTEXT/repository_structure.txt
 scratch/
 
 # Generated dataset folders
-training/seventh_model_data/
+training/*_data/
+training/*_model_data/
+training/*/*_data/
+training/**_data/
+training/model_*/*_data/
+
 

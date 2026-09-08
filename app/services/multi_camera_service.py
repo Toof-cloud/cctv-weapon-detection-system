@@ -135,7 +135,7 @@ class MultiCameraService:
                     min_temporal_hits=2,
                     class_thresholds={
                         "handgun": max(0.50, self.confidence_threshold),
-                        "knife": max(0.65, self.confidence_threshold + 0.15),
+                        "knife": max(0.50, self.confidence_threshold),
                     },
                 )
 

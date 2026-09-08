@@ -1,7 +1,9 @@
+from pathlib import Path
 import pandas as pd
 
-INPUT_CSV = "handgun_train_annotations.csv"
-OUTPUT_CSV = "handgun_train_annotations_fixed.csv"
+ROOT_DIR = Path(__file__).resolve().parents[1]
+INPUT_CSV = ROOT_DIR / "handgun_train_annotations.csv"
+OUTPUT_CSV = ROOT_DIR / "handgun_train_annotations_fixed.csv"
 
 df = pd.read_csv(INPUT_CSV)
 

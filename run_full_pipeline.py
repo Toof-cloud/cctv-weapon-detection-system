@@ -123,6 +123,10 @@ def resolve_model_path(model_arg: str | None) -> str | Path | None:
     value = str(model_arg).strip().lower()
     if value in {"auto", "default"}:
         return None
+    if value in {"ninth", "model9", "nine"}:
+        return ROOT_DIR / "best_weapon_detector_ninth_model.pth"
+    if value in {"eighth", "model8", "eight"}:
+        return ROOT_DIR / "best_weapon_detector_eighth_model.pth"
     if value in {"seventh", "model7", "seven"}:
         return ROOT_DIR / "best_weapon_detector_seventh_model.pth"
     if value in {"sixth", "model6", "six"}:
@@ -207,7 +211,7 @@ def detect_video_with_model(
             min_temporal_hits=2,
             class_thresholds={
                 "handgun": max(0.50, confidence_threshold),
-                "knife": max(0.65, confidence_threshold + 0.15),
+                "knife": max(0.50, confidence_threshold),
             },
         )
 
@@ -279,6 +283,9 @@ def detect_video_with_model(
                         "validation_status": rec.get("validation_status") or rec.get("status", "CONFIRMED_ALERT"),
                         "rejection_reason": rec.get("rejection_reason", "") or "",
                         "temporal_track_id": rec.get("temporal_track_id"),
+                        "track_id": rec.get("track_id"),
+                        "raw_class_name": rec.get("raw_class_name", rec["class_name"]),
+                        "raw_confidence": rec.get("raw_confidence", rec["confidence"]),
                     }
                 )
 
@@ -316,6 +323,53 @@ def detect_video_with_model(
     # Reconcile temporal consistency across whole video
     if cctv_filter and enable_temporal_consistency:
         detection_records = cctv_filter.reconcile_video_records(detection_records, min_hits=2)
+
+        # Re-render video and detected PNG frames with final reconciled forensic labels
+        confirmed_by_frame = {}
+        for r in detection_records:
+            if r.get("validation_status") == "VALIDATED_TEMPORAL":
+                f_num = int(r["frame_number"])
+                if f_num not in confirmed_by_frame:
+                    confirmed_by_frame[f_num] = []
+                box = [int(r["x1"]), int(r["y1"]), int(r["x2"]), int(r["y2"])]
+                confirmed_by_frame[f_num].append({
+                    "box": box,
+                    "confidence": float(r["confidence_score"]),
+                    "class_name": r["object_label"],
+                    "status": "CONFIRMED_ALERT",
+                })
+
+        if confirmed_by_frame:
+            cap_re = cv2.VideoCapture(str(input_file))
+            fourcc_re = cv2.VideoWriter_fourcc(*"mp4v")
+            temp_output = output_file.parent / f"{output_file.stem}_reconciled_temp.mp4"
+            writer_re = cv2.VideoWriter(str(temp_output), fourcc_re, fps, (width, height))
+            f_idx = 0
+            while True:
+                ret, raw_f = cap_re.read()
+                if not ret:
+                    break
+                if f_idx in confirmed_by_frame:
+                    ann_f = draw_detections(raw_f.copy(), confirmed_by_frame[f_idx])
+                    if save_detected_frames:
+                        saved_path = detected_frames_dir / f"frame_{f_idx:06d}_detected.png"
+                        cv2.imwrite(str(saved_path), ann_f)
+                    draw_f = ann_f
+                else:
+                    draw_f = raw_f
+
+                ts = f_idx / fps
+                ts_label = f"{camera_id} | Frame {f_idx} | Time {ts:.2f}s"
+                cv2.putText(draw_f, ts_label, (12, height - 15), cv2.FONT_HERSHEY_SIMPLEX, 0.50, (255, 255, 255), 2, cv2.LINE_AA)
+                writer_re.write(draw_f)
+                f_idx += 1
+            cap_re.release()
+            writer_re.release()
+
+            if temp_output.exists():
+                if output_file.exists():
+                    output_file.unlink()
+                temp_output.rename(output_file)
 
     # Export via ReportService (CSV, JSON, HTML, PDF)
     report_service = ReportService(output_dir=csv_path.parent)

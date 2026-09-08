@@ -30,6 +30,49 @@ def box_overlap_area(b1: List[int], b2: List[int]) -> float:
     return 0.0
 
 
+def box_iou(b1: List[int], b2: List[int]) -> float:
+    """Calculates Intersection over Union (IoU) between two bounding boxes."""
+    inter = box_overlap_area(b1, b2)
+    if inter <= 0.0:
+        return 0.0
+    area1 = float(max(1, b1[2] - b1[0]) * max(1, b1[3] - b1[1]))
+    area2 = float(max(1, b2[2] - b2[0]) * max(1, b2[3] - b2[1]))
+    union = area1 + area2 - inter
+    return inter / max(1.0, union)
+
+
+def resolve_cross_class_conflicts(detections: List[Dict[str, Any]], iou_threshold: float = 0.45) -> List[Dict[str, Any]]:
+    """
+    Resolves competing multi-class weapon proposals on the exact same physical object.
+    When multiple proposals overlap with IoU >= iou_threshold on the same hand,
+    retains the candidate with highest confidence and preserves secondary class telemetry.
+    """
+    if len(detections) <= 1:
+        return detections
+
+    sorted_dets = sorted(detections, key=lambda d: d.get("confidence", 0.0), reverse=True)
+    resolved: List[Dict[str, Any]] = []
+
+    while sorted_dets:
+        winner = sorted_dets.pop(0)
+        i = 0
+        while i < len(sorted_dets):
+            cand = sorted_dets[i]
+            if box_iou(winner["box"], cand["box"]) >= iou_threshold:
+                if "secondary_proposals" not in winner:
+                    winner["secondary_proposals"] = []
+                winner["secondary_proposals"].append({
+                    "class_name": cand.get("class_name"),
+                    "confidence": cand.get("confidence"),
+                })
+                sorted_dets.pop(i)
+            else:
+                i += 1
+        resolved.append(winner)
+
+    return resolved
+
+
 class PersonDetector:
     """Lightweight person detector using FasterRCNN MobileNetV3 FPN.
     
@@ -131,8 +174,6 @@ class CentroidMotionTracker:
             for t_id, track in self.tracks.items():
                 if t_id in matched_tracks:
                     continue
-                if track["class_name"] != cand["class_name"]:
-                    continue
 
                 dist = math.hypot(cand["cx"] - track["last_cx"], cand["cy"] - track["last_cy"])
                 if dist < self.max_drift_pixels and dist < best_dist:
@@ -156,18 +197,30 @@ class CentroidMotionTracker:
                 track["missing_frames"] = 0
                 track["total_frames"] += 1
 
+                cname = cand["class_name"]
+                conf = float(cand["det"].get("confidence", 0.0))
+                if "class_votes" not in track:
+                    track["class_votes"] = {track["class_name"]: 1}
+                track["class_votes"][cname] = track["class_votes"].get(cname, 0) + 1
+
+                if "class_max_conf" not in track:
+                    track["class_max_conf"] = {track["class_name"]: 0.0}
+                track["class_max_conf"][cname] = max(track["class_max_conf"].get(cname, 0.0), conf)
+
                 init_cx, init_cy, _ = track["history"][0]
                 displacement = math.hypot(cand["cx"] - init_cx, cand["cy"] - init_cy)
                 track["displacement"] = displacement
 
-                is_static = (
-                    in_known_static_zone
-                    or track.get("is_static", False)
-                    or (
-                        track["total_frames"] >= self.static_frame_limit
-                        and displacement < (self.max_drift_pixels * 1.5)
+                # Physical motion release: If the candidate undergoes genuine displacement
+                # beyond the drift threshold, it is actively moving and cannot be a static background trap.
+                if displacement >= (self.max_drift_pixels * 1.5):
+                    is_static = False
+                else:
+                    is_static = (
+                        in_known_static_zone
+                        or track.get("is_static", False)
+                        or (track["total_frames"] >= self.static_frame_limit)
                     )
-                )
                 track["is_static"] = is_static
 
                 cand["det"]["track_id"] = best_t_id
@@ -227,7 +280,7 @@ class TemporalConsistencyFilter:
     def __init__(
         self,
         min_hits: int = 2,
-        max_missing_frames: int = 5,
+        max_missing_frames: int = 15,
         max_match_distance: float = 65.0,
         enable_label_smoothing: bool = True,
     ):
@@ -295,8 +348,9 @@ class TemporalConsistencyFilter:
                 }
                 matched_tracks.add(t_id)
                 cand["temporal_track_id"] = t_id
-                cand["temporal_hits"] = 1
-                cand["is_temporally_consistent"] = (self.min_hits <= 1)
+                # Ultra-high confidence detection bypass: Detections with confidence >= 0.85
+                # are prioritized to avoid dropping brief draw/conceal weapon events.
+                cand["is_temporally_consistent"] = (self.min_hits <= 1 or cand.get("confidence", 0.0) >= 0.85)
 
         # Decay missing tracks
         for t_id in list(self.active_tracks.keys()):
@@ -319,7 +373,7 @@ class CCTVIntelligenceFilter:
         max_person_area_ratio: float = 0.20,
         max_person_width_ratio: float = 0.75,
         max_person_height_ratio: float = 0.45,
-        min_person_reach_y: float = 0.15,
+        min_person_reach_y: float = 0.18,
         max_person_reach_y: float = 0.95,
         enable_person_gating: bool = True,
         enable_anthropometric_gating: bool = True,
@@ -332,7 +386,7 @@ class CCTVIntelligenceFilter:
     ):
         self.class_thresholds = class_thresholds or {
             "handgun": 0.50,
-            "knife": 0.65,
+            "knife": 0.50,
         }
         self.max_area_ratio = max_area_ratio
         self.max_edge_distance = max_edge_distance
@@ -365,7 +419,7 @@ class CCTVIntelligenceFilter:
         self.temporal_filter = (
             TemporalConsistencyFilter(
                 min_hits=min_temporal_hits,
-                max_missing_frames=5,
+                max_missing_frames=15,
                 max_match_distance=65.0,
                 enable_label_smoothing=True,
             )
@@ -382,6 +436,9 @@ class CCTVIntelligenceFilter:
         """Filters raw weapon detections using surveillance-grade intelligence rules."""
         h, w = frame_bgr.shape[:2]
         frame_area = float(h * w)
+
+        # Resolve competing proposals on the exact same physical weapon
+        raw_detections = resolve_cross_class_conflicts(raw_detections, iou_threshold=0.45)
 
         if self.motion_tracker:
             raw_detections = self.motion_tracker.update(raw_detections, frame_idx)
@@ -406,8 +463,11 @@ class CCTVIntelligenceFilter:
 
             rejection_reason = None
 
-            # Check 1: Calibrated class-specific confidence threshold (Wenkel et al., 2021)
-            req_threshold = self.class_thresholds.get(cname, 0.50)
+            # Check 1: Calibrated class-specific confidence threshold with two-tier hysteresis
+            # An isolated proposal requires full threshold (>= 0.50).
+            # An ongoing tracked weapon (track_frames >= 2) persists through 30 FPS motion blur down to 0.38.
+            is_ongoing_track = det.get("track_frames", 1) >= 2
+            req_threshold = 0.38 if is_ongoing_track else self.class_thresholds.get(cname, 0.50)
             if conf < req_threshold:
                 rejection_reason = f"BELOW_CLASS_THRESHOLD ({conf:.1%} < {req_threshold:.1%})"
 
@@ -430,30 +490,46 @@ class CCTVIntelligenceFilter:
             is_held_by_person = False
             min_edge_dist = float("inf")
             associated_person = None
+            allowed_reach = self.max_edge_distance
 
             if persons:
+                best_overlapping_person = None
+                max_overlap = 0.0
+                closest_person = None
+                min_edge_dist = float("inf")
+                closest_person_reach = self.max_edge_distance
+
                 for p in persons:
                     pbox = p["box"]
+                    p_h = max(1, pbox[3] - pbox[1])
+                    person_reach = max(self.max_edge_distance, 0.50 * p_h)
                     dist = box_edge_distance(wbox, pbox)
+                    overlap = box_overlap_area(wbox, pbox)
+
+                    if overlap > max_overlap:
+                        max_overlap = overlap
+                        best_overlapping_person = p
+
                     if dist < min_edge_dist:
                         min_edge_dist = dist
-                        associated_person = p
+                        closest_person = p
+                        closest_person_reach = person_reach
 
-                    if dist <= self.max_edge_distance:
+                if best_overlapping_person is not None:
+                    associated_person = best_overlapping_person
+                    is_adjacent_to_person = True
+                    pbox = associated_person["box"]
+                    p_h = max(1, pbox[3] - pbox[1])
+                    allowed_reach = max(self.max_edge_distance, 0.50 * p_h)
+                    rel_y = (cy - pbox[1]) / max(1, p_h)
+                    # Handheld objects must fall within realistic arm/hand manipulation envelope.
+                    if self.min_person_reach_y <= rel_y <= self.max_person_reach_y and not det.get("is_static", False):
+                        is_held_by_person = True
+                elif closest_person is not None:
+                    associated_person = closest_person
+                    allowed_reach = closest_person_reach
+                    if min_edge_dist <= allowed_reach:
                         is_adjacent_to_person = True
-                        associated_person = p
-
-                    # Overlap with person body
-                    overlap = box_overlap_area(wbox, pbox)
-                    if overlap > 0:
-                        is_adjacent_to_person = True
-                        associated_person = p
-                        person_h = pbox[3] - pbox[1]
-                        rel_y = (cy - pbox[1]) / max(1, person_h)
-                        # Handheld objects must fall within realistic arm/hand manipulation envelope.
-                        # Objects at ankle/floor level (rel_y > 0.80) while walking are on the ground.
-                        if 0.20 <= rel_y <= 0.80 and not det.get("is_static", False):
-                            is_held_by_person = True
 
             # Relative motion check: If the candidate weapon is stationary (drift < 8px)
             # but the closest person is actively walking/moving across the room,
@@ -469,7 +545,7 @@ class CCTVIntelligenceFilter:
                 if not persons:
                     rejection_reason = "NO_PERSON_IN_SCENE"
                 elif not is_adjacent_to_person:
-                    rejection_reason = f"NO_PERSON_PROXIMITY (edge_dist={min_edge_dist:.1f}px > {self.max_edge_distance}px)"
+                    rejection_reason = f"NO_PERSON_PROXIMITY (edge_dist={min_edge_dist:.1f}px > {allowed_reach:.1f}px)"
 
             # Check 3b: Anthropometric Scale & Feasibility Gating relative to associated human
             # Perspective-safe normalization: Use effective body dimension to handle top-down cameras
@@ -517,6 +593,8 @@ class CCTVIntelligenceFilter:
 
             eval_entry = {
                 **det,
+                "raw_class_name": det.get("class_name"),
+                "raw_confidence": det.get("confidence"),
                 "persons_in_frame": len(persons),
             }
 
@@ -590,6 +668,47 @@ class CCTVIntelligenceFilter:
                     r["validation_status"] = "SUPPRESSED_TEMPORAL_FLICKER"
                     r["rejection_reason"] = f"SUPPRESSED_TEMPORAL_FLICKER (Isolated {total}-frame transient proposal)"
 
+        # Track-level weapon class consensus resolution across the video trajectory
+        track_class_stats: Dict[Any, Dict[str, Any]] = {}
+        for r in records:
+            t_id = r.get("temporal_track_id") or r.get("track_id")
+            if t_id is not None and not r.get("rejection_reason"):
+                cname = r.get("raw_class_name") or r.get("object_label") or r.get("class_name")
+                conf = float(r.get("raw_confidence") or r.get("confidence_score") or r.get("confidence") or 0.0)
+                if t_id not in track_class_stats:
+                    track_class_stats[t_id] = {}
+                stats = track_class_stats[t_id]
+                if cname not in stats:
+                    stats[cname] = {"count": 0, "max_conf": 0.0, "sum_conf": 0.0}
+                stats[cname]["count"] += 1
+                stats[cname]["max_conf"] = max(stats[cname]["max_conf"], conf)
+                stats[cname]["sum_conf"] += conf
+
+        track_consensus: Dict[Any, str] = {}
+        for t_id, stats in track_class_stats.items():
+            knife_stats = stats.get("knife", {"count": 0, "max_conf": 0.0, "sum_conf": 0.0})
+            handgun_stats = stats.get("handgun", {"count": 0, "max_conf": 0.0, "sum_conf": 0.0})
+
+            # Physical consistency rule: In surveillance CCTV, knives held pointing forward at distance
+            # have foreshortened blades where only the dark grip/fist is visible, yielding handgun proposals.
+            # When the suspect approaches or swings the weapon, the blade becomes clearly visible.
+            # In physical reality, a handgun cannot transform into an optical knife with a shiny blade.
+            # Therefore, if a tracklet achieves definitive optical knife confirmation (>= 0.85)
+            # and its peak confidence rivals or exceeds the distant handgun proposals, the track resolves to knife.
+            if knife_stats["max_conf"] >= 0.85 and knife_stats["max_conf"] >= handgun_stats["max_conf"]:
+                track_consensus[t_id] = "knife"
+            elif handgun_stats["max_conf"] >= 0.85 and handgun_stats["max_conf"] >= knife_stats["max_conf"]:
+                track_consensus[t_id] = "handgun"
+            else:
+                # Dominant class decided by total accumulated confidence and vote count
+                track_consensus[t_id] = max(stats.keys(), key=lambda c: (stats[c]["count"], stats[c]["sum_conf"]))
+
+        # Apply tracklet consensus strictly to each distinct physical weapon track
+        for r in records:
+            t_id = r.get("temporal_track_id") or r.get("track_id")
+            if t_id in track_consensus and not r.get("rejection_reason"):
+                r["object_label"] = track_consensus[t_id]
+                r["class_name"] = track_consensus[t_id]
 
         return records
 

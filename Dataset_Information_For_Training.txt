@@ -195,4 +195,122 @@ Split Ratio: 70% Train / 15% Validation / 15% Test
   Thesis Alignment: Directly satisfies thesis paper methodology requiring authentic multi-camera VIRAT surveillance background integration to penalize false alarms on daily pedestrian activities.
 
 
+* Model 7 Dataset Information (Hard Negative Mining + Micro-Scale Anchors + Cosine LR)
+Dataset Name: Handgun (Action Recognition Firearm Dataset - Mendeley Data DOI: 10.17632/bbzpxhd22j.2, folder: dataset_analysis\3rd_Model_Dataset\Handgun\Handgun_USRT_CCTV)
+              Knife (KNIFE DATASET - OD- WEAPONDETECTION: KNIFE DETECTION (dataset_analysis\3rd_Model_Dataset\Knife\Knife_First_Clean_Howard))
+              Negatives (Hard Negative Mining: Bare Hands, Railings, Floor/Wall Fixtures, VIRAT Surveillance)
+              Split Data Folder: training\seventh_model_data
+Total Images: 2628
+Total Annotations: 2328
+
+Split Ratio: 70% Train / 15% Validation / 15% Test
+
+- TRAIN SPLIT (70%):
+  Total images: 1838
+  Handgun images: 789 (789 bounding boxes)
+  Knife images: 794 (843 bounding boxes)
+  Negative images: 255 (0 bounding boxes)
+  Total annotations: 1632
+
+- VALIDATION SPLIT (15%):
+  Total images: 393
+  Handgun images: 169 (169 bounding boxes)
+  Knife images: 170 (180 bounding boxes)
+  Negative images: 54 (0 bounding boxes)
+  Total annotations: 349
+
+- TEST SPLIT (15%):
+  Total images: 397
+  Handgun images: 170 (170 bounding boxes)
+  Knife images: 171 (177 bounding boxes)
+  Negative images: 56 (0 bounding boxes)
+  Total annotations: 347
+
+- CLASS TOTALS:
+  Total Handgun images: 1128 (1128 bounding boxes)
+  Total Knife images: 1135 (1200 bounding boxes)
+  Total Negative images: 365 (Hard negative background scenes)
+  Anchor Configuration: Small anchors ((8,), (16,), (32,), (64,), (128,)) for micro-weapon detection.
+
+
+* Model 8 Dataset Information (Balanced Anchors + Sanitized Negatives + Specular Jitter)
+Dataset Name: Handgun (USRT CCTV-Gun + Specular Highlight Simulation for Chrome/Stainless Steel)
+              Knife (Howard Clean Knives + Surveillance Motion Blur Augmentation)
+              Negatives (Sanitized Hard Negatives: 200 VIRAT Surveillance Frames + 100 USRT No_Gun + 40 Pure Surveillance Clips + 17 Restaurant Floor Smartphone Frames)
+              Split Data Folder: training\eighth_model_data
+Total Images: 2620
+Total Annotations: 2685
+
+Split Ratio: 80% Train / 10% Validation / 10% Test
+
+- TRAIN SPLIT (80%):
+  Total images: 2095
+  Handgun images: 902 (902 bounding boxes)
+  Knife images: 908 (960 bounding boxes)
+  Negative images: 285 (0 bounding boxes)
+  Total annotations: 2147
+
+- VALIDATION SPLIT (10%):
+  Total images: 260
+  Handgun images: 113 (113 bounding boxes)
+  Knife images: 113 (120 bounding boxes)
+  Negative images: 34 (0 bounding boxes)
+  Total annotations: 267
+
+- TEST SPLIT (10%):
+  Total images: 265
+  Handgun images: 113 (113 bounding boxes)
+  Knife images: 114 (120 bounding boxes)
+  Negative images: 38 (0 bounding boxes)
+  Total annotations: 271
+
+- CLASS TOTALS:
+  Total Handgun images: 1128 (1128 bounding boxes)
+  Total Knife images: 1135 (1200 bounding boxes)
+  Total Negative images: 357 (Sanitized hard negatives)
+  Anchor Configuration: Balanced scales ((16,), (32,), (64,), (128,), (256,)) covering distance and close-up weapons.
+
+
+* Model 9 Dataset Information (CCTV Hard Negatives + Directional Motion Blur + Foreshortening)
+Dataset Name: Handgun (USRT CCTV-Gun + Specular Highlight & Metallic Contrast Simulation)
+              Knife (Howard Clean Knives + 1D Directional Motion Blur [PSF kernel] + Foreshortened Angles)
+              Negatives (505 Combined Hard Negatives: VIRAT Surveillance + Clip 08 Dining Hall [Beverage Bottles, Cups, Phones, Cutlery] + Retail Cash Counters [Card Payment Terminals, Pinpads, Cash Trays] + Staged Empty Fixtures)
+              Split Data Folder: training\ninth_model_data
+Total Images: 2768
+Total Annotations: 2833
+
+Split Ratio: 80% Train / 10% Validation / 10% Test
+
+- TRAIN SPLIT (80%):
+  Total images: 2214
+  Handgun images: 902 (902 bounding boxes)
+  Knife images: 908 (960 bounding boxes)
+  Negative images: 404 (0 bounding boxes; authentic CCTV background scenes)
+  Total annotations: 2266
+
+- VALIDATION SPLIT (10%):
+  Total images: 275
+  Handgun images: 113 (113 bounding boxes)
+  Knife images: 113 (120 bounding boxes)
+  Negative images: 49 (0 bounding boxes)
+  Total annotations: 282
+
+- TEST SPLIT (10%):
+  Total images: 279
+  Handgun images: 113 (113 bounding boxes)
+  Knife images: 114 (120 bounding boxes)
+  Negative images: 52 (0 bounding boxes)
+  Total annotations: 285
+
+- CLASS TOTALS:
+  Total Handgun images: 1128 (1128 bounding boxes)
+  Total Knife images: 1135 (1200 bounding boxes)
+  Total Negative images: 505 (Surveillance-mined hard negatives)
+  Key Innovations:
+  1. Real CCTV Distractor Mining: Directly mined counter card terminals, glass bottles, and cash drawers.
+  2. 1D Directional Motion Blur: Authentic linear point spread function kernels simulating rapid draw and knife lunge dynamics.
+  3. Highest mAP@0.50 in project history: 92.75% with 92.16% hard negative scene rejection rate.
+
+
+
 
