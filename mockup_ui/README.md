@@ -159,11 +159,10 @@ different model run. Use **Open saved review…** and choose that file, or choos
 keep the original annotated-video files for frame previews. Detection records and
 reviews remain readable if those files are unavailable.
 
-**Automated Validation Result** is read-only and separate from **Analyst Review
-Decision**. The current pipeline supplies detections and confidence filtering but
-does not perform independent observation validation, so its value is **Not performed**.
-If a detection explicitly supplies `automated_validation_status`, that exact value
-is preserved. An analyst choice never overwrites the automated status.
+The review panel retains any pipeline-supplied automated validation status as
+read-only evidence. The PDF, HTML, JSON and CSV report files present the analyst
+decision without an automated-validation result field. The original status remains
+in `observation_reviews.json`; an analyst choice never overwrites it.
 
 Review files are written atomically and checked against the saved run's detection
 details and source references. Export includes the latest saved decisions and is a
@@ -184,6 +183,12 @@ Available source and input-record SHA-256 hashes are measured at report generati
 they are not presented as an earlier ingestion record or chain-of-custody history.
 Newly saved runs also record resolution, source frame count, and analysis completion
 time. Older saved results leave unavailable fields blank with explicit statuses.
+
+The report begins with the system-generated/analyst-review disclaimer, followed by
+Video Metadata, Video and Detection Information, Interpretation, Object Detection
+Observations and Reviews, and Analyst Review Information. Source References and the
+Traceability Report appear at the end. The PDF does not print guide labels such as
+section group numbers.
 
 Create a report from an existing export without rerunning inference:
 
@@ -251,7 +256,7 @@ mockup_ui/
 ├── forensic_report.py           Readable report and structured detection-record exports
 ├── observation_review.py        Stable observation IDs and atomic review persistence
 ├── review_panel.py              Analyst decision controls, notes and frame preview
-├── pdf_report.py                Paginated PDF with automated and analyst results
+├── pdf_report.py                Paginated PDF with detection and analyst-review sections
 ├── requirements-ui.txt          Desktop UI and PDF dependencies
 ├── video_player.py              OpenCV playback, pause, timeline and exact-frame seeking
 ├── styles.qss                   Figma-derived Qt styles
@@ -337,8 +342,9 @@ thread completion before disposal, following [Qt's thread-affinity guidance](htt
 The current combined run is recorded in `temp/observation-review-tests.txt`.
 Review checks cover all three decision rules, whitespace rejection, changing
 decisions, no default selection, navigation, reopening from disk, new-run isolation,
-failed-write recovery, source/status preservation, and matching PDF/report values.
+failed-write recovery, source/status preservation, requested report order, the
+disclaimer, omission of the automated-validation result, and matching report values.
 The panel was rendered at 1120 × 800 and 920 × 700. All three pages of the synthetic
-PDF fixture, including long notes, were rendered and inspected. QA artifacts are
-under `temp/review-visual-check/` and contain explicitly synthetic observations and
-test analyst decisions only.
+PDF layout sample were rendered and inspected. QA artifacts are under
+`temp/pdf-layout-qa-20260910-final/` and contain explicitly synthetic observations
+and test analyst decisions only.

@@ -57,7 +57,16 @@ class ForensicReportTests(unittest.TestCase):
         self.assertEqual(exported[0]["record_id"], row["record_id"])
         self.assertEqual(exported[0]["camera_id"], "")
         self.assertEqual(exported[0]["camera_id_status"], "not_recorded_by_current_pipeline")
-        self.assertIn("80.72%", html.read_text(encoding="utf-8"))
+        self.assertNotIn("automated_validation_status", exported[0])
+        rendered = html.read_text(encoding="utf-8")
+        self.assertIn("80.72%", rendered)
+        self.assertIn("This is a system-generated report and analyst review is provided here.", rendered)
+        self.assertNotIn("Automated Validation Result", rendered)
+        headings = ("Video Metadata", "Video and Detection Information", "Interpretation",
+                    "Object Detection Observations and Reviews", "Analyst Review Information",
+                    "Source References", "Traceability Report")
+        positions = [rendered.index(heading) for heading in headings]
+        self.assertEqual(positions, sorted(positions))
         self.assertEqual(self.summary_path.read_bytes(), original)
         with self.assertRaises(FileExistsError):
             write_forensic_report(self.summary_path, html.parent)
@@ -77,7 +86,7 @@ class ForensicReportTests(unittest.TestCase):
         report = json.loads(html.with_suffix(".json").read_text())
         self.assertEqual(report["summary"]["total_frame_detections"], 0)
         self.assertEqual(report["source"]["file_at_report_generation"]["status"], "unavailable")
-        self.assertIn("No handgun or knife detections met", html.read_text())
+        self.assertIn("No handgun or knife observations met", html.read_text())
         self.assertNotIn("<script>", html.read_text())
         with (html.parent / "forensic_records.csv").open(encoding="utf-8-sig", newline="") as stream:
             reader = csv.DictReader(stream)

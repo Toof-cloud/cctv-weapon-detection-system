@@ -51,7 +51,7 @@ from mockup_ui.model_bridge import (
     read_video, save_result, timecode,
 )
 from mockup_ui.video_player import VideoPlayer
-from mockup_ui.observation_review import REVIEW_DIR, ReviewStore, status_label
+from mockup_ui.observation_review import REVIEW_DIR, ReviewStore
 from mockup_ui.review_panel import ObservationReviewDialog
 
 logging.basicConfig(
@@ -93,7 +93,7 @@ class DetectionTableModel(QAbstractTableModel):
 
 
 class ReportTableModel(QAbstractTableModel):
-    HEADERS = ("Time", "Frame", "Object", "Confidence", "Bounding box", "Automated validation", "Analyst decision", "Analyst notes", "Reviewed at (UTC)")
+    HEADERS = ("Time", "Frame", "Object", "Confidence", "Bounding box", "Analyst decision", "Analyst notes", "Reviewed at (UTC)")
 
     def __init__(self, records, parent=None, observations=None):
         super().__init__(parent)
@@ -121,7 +121,6 @@ class ReportTableModel(QAbstractTableModel):
         return (timecode(row["timestamp_seconds"]), str(row["frame_number"]),
                 row["class_name"].title(), f"{row['confidence']:.1%}",
                 f"[{box[0]}, {box[1]}, {box[2]}, {box[3]}]",
-                status_label(observation.get("automatedValidationStatus", "not_performed")),
                 review.get("decision", "Not reviewed"), review.get("notes", ""), review.get("reviewedAt", ""))[index.column()]
 
 
@@ -242,6 +241,11 @@ class ForensicReportDialog(QDialog):
         top.addWidget(badge)
         layout.addLayout(top)
 
+        disclaimer = QLabel("This is a system-generated report and analyst review is provided here.")
+        disclaimer.setObjectName("reportObservation")
+        disclaimer.setWordWrap(True)
+        layout.addWidget(disclaimer)
+
         info = QGridLayout()
         values = (
             ("VIDEO INFORMATION", f"{result.video.width} × {result.video.height} · {result.video.fps:.2f} FPS\n"
@@ -274,13 +278,13 @@ class ForensicReportDialog(QDialog):
         table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         table.verticalHeader().hide()
         table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
-        for column, width in enumerate((95, 55, 80, 90, 155, 150, 120, 220, 210)):
+        for column, width in enumerate((95, 55, 80, 90, 155, 120, 220, 210)):
             table.setColumnWidth(column, width)
         layout.addWidget(table, 1)
         summary = (f"Automated analysis recorded {len(result.detections):,} handgun/knife observation(s) "
                    f"across {result.positive_frames:,} frame(s). " if result.detections else
                    "No handgun or knife observation met the configured threshold. ")
-        observation = QLabel(summary + "Automated validation and analyst decisions are separate. All observations, including rejected and uncertain decisions, remain in this report. Camera ID and recording timestamps are not recorded.")
+        observation = QLabel(summary + "All observations, including rejected and uncertain analyst decisions, remain in this report. Camera ID and recording timestamps are not recorded.")
         observation.setObjectName("reportObservation")
         observation.setWordWrap(True)
         layout.addWidget(observation)

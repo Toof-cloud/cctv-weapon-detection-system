@@ -140,7 +140,7 @@ class ObservationReviewTests(unittest.TestCase):
         panel.save_review()
         self.assertEqual(panel.store.observations[0]["analystReview"]["decision"], "Accept")
 
-    def test_report_pdf_and_export_preserve_both_statuses_notes_source_and_timestamp(self):
+    def test_report_pdf_uses_requested_sections_and_preserves_review_source_and_timestamp(self):
         identifiers = [row["observationId"] for row in self.store.observations]
         saved = self.store.save_review(identifiers[0], "Reject", "The visible object is inconclusive. <not markup>")
         self.store.save_review(identifiers[1], "Uncertain", "")
@@ -158,25 +158,42 @@ class ObservationReviewTests(unittest.TestCase):
         self.assertEqual(summary["detections"], self.rows)
         report = json.loads((exported / "forensic_report.json").read_text())
         row = report["detections"][0]
-        self.assertEqual(row["automated_validation_status"], "validated")
+        self.assertNotIn("automated_validation_status", row)
         self.assertEqual(row["analyst_decision"], "Reject")
         self.assertEqual(row["analyst_notes"], saved["notes"])
         self.assertEqual(row["observation_id"], identifiers[0])
         self.assertEqual(row["reviewed_at"], saved["reviewedAt"])
-        self.assertEqual(report["observations"], self.store.observations)
-        self.assertEqual(ReviewStore(exported / "observation_reviews.json").observations, self.store.observations)
+        self.assertNotIn("observations", report)
+        exported_reviews = ReviewStore(exported / "observation_reviews.json").observations
+        self.assertEqual(exported_reviews, self.store.observations)
+        self.assertEqual(exported_reviews[0]["automatedValidationStatus"], "validated")
+        html_text = (exported / "forensic_report.html").read_text(encoding="utf-8")
+        self.assertIn("This is a system-generated report and analyst review is provided here.", html_text)
+        self.assertNotIn("Automated Validation Result", html_text)
         document = QPdfDocument(self.application)
         self.assertEqual(document.load(str(exported / "forensic_report.pdf")), QPdfDocument.Error.None_)
         text = "\n".join(document.getAllText(i).text() for i in range(document.pageCount()))
-        for required in ("Automated Validation Result", "Analyst Review Decision", "Reject", "Uncertain", "validated", "<not markup>", saved["reviewedAt"]):
+        for required in ("This is a system-generated report and analyst review is provided here.",
+                         "Video Metadata", "Video and Detection Information", "Interpretation",
+                         "Object Detection Observations and Reviews", "Analyst Review Information",
+                         "Source References", "Traceability Report", "Analyst Review Decision",
+                         "Reject", "Uncertain", "<not markup>", saved["reviewedAt"]):
             self.assertIn(required, text)
+        headings = ("Video Metadata", "Video and Detection Information", "Interpretation",
+                    "Object Detection Observations and Reviews", "Analyst Review Information",
+                    "Source References", "Traceability Report")
+        positions = [text.index(heading) for heading in headings]
+        self.assertEqual(positions, sorted(positions))
+        self.assertNotIn("Automated Validation Result", text)
+        self.assertNotRegex(text, r"\bPART\b")
         document.close()
         from shiboken6 import delete
         delete(document)  # Release Qt PDFium's Windows file handle before fixture cleanup.
         dialog = ForensicReportDialog(self.result)
-        self.assertEqual(dialog.model.data(dialog.model.index(0, 5)), "validated")
-        self.assertEqual(dialog.model.data(dialog.model.index(0, 6)), "Reject")
-        self.assertEqual(dialog.model.data(dialog.model.index(0, 7)), saved["notes"])
+        self.assertNotIn("Automated validation", dialog.model.HEADERS)
+        self.assertEqual(dialog.model.data(dialog.model.index(0, 5)), "Reject")
+        self.assertEqual(dialog.model.data(dialog.model.index(0, 6)), saved["notes"])
+        self.assertEqual(dialog.model.data(dialog.model.index(0, 7)), saved["reviewedAt"])
         dialog.close()
 
     def test_reopen_saved_review_in_application_does_not_run_inference(self):
