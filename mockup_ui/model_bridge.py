@@ -109,6 +109,8 @@ class VideoAnalysisResult:
     threshold: float
     analyzed_frames: int
     completed_at_utc: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat(timespec="seconds"))
+    run_id: str = field(default_factory=lambda: uuid4().hex)
+    review_path: Path | None = None
 
     @property
     def counts(self) -> dict[str, int]:
@@ -221,17 +223,11 @@ class ModelBridge:
                                    int(details["analyzed_frames"]))
 
 
-def save_result(result: VideoAnalysisResult, output_dir: Path = OUTPUT_DIR) -> Path:
-    """Save a video, CSV and JSON report into a unique mockup output directory."""
-    output_dir = Path(output_dir).resolve()
-    if not output_dir.is_relative_to(MOCKUP_DIR):
-        raise ValueError("Mockup outputs must stay inside mockup_ui/.")
-    stem = re.sub(r"[^a-zA-Z0-9_-]", "_", result.video.path.stem)[:60] or "video"
-    name = f"{stem}_{datetime.now():%Y%m%d_%H%M%S}_{uuid4().hex[:8]}"
-    destination = output_dir / name
-    destination.mkdir(parents=True, exist_ok=False)
-    summary = {
+def result_summary(result: VideoAnalysisResult) -> dict:
+    return {
+        "run_id": result.run_id,
         "source_video": str(result.video.path), "model_path": result.model_path,
+        "source_size_bytes": result.video.size_bytes, "source_modified_ns": result.video.modified_ns,
         "device": result.device, "confidence_threshold": result.threshold,
         "fps": result.video.fps, "duration_seconds": result.video.duration,
         "width": result.video.width, "height": result.video.height,
@@ -242,9 +238,26 @@ def save_result(result: VideoAnalysisResult, output_dir: Path = OUTPUT_DIR) -> P
         "frame_numbering": "Zero-based", "box_format": "[x1, y1, x2, y2] in source-frame pixels",
         "elapsed_seconds": round(result.elapsed_seconds, 3), "detections": result.detections,
     }
+
+
+def save_result(result: VideoAnalysisResult, output_dir: Path = OUTPUT_DIR) -> Path:
+    """Export the completed analysis and a snapshot of saved analyst reviews."""
+    from mockup_ui.observation_review import ReviewStore, atomic_json
+    store = ReviewStore.for_result(result)
+    output_dir = Path(output_dir).resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
+    stem = re.sub(r"[^a-zA-Z0-9_-]", "_", result.video.path.stem)[:60] or "video"
+    name = f"{stem}_{datetime.now():%Y%m%d_%H%M%S}_{uuid4().hex[:8]}"
+    destination = output_dir / name
+    destination.mkdir(parents=True, exist_ok=False)
+    summary = result_summary(result)
+    summary["observations"] = store.observations
     shutil.copy2(result.output_path, destination / "annotated.mp4")
     shutil.copy2(result.csv_path, destination / "detections.csv")
     (destination / "summary.json").write_text(json.dumps(summary, indent=2, allow_nan=False), encoding="utf-8")
+    snapshot = dict(store.data)
+    snapshot["artifacts"] = {"annotatedVideo": str(destination / "annotated.mp4"), "detectionsCsv": str(destination / "detections.csv")}
+    atomic_json(destination / "observation_reviews.json", snapshot)
     from mockup_ui.forensic_report import write_forensic_report
     write_forensic_report(destination / "summary.json", destination)
     return destination

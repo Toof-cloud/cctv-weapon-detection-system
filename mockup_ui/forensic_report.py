@@ -10,6 +10,7 @@ from html import escape
 import json
 from pathlib import Path
 from uuid import uuid4
+from mockup_ui.observation_review import DETECTION_KEYS, make_observations, validate_observations, status_label
 
 MOCKUP_DIR = Path(__file__).resolve().parent
 VALIDATION_STATUS = "pending_human_validation"
@@ -20,6 +21,7 @@ CSV_FIELDS = (
     "source_timestamp_status", "camera_id", "camera_id_status", "object_label",
     "x1", "y1", "x2", "y2", "confidence_score", "validation_status",
     "reviewer", "reviewed_at", "model_reference",
+    "observation_id", "automated_validation_status", "analyst_decision", "analyst_notes",
 )
 
 
@@ -55,7 +57,7 @@ def _read_verified_summary(summary_path: Path) -> dict:
             "class_name": row["class_name"], "confidence": float(row["confidence"]),
             "box": [int(row[key]) for key in ("x1", "y1", "x2", "y2")],
         } for row in csv.DictReader(stream)]
-    if original_rows != summary["detections"]:
+    if original_rows != [{key: row[key] for key in DETECTION_KEYS} for row in summary["detections"]]:
         raise ValueError("The saved detection CSV and summary disagree. A report was not generated.")
     return summary
 
@@ -64,6 +66,12 @@ def build_report(summary_path: Path) -> dict:
     summary_path = Path(summary_path).resolve()
     summary = _read_verified_summary(summary_path)
     report_id = f"FR-{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}-{uuid4().hex[:8]}"
+    observations = summary.get("observations")
+    if observations is None:
+        # Stable identifiers for historical exports without a run ID.
+        run_id = summary.get("run_id") or hashlib.sha256(summary_path.read_bytes()).hexdigest()[:32]
+        observations = make_observations(summary, run_id)
+    validate_observations(observations, summary)
     source = Path(summary["source_video"])
     rows = [{
         "report_id": report_id, "record_id": f"{report_id}-D{index:05d}",
@@ -77,10 +85,23 @@ def build_report(summary_path: Path) -> dict:
         "confidence_score": row["confidence"], "validation_status": VALIDATION_STATUS,
         "reviewer": None, "reviewed_at": None, "model_reference": summary["model_path"],
     } for index, row in enumerate(summary["detections"], 1)]
+    for row, observation in zip(rows, observations, strict=True):
+        review = observation["analystReview"]
+        row.update(observation_id=observation["observationId"],
+                   automated_validation_status=observation["automatedValidationStatus"],
+                   analyst_decision=review["decision"] if review else None,
+                   analyst_notes=review["notes"] if review else "",
+                   reviewed_at=review["reviewedAt"] if review else None,
+                   validation_status="analyst_reviewed" if review else VALIDATION_STATUS)
+    reviewed = sum(row["analystReview"] is not None for row in observations)
+    review_summary = f"{reviewed} of {len(observations)} observations reviewed"
+    counts_by_decision = dict(Counter(row["analyst_decision"] or "Not reviewed" for row in rows))
     counts = dict(Counter(row["object_label"] for row in rows))
     return {
-        "schema_version": "1.0", "report_id": report_id, "report_type": "mockup_forensic_detection_report",
-        "generated_at_utc": utc_now(), "validation_status": VALIDATION_STATUS,
+        "schema_version": "2.0", "report_id": report_id, "report_type": "forensic_detection_report",
+        "generated_at_utc": utc_now(), "validation_status": "analyst_reviewed" if observations and reviewed == len(observations) else VALIDATION_STATUS,
+        "review_summary": review_summary, "counts_by_analyst_decision": counts_by_decision,
+        "observations": observations,
         "source": {
             "reference": str(source), "name": source.name,
             "fps": summary["fps"], "duration_seconds": summary["duration_seconds"],
@@ -104,8 +125,8 @@ def build_report(summary_path: Path) -> dict:
             "timestamp_basis": TIME_BASIS,
             "box_format": "[x1, y1, x2, y2] in source-frame pixels, origin at the upper-left corner.",
             "count_definition": "Per-frame observations; the same weapon can appear in multiple frames. These are not unique-object counts.",
-            "validation_status": "Automated model output awaiting human review. Confidence and successful processing do not validate the object label.",
-            "missing_metadata": "Camera identifiers and original recording timestamps are not collected by this mockup. They are not inferred from filenames or filesystem dates.",
+            "validation_status": "Automated Validation Result and Analyst Review Decision are separate. Not performed means no automated validation verdict was supplied. Confidence and processing success never select an analyst decision.",
+            "missing_metadata": "Camera identifiers and original recording timestamps are not collected by the current system. They are not inferred from filenames or filesystem dates.",
             "fingerprints": "SHA-256 values identify files read when this report was generated; no ingestion-time hash or chain-of-custody history is asserted.",
         },
         "artifacts": {"saved_summary": file_reference(summary_path),
@@ -128,9 +149,18 @@ def render_html(report: dict) -> str:
         f"<tr><td>D{index:05d}</td><td>{e(row['frame_number'])}</td>"
         f"<td>{row['video_relative_timestamp_seconds']:.2f}</td><td>{e(row['object_label'].title())}</td>"
         f"<td>[{row['x1']}, {row['y1']}, {row['x2']}, {row['y2']}]</td>"
-        f"<td>{row['confidence_score']:.2%}</td><td>Pending human validation</td></tr>"
+        f"<td>{row['confidence_score']:.2%}</td><td>{e(status_label(row['automated_validation_status']))}</td>"
+        f"<td>{e(row['analyst_decision'] or 'Not reviewed')}</td></tr>"
         for index, row in enumerate(report["detections"], 1)
-    ) or '<tr><td colspan="7">No handgun or knife detections met the configured confidence threshold.</td></tr>'
+    ) or '<tr><td colspan="8">No handgun or knife detections met the configured confidence threshold.</td></tr>'
+    review_details = "".join(
+        f"<h3>{e(row['observation_id'])}</h3>" + fields([
+            ("Automated Validation Result", status_label(row["automated_validation_status"])),
+            ("Analyst Review Decision", row["analyst_decision"] or "Not reviewed"),
+            ("Analyst notes", row["analyst_notes"] or "No notes provided"),
+            ("Review timestamp (UTC)", row["reviewed_at"]),
+        ]) for row in report["detections"]
+    )
     dimensions = f"{source['width']} × {source['height']} pixels" if source["width"] and source["height"] else None
     definitions = "".join(f"<li>{e(value)}</li>" for value in report["definitions"].values())
     return f'''<!doctype html>
@@ -152,8 +182,8 @@ li{{margin:5px 0}}footer{{margin-top:28px;border-top:1px solid #dce0e8;padding-t
 @media(max-width:700px){{main{{margin:0;padding:24px 18px}}dl{{grid-template-columns:140px minmax(0,1fr)}}.metrics{{flex-wrap:wrap}}.metric{{min-width:40%}}}}
 @media print{{body{{background:white}}main{{margin:0;padding:0;max-width:none;border:0}}thead{{display:table-header-group}}tr,dl,.metrics{{break-inside:avoid}}h2{{break-after:avoid}}.table-wrap{{overflow:visible}}@page{{size:A4 landscape;margin:15mm}}}}
 </style></head><body><main>
-<header><div class="brand">FORENSIKADA / MOCKUP RECORD</div><h1>Forensic detection report</h1>
-<p class="muted">{e(source['name'])}</p><span class="badge">Pending human validation</span>
+<header><div class="brand">FORENSIKADA / ANALYSIS RECORD</div><h1>Forensic detection report</h1>
+<p class="muted">{e(source['name'])}</p><span class="badge">{e(report['review_summary'])}</span>
 <p class="muted">Report {e(report['report_id'])}<br>Generated (UTC): {e(report['generated_at_utc'])}</p></header>
 <div class="metrics"><div class="metric"><strong>{summary['total_frame_detections']}</strong><span>Frame detections</span></div>
 <div class="metric"><strong>{counts.get('knife', 0)}</strong><span>Knife observations</span></div>
@@ -163,10 +193,11 @@ li{{margin:5px 0}}footer{{margin-top:28px;border-top:1px solid #dce0e8;padding-t
 <h2>Source-video reference</h2>
 {fields([('Source reference', source['reference']), ('Camera identifier', source['camera_id']), ('Recording date/time', source['recording_start_timestamp']), ('Video timing', f"{source['fps']:g} FPS · {source['duration_seconds']:.3f} seconds"), ('Resolution', dimensions), ('Source SHA-256 (at report generation)', source['file_at_report_generation']['sha256']), ('Source file check', source['file_at_report_generation']['status'])])}
 <h2>Processing record</h2>
-{fields([('Model used for this run', processing['model_reference']), ('Run status', 'Completed saved run'), ('Detection validation', 'Pending human validation'), ('Reviewer / reviewed at', None), ('Confidence threshold', f"{processing['confidence_threshold']:.0%}"), ('Device / processing time', f"{processing['device'].upper()} · {processing['elapsed_seconds']:.2f} seconds"), ('Analysis completed (UTC)', processing['completed_at_utc']), ('Saved result reference', report['artifacts']['saved_summary']['path'])])}
+{fields([('Model used for this run', processing['model_reference']), ('Run status', 'Completed saved run'), ('Analyst reviews', report['review_summary']), ('Confidence threshold', f"{processing['confidence_threshold']:.0%}"), ('Device / processing time', f"{processing['device'].upper()} · {processing['elapsed_seconds']:.2f} seconds"), ('Analysis completed (UTC)', processing['completed_at_utc']), ('Saved result reference', report['artifacts']['saved_summary']['path'])])}
 <h2>Detection records</h2><p class="muted">All rows refer to the source video above. Camera ID and recording timestamp: not recorded for every row.
 Full record IDs in JSON/CSV use the report ID followed by the row ID. Times below are offsets within the video.</p>
-<div class="table-wrap"><table><thead><tr><th>Record</th><th>Frame (0-based)</th><th>Video offset (s)</th><th>Object label</th><th>Box [x1, y1, x2, y2]</th><th>Confidence</th><th>Validation status</th></tr></thead><tbody>{table_rows}</tbody></table></div>
+<div class="table-wrap"><table><thead><tr><th>Record</th><th>Frame (0-based)</th><th>Video offset (s)</th><th>Object label</th><th>Box [x1, y1, x2, y2]</th><th>Confidence</th><th>Automated Validation Result</th><th>Analyst Review Decision</th></tr></thead><tbody>{table_rows}</tbody></table></div>
+<h2>Analyst review records</h2>{review_details}
 <h2>Record definitions and available information</h2><ul>{definitions}</ul>
 <footer>Generated from saved detection records without rerunning or relabeling the model output.
 Companion files: forensic_report.json and forensic_records.csv. Use your browser's Print command to print or save this report as PDF.</footer>
@@ -178,10 +209,8 @@ def write_forensic_report(summary_path: Path, destination: Path | None = None) -
     summary_path = Path(summary_path).resolve()
     report = build_report(summary_path)
     destination = Path(destination).resolve() if destination else summary_path.parent / report["report_id"]
-    if not destination.is_relative_to(MOCKUP_DIR):
-        raise ValueError("Mockup reports must stay inside mockup_ui/.")
     destination.mkdir(parents=True, exist_ok=True)
-    paths = [destination / name for name in ("forensic_report.html", "forensic_report.json", "forensic_records.csv")]
+    paths = [destination / name for name in ("forensic_report.html", "forensic_report.json", "forensic_records.csv", "forensic_report.pdf")]
     if any(path.exists() for path in paths):
         raise FileExistsError("A forensic report already exists in this folder. Choose a new destination.")
     paths[0].write_text(render_html(report), encoding="utf-8")
@@ -190,6 +219,8 @@ def write_forensic_report(summary_path: Path, destination: Path | None = None) -
         writer = csv.DictWriter(stream, fieldnames=CSV_FIELDS)
         writer.writeheader()
         writer.writerows(report["detections"])
+    from mockup_ui.pdf_report import write_pdf
+    write_pdf(report, paths[3])
     return paths[0]
 
 

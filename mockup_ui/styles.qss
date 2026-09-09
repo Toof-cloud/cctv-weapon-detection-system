@@ -63,6 +63,28 @@ QScrollBar:vertical { background: #f5f6f8; width: 8px; margin: 0; }
 QScrollBar::handle:vertical { background: #ccd1d9; min-height: 30px; border-radius: 4px; }
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
 QToolTip { background: #303841; color: white; border: none; padding: 6px; }
+QDialog#configurationDialog, QDialog#processingDialog, QDialog#forensicReportDialog { background: #ffffff; }
+QDialog#observationReviewDialog { background: #ffffff; }
+QPushButton#decisionButton { padding: 10px 14px; border: 1px solid #c5cbd7; background: #ffffff; }
+QPushButton#decisionButton:checked { color: #ffffff; background: #2f318e; border: 2px solid #292b79; font-weight: 700; }
+QPushButton#decisionButton[decision="Accept"]:checked { background: #256044; border-color: #194932; }
+QPushButton#decisionButton[decision="Reject"]:checked { background: #9d343a; border-color: #7e252b; }
+QPushButton#decisionButton[decision="Uncertain"]:checked { background: #865710; border-color: #664109; }
+QPlainTextEdit { background: #ffffff; border: 1px solid #bac2d0; border-radius: 5px; padding: 8px; }
+QPlainTextEdit:focus { border-color: #2f318e; }
+QListWidget { background: #f7f8fc; border: 1px solid #dce1eb; border-radius: 5px; }
+QListWidget::item { padding: 12px 9px; border-bottom: 1px solid #e3e7ef; }
+QListWidget::item:selected { background: #e4e6fa; color: #292b79; }
+QLabel#automatedStatus { background: #f1f3f8; border: 1px solid #dce1eb; padding: 10px; border-radius: 5px; color: #344153; }
+QLabel#reviewFeedback { color: #865710; font-size: 12px; }
+QLabel#dialogHeading { color: #20262d; font-size: 21px; font-weight: 650; }
+QLabel#dialogDetail { color: #66717d; font-size: 12px; }
+QLabel#dialogThreshold { color: #2f318e; font-size: 20px; font-weight: 700; min-width: 58px; }
+QLabel#reviewBadge { background: #fff2d8; color: #775014; border: 1px solid #efd8aa; border-radius: 5px; padding: 6px 9px; font-size: 10px; font-weight: 700; }
+QFrame#reportCard { background: #f7f8fb; border: 1px solid #dfe3ea; border-radius: 7px; }
+QLabel#reportObservation { color: #4d5967; background: #f7f8fb; border: 1px solid #dfe3ea; border-radius: 6px; padding: 10px; }
+QDialog QProgressBar { border: 1px solid #d8dce5; border-radius: 5px; background: #eef0f5; text-align: center; color: #303841; }
+QDialog QProgressBar::chunk { background: #5659b7; border-radius: 4px; }
 QFrame#playerControls { background: #303841; }
 QFrame#playerControls QLabel { color: #e7e9ee; font-size: 10px; }
 QFrame#playerControls QPushButton { color: white; background: #303841; border: 1px solid #737d88; padding: 5px 8px; }

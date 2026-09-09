@@ -1,7 +1,7 @@
 # Forensikada video detection mockup
 
-The mockup visualizes the existing weapon-detection system:
-**Import video → scan with the third trained model → play the annotated
+The interface visualizes the existing weapon-detection system:
+**Import video → confirm threshold and start detection → scan with the third trained model → play the annotated
 video and show its detection summary.** The service loads the trained model,
 detects its **handgun** and **knife** classes, and produces the boxes and report.
 
@@ -36,26 +36,33 @@ an existing working CUDA environment for GPU inference if available.
 
 ## Demonstration
 
-1. **Import video** or drop a local video onto the viewer.
-2. Analysis starts automatically. The detection service loads the trained model and
+1. **Import video** or drop a local video onto the viewer. The video loads without starting detection.
+2. Review the video details and confidence threshold in the configuration dialog.
+   Select **Start detection** to continue, or cancel and use **Analyze video** later.
+3. The detection service loads the trained model and
    scans every video frame. The UI shows loading/scanning progress. Playback and
    result controls remain disabled; summary values stay pending while scanning.
-3. Once processing and output validation finish, the annotated video automatically
+4. Once processing and output validation finish, the annotated video automatically
    plays from the beginning at its source frame rate. It contains the boxes,
    labels and confidence scores drawn by the existing detection service.
-4. The summary and observation table show results for the **entire processed video**.
+5. The summary and observation table show results for the **entire processed video**.
    Play, pause, seek, or click a detection row to review a particular frame. Only
    **Current frame** details change during playback; full-video totals stay fixed.
-5. **Save video + report** exports an annotated MP4, the original CSV/JSON results,
+6. **Forensic report** opens the completed analysis inside the application.
+7. **Save video + report** asks for a destination and exports an annotated MP4, the original CSV/JSON results,
    and a readable forensic report with structured records.
 
-Importing is the only action needed to start analysis. The toolbar contains
-**Import video** and **Save video + report**; there is no detection button.
-The app locates the checkpoint automatically and does not open a model picker
-during import. If it is missing, the imported video waits while the required path
+After analysis, **Observation review** opens the analyst decision panel. Saved
+reviews can be resumed with **Open saved review…**, including after restarting
+the application. Opening a review never reruns detection.
+
+Importing never starts analysis. The toolbar contains **Import video**,
+**Forensic report**, and **Save video + report**. An **Analyze video** control opens
+the threshold confirmation whenever an imported video remains unprocessed.
+The app does not open a model picker. If the required model is missing after the
+user explicitly starts detection, the imported video waits while the required path
 is checked every two seconds. Adding `best_weapon_detector_third_model.pth` to
-`mockup_ui/models/` starts the scan
-automatically, without restarting the app or importing the video again.
+`mockup_ui/models/` resumes that requested scan without reimporting the video.
 
 Importing displays a still preview and metadata. The player is a result viewer:
 its playback controls become available after detection completes. You can adjust
@@ -101,11 +108,19 @@ presentation, then confirm a second run works offline.
 
 ## Forensic report
 
-After processing, **Save video + report** also creates:
+After processing, **Forensic report** displays video information, detection
+configuration, full-video totals, processing details, timeline rows, bounding boxes,
+confidence scores, and review status in a large in-app dialog.
 
-- `forensic_report.html`: readable report; open in a browser to view or print/save as PDF.
+**Save video + report** opens a destination-folder chooser. Cancelling it writes
+nothing. Confirming creates a uniquely named result folder there containing:
+
+- `forensic_report.pdf`: paginated report with separate automated and analyst results.
+- `forensic_report.html`: readable browser version with the same saved decisions.
 - `forensic_report.json`: report metadata and every structured detection record.
 - `forensic_records.csv`: one row per observation, including source and model references.
+- `observation_reviews.json`: reopenable review snapshot with source references,
+  detection details, decisions, notes, UTC timestamps, and review revision history.
 
 Each record includes a report/record ID, source-video path/name, zero-based frame
 number, video-relative time, object label, bounding box, confidence, and validation
@@ -113,9 +128,54 @@ status. Camera identifier and source recording timestamp fields are included but
 marked **not recorded by the current pipeline**. File modification dates and
 report-generation times are never substituted for a recording timestamp.
 
-Every detection begins as **pending human validation**; no reviewer or review time
-is invented. Completed processing and high confidence do not constitute human
-validation. Repeated detections across frames do not count unique weapons.
+Every detection begins with **no analyst decision**. Completed processing and high
+confidence do not select a decision. Repeated detections across frames do not count
+unique weapons. Reports retain all observations, including Reject and Uncertain.
+Detection totals and annotated boxes continue to represent the original model output.
+
+## Observation Review
+
+The panel lists every observation and shows its annotated frame, source path,
+frame number, video offset, object class, confidence, box, and stable observation ID.
+Select one of exactly three decision options:
+
+| Decision | Notes | Save behavior |
+| --- | --- | --- |
+| Accept | Optional | Empty notes are valid. |
+| Reject | Required | Empty or whitespace-only notes are blocked with a reason-required message. |
+| Uncertain | Optional | Empty notes are valid. |
+
+The options are mutually exclusive. No option is preselected for a new observation.
+Changing the decision immediately updates the notes label, placeholder, and validation
+rules. Save without selecting a decision is blocked. **Save review** persists a
+trimmed note and UTC review timestamp; previously saved decisions can be revised.
+Unsaved drafts survive navigation within the panel and are explicitly discarded
+only when closing with confirmation. Saved decisions survive reopening and app restart.
+
+Completed analyses are stored under `mockup_ui/reviews/<run-id>.json`. Each new
+analysis receives a distinct run ID so reviews cannot silently carry over to a
+different model run. Use **Open saved review…** and choose that file, or choose
+`observation_reviews.json` from an export. The saved source/video paths are retained;
+keep the original annotated-video files for frame previews. Detection records and
+reviews remain readable if those files are unavailable.
+
+**Automated Validation Result** is read-only and separate from **Analyst Review
+Decision**. The current pipeline supplies detections and confidence filtering but
+does not perform independent observation validation, so its value is **Not performed**.
+If a detection explicitly supplies `automated_validation_status`, that exact value
+is preserved. An analyst choice never overwrites the automated status.
+
+Review files are written atomically and checked against the saved run's detection
+details and source references. Export includes the latest saved decisions and is a
+snapshot; export again after changing a decision to generate an updated PDF. Viewing
+the in-app report does not create a PDF. The PDF is generated only on explicit export.
+
+PDF generation uses ReportLab in the isolated app environment. To set up another
+working detector environment with the UI/PDF dependencies:
+
+```powershell
+python -m pip install -r mockup_ui/requirements-ui.txt
+```
 
 The report records the model actually used by its saved run. Historical results
 retain their original model reference, even though new processing uses only the
@@ -131,8 +191,7 @@ Create a report from an existing export without rerunning inference:
 .\mockup_ui\.venv\Scripts\python.exe -B -m mockup_ui.forensic_report "mockup_ui\outputs\YOUR_SAVED_RUN\summary.json"
 ```
 
-This creates a new report subfolder and preserves the previous export. All outputs
-stay inside `mockup_ui/`.
+This creates a new report subfolder and preserves the previous export.
 
 ## How the UI calls the existing system
 
@@ -166,8 +225,8 @@ cannot be mistaken for the current run. Failed/incomplete processing is not
 presented as a completed result. Failed runs keep totals pending and disable
 playback/export; any partial files remain isolated under `temp/`.
 
-The mockup does not run video enhancement, training, multi-camera comparison,
-object tracking, case management or forensic decisions.
+The application does not run video enhancement, training, multi-camera comparison,
+object tracking, or case management. Analyst decisions are entered manually.
 
 ## What the results mean
 
@@ -190,13 +249,19 @@ mockup_ui/
 ├── app.py                       Video interface, results table and background worker
 ├── model_bridge.py              Adapter calling the original whole-video detection function
 ├── forensic_report.py           Readable report and structured detection-record exports
+├── observation_review.py        Stable observation IDs and atomic review persistence
+├── review_panel.py              Analyst decision controls, notes and frame preview
+├── pdf_report.py                Paginated PDF with automated and analyst results
+├── requirements-ui.txt          Desktop UI and PDF dependencies
 ├── video_player.py              OpenCV playback, pause, timeline and exact-frame seeking
 ├── styles.qss                   Figma-derived Qt styles
 ├── test_mockup.py               Video integration and UI regression checks
 ├── test_forensic_report.py      Report traceability, missing metadata and consistency checks
+├── test_observation_review.py   Decision rules, reopening, persistence, and PDF checks
 ├── README.md                    These instructions
 ├── .gitignore                   Excludes runtime files
 ├── models/                      Required location of best_weapon_detector_third_model.pth
+├── reviews/                     Persistent completed runs and analyst review records
 ├── assets/
 │   ├── forensikada-logo.png      Original Figma logo
 │   ├── import-image.png         Existing Figma folder icon, reused for video import
@@ -215,7 +280,9 @@ mockup_ui/
         ├── detections.csv
         ├── summary.json
         ├── forensic_report.html
+        ├── forensic_report.pdf
         ├── forensic_report.json
+        ├── observation_reviews.json
         └── forensic_records.csv
 ```
 
@@ -233,18 +300,18 @@ are reused locally, with no new visual downloads or dependencies in this update.
 ## Verification
 
 ```powershell
-.\mockup_ui\.venv\Scripts\python.exe -B -m unittest mockup_ui.test_mockup mockup_ui.test_forensic_report -v
+.\mockup_ui\.venv\Scripts\python.exe -B -m unittest mockup_ui.test_mockup mockup_ui.test_forensic_report mockup_ui.test_observation_review -v
 ```
 
-All **13 tests passed**, including three forensic-report checks. They cover video validation, Unicode paths, metadata,
+All **19 tests passed**, including six observation-review checks and three forensic-report checks. They cover video validation, Unicode paths, metadata,
 missing checkpoints, changed inputs, incomplete processing, original per-frame
 inference/preprocessing, actual MP4 encoding/decoding, bounding-box rendering,
 CSV/JSON exports, playback/seeking, progress, repeated-click prevention, no
 detections, exact-frame navigation, error recovery and clearing stale results.
 Workflow checks verify that playback and totals wait until processing finishes,
 the processed file starts playing automatically, and full-video totals remain
-constant when reviewing other frames. They also cover the removed button,
-import-triggered analysis without a model-picker popup, finding a newly added
+constant when reviewing other frames. They also cover manual threshold confirmation,
+cancelled configuration retaining the imported video, finding a newly added
 third checkpoint while a video waits, exclusive selection despite other available
 weights or legacy overrides, and refusal to fall back if the required file is removed.
 
@@ -267,5 +334,11 @@ clearly marked test predictions in `temp/scanning-test.png` and
 Worker updates use explicitly queued GUI slots and
 thread completion before disposal, following [Qt's thread-affinity guidance](https://doc.qt.io/qtforpython-6/tutorials/basictutorial/signals_and_slots.html#thread-affinity).
 
-The combined 13-test run, including forensic reports, is recorded in
-`temp/forensic-report-tests.txt`.
+The current combined run is recorded in `temp/observation-review-tests.txt`.
+Review checks cover all three decision rules, whitespace rejection, changing
+decisions, no default selection, navigation, reopening from disk, new-run isolation,
+failed-write recovery, source/status preservation, and matching PDF/report values.
+The panel was rendered at 1120 × 800 and 920 × 700. All three pages of the synthetic
+PDF fixture, including long notes, were rendered and inspected. QA artifacts are
+under `temp/review-visual-check/` and contain explicitly synthetic observations and
+test analyst decisions only.

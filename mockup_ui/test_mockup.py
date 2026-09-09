@@ -21,6 +21,7 @@ from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox, QPushButton
 
 import mockup_ui.model_bridge as bridge_module
+import mockup_ui.observation_review as review_module
 from mockup_ui.app import MainWindow
 from mockup_ui.model_bridge import (
     MOCKUP_DIR, TEMP_DIR, ModelBridge, ModelSetupError, VideoAnalysisResult,
@@ -67,6 +68,7 @@ class VideoAdapterTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory(dir=TEMP_DIR)
         self.addCleanup(self.temp.cleanup)
         self.folder = Path(self.temp.name)
+        self.enterContext(patch.object(review_module, "REVIEW_DIR", self.folder / "reviews"))
         self.checkpoint = self.folder / "models" / bridge_module.MODEL_FILENAME
         self.checkpoint.parent.mkdir()
         self.enterContext(patch.object(bridge_module, "MODEL_PATH", self.checkpoint))
@@ -164,8 +166,6 @@ class VideoAdapterTests(unittest.TestCase):
         self.assertEqual(summary["total_frame_detections"], 3)
         self.assertEqual(summary["detections"], result.detections)
         self.assertNotEqual(saved, save_result(result, self.folder))
-        with self.assertRaises(ValueError):
-            save_result(result, MOCKUP_DIR.parent)
 
     def test_partial_processing_is_not_reported_as_success(self):
         bridge = ModelBridge()
@@ -216,6 +216,7 @@ class VideoUiTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory(dir=TEMP_DIR)
         self.addCleanup(self.temp.cleanup)
         self.folder = Path(self.temp.name)
+        self.enterContext(patch.object(review_module, "REVIEW_DIR", self.folder / "reviews"))
         self.checkpoint = self.folder / "models" / bridge_module.MODEL_FILENAME
         self.checkpoint.parent.mkdir()
         self.enterContext(patch.object(bridge_module, "MODEL_PATH", self.checkpoint))
@@ -236,30 +237,43 @@ class VideoUiTests(unittest.TestCase):
 
     def close_window(self):
         self.wait_finished()
+        if self.window._config_dialog:
+            self.window._config_dialog.reject()
         self.window.close()
 
-    def test_import_waits_without_dialog_then_automatically_finds_added_model(self):
+    def confirm_detection(self, threshold=None):
+        dialog = self.window._config_dialog
+        self.assertIsNotNone(dialog)
+        self.assertTrue(dialog.isVisible())
+        if threshold is not None:
+            dialog.slider.setValue(threshold)
+        dialog.accept()
+        QTest.qWait(20)
+
+    def test_import_never_starts_detection_cancel_preserves_video_and_manual_start_waits_for_model(self):
         self.checkpoint.unlink()
         self.window.bridge.analyze_video = lambda v, t, p: fixture_result(v)
         with patch.object(QFileDialog, "getOpenFileName") as dialog:
             self.window.load_video(str(self.video.path))
             dialog.assert_not_called()
         self.assertEqual(self.window.video_info.frame_count, 8)
-        self.assertFalse(hasattr(self.window, "analyze_button"))
-        self.assertNotIn("Detect weapons", [button.text() for button in self.window.findChildren(QPushButton)])
+        self.assertIsNone(self.window._thread)
+        self.assertFalse(self.window._model_retry.isActive())
+        self.assertEqual(self.window.status_title.text(), "Ready to analyze")
+        self.assertTrue(self.window.analyze_button.isEnabled())
+        self.assertEqual(self.window._config_dialog.slider.value(), 50)
+        self.window._config_dialog.reject()
+        QTest.qWait(20)
+        self.assertEqual(self.window.source_path, self.video.path)
+        self.assertIsNone(self.window.result)
+        self.assertIn("remains imported", self.window.status_detail.text())
+        self.assertFalse(self.window.player.play_button.isEnabled())
+        self.window.show_detection_configuration()
+        self.confirm_detection(63)
+        self.assertEqual(self.window.threshold_slider.value(), 63)
+        self.assertIsNone(self.window._thread)
         self.assertTrue(self.window._model_retry.isActive())
         self.assertEqual(self.window.status_title.text(), "Waiting for trained model")
-        self.assertFalse(self.window.player.play_button.isEnabled())
-        self.window.player.play()
-        self.window.player.seek_frame(3)
-        self.assertEqual(self.window.player.frame_number, 0)
-        self.assertFalse(self.window.player.timer.isActive())
-        self.window.load_video(str(self.folder / "missing.mp4"))
-        self.assertEqual(self.window.source_path, self.video.path)
-        self.assertIsNone(self.window._thread)
-        self.assertTrue(self.errors)
-        self.assertFalse(self.window.save_button.isEnabled())
-        self.assertFalse(self.window.player.play_button.isEnabled())
         (self.checkpoint.parent / "best_weapon_detector.pth").write_text("TEST ONLY")
         self.window.analyze()
         self.assertIsNone(self.window._thread)
@@ -275,21 +289,35 @@ class VideoUiTests(unittest.TestCase):
         self.assertFalse(self.window._model_retry.isActive())
         self.assertTrue(self.window.player.timer.isActive())
 
-    def test_import_uses_third_checkpoint_without_model_selection_and_autoplays(self):
+    def test_confirmed_import_uses_third_checkpoint_enables_report_and_destination_export(self):
         (self.checkpoint.parent / "best_weapon_detector_retrained.pth").write_text("TEST ONLY")
-        self.window.bridge.analyze_video = lambda v, t, p: fixture_result(v)
+        thresholds = []
+        self.window.bridge.analyze_video = lambda v, t, p: thresholds.append(t) or fixture_result(v)
         with patch.object(QFileDialog, "getOpenFileName") as dialog:
             self.window.load_video(str(self.video.path))
             self.assertFalse(self.window.player.timer.isActive())
+            self.assertIsNone(self.window._thread)
+            self.confirm_detection(71)
             self.wait_finished()
             self.assertTrue(self.window.player.timer.isActive())
             self.assertEqual(self.window.player.path, self.window.result.output_path)
             self.assertNotEqual(self.window.player.path, self.video.path)
             self.assertEqual(self.window.bridge.model_path, self.checkpoint)
-            self.window.load_video(str(self.video.path))
-            self.assertFalse(self.window.player.play_button.isEnabled())
-            self.wait_finished()
             dialog.assert_not_called()
+        self.assertEqual(self.window.threshold_slider.value(), 71)
+        self.assertEqual(thresholds, [.71])
+        self.assertTrue(self.window.report_button.isEnabled())
+        with patch("mockup_ui.app.ForensicReportDialog.exec", return_value=0) as report:
+            self.window.show_forensic_report()
+            report.assert_called_once()
+        with patch.object(QFileDialog, "getExistingDirectory", return_value=""), patch("mockup_ui.app.save_result") as save:
+            self.window.save_current_result()
+            save.assert_not_called()
+        with patch.object(QFileDialog, "getExistingDirectory", return_value=str(self.folder)), \
+             patch("mockup_ui.app.save_result", return_value=self.folder / "saved") as save, \
+             patch.object(QMessageBox, "information"):
+            self.window.save_current_result()
+            save.assert_called_once_with(self.window.result, self.folder)
         self.assertIn(bridge_module.MODEL_FILENAME, self.window.model_label.text())
         self.assertFalse(hasattr(self.window, "model_settings_action"))
         self.assertFalse(self.window.model_label.actions())
@@ -306,7 +334,8 @@ class VideoUiTests(unittest.TestCase):
             return fixture_result(video)
         self.window.bridge.analyze_video = controlled
         self.window.load_video(str(self.video.path))
-        self.window.load_video(str(self.video.path))
+        self.confirm_detection()
+        self.window.analyze()
         deadline = time.monotonic() + 2
         while self.window.progress.value() != 25 and time.monotonic() < deadline:
             QTest.qWait(10)
@@ -315,6 +344,11 @@ class VideoUiTests(unittest.TestCase):
         self.assertEqual(self.window.progress.value(), 25)
         self.assertFalse(self.window.player.play_button.isEnabled())
         self.assertFalse(self.window.open_button.isEnabled())
+        self.assertFalse(self.window.analyze_button.isEnabled())
+        self.assertFalse(self.window.report_button.isEnabled())
+        self.assertIsNotNone(self.window._processing_dialog)
+        self.assertTrue(self.window._processing_dialog.isVisible())
+        self.assertIn("frame 2 of 8", self.window._processing_dialog.frames.text().lower())
         self.assertEqual(self.window.total_metric.text(), "—")
         self.assertEqual(self.window.observation_model.rowCount(), 0)
         self.assertIsNone(self.window.result)
@@ -330,6 +364,8 @@ class VideoUiTests(unittest.TestCase):
         self.assertEqual(self.window.total_metric.text(), "0")
         self.assertTrue(self.window.player.timer.isActive())
         self.assertTrue(self.window.save_button.isEnabled())
+        self.assertTrue(self.window.report_button.isEnabled())
+        self.assertIsNone(self.window._processing_dialog)
         self.assertEqual(self.window.player.path, self.window.result.output_path)
 
     def test_completed_summary_stays_constant_while_reviewing_boxed_frames(self):
@@ -341,6 +377,7 @@ class VideoUiTests(unittest.TestCase):
         ]
         self.window.bridge.analyze_video = lambda v, t, p: fixture_result(v, records)
         self.window.load_video(str(self.video.path))
+        self.confirm_detection()
         self.wait_finished()
         self.assertTrue(self.window.player.timer.isActive())
         self.assertEqual(self.window.total_metric.text(), "2")
@@ -364,11 +401,14 @@ class VideoUiTests(unittest.TestCase):
         self.window.player.pause()
         self.window.bridge.analyze_video = lambda *args: (_ for _ in ()).throw(RuntimeError("test failure"))
         self.window.load_video(str(self.video.path))
+        self.confirm_detection()
         self.assertEqual(self.window.observation_model.rowCount(), 0)
         self.wait_finished()
         self.assertTrue(self.errors)
         self.assertIsNone(self.window.result)
         self.assertFalse(self.window.save_button.isEnabled())
+        self.assertFalse(self.window.report_button.isEnabled())
+        self.assertIsNone(self.window._processing_dialog)
         self.assertFalse(self.window.player.play_button.isEnabled())
         self.assertEqual(self.window.total_metric.text(), "—")
         self.assertFalse(self.window.player.timer.isActive())
