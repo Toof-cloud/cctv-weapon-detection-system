@@ -1,8 +1,8 @@
 # Forensikada video detection mockup
 
 The interface visualizes the existing weapon-detection system:
-**Import video → confirm threshold and start detection → scan with the third trained model → play the annotated
-video and show its detection summary.** The service loads the trained model,
+**Import video → configure the video-enhancement stage → confirm threshold and start detection → scan with the third trained model → play the annotated
+video and show its detection summary.** BasicVSR++ processing is not implemented in the current mockup, so the detector still receives the original video. The service loads the trained model,
 detects its **handgun** and **knife** classes, and produces the boxes and report.
 
 **Original project files modified: NONE.** Changes are confined to `mockup_ui/`.
@@ -37,19 +37,23 @@ an existing working CUDA environment for GPU inference if available.
 ## Demonstration
 
 1. **Import video** or drop a local video onto the viewer. The video loads without starting detection.
-2. Review the video details and confidence threshold in the configuration dialog.
+2. Select **Enhance video** to open the BasicVSR++ enhancement UI. It shows the
+   source frame beside the reserved enhanced-output preview. Enhancement is
+   automatic, so there are no presets or manual adjustment controls. The run
+   action remains disabled and the imported video remains unchanged.
+3. Review the video details and confidence threshold in the configuration dialog.
    Select **Start detection** to continue, or cancel and use **Analyze video** later.
-3. The detection service loads the trained model and
+4. The detection service loads the trained model and
    scans every video frame. The UI shows loading/scanning progress. Playback and
    result controls remain disabled; summary values stay pending while scanning.
-4. Once processing and output validation finish, the annotated video automatically
+5. Once processing and output validation finish, the annotated video automatically
    plays from the beginning at its source frame rate. It contains the boxes,
    labels and confidence scores drawn by the existing detection service.
-5. The summary and observation table show results for the **entire processed video**.
+6. The summary and observation table show results for the **entire processed video**.
    Play, pause, seek, or click a detection row to review a particular frame. Only
    **Current frame** details change during playback; full-video totals stay fixed.
-6. **Forensic report** opens the completed analysis inside the application.
-7. **Save video + report** asks for a destination and exports an annotated MP4, the original CSV/JSON results,
+7. **Forensic report** opens the completed analysis inside the application.
+8. **Save video + report** asks for a destination and exports an annotated MP4, the original CSV/JSON results,
    and a readable forensic report with structured records.
 
 After analysis, **Observation review** opens the analyst decision panel. Saved
@@ -70,6 +74,12 @@ the threshold before importing a video and compare Original and Detected views a
 Playing or seeking the completed video does not rerun inference or change its
 summary. Importing another video clears the previous result. Reimport a video
 to scan it again with a changed threshold or retry after a processing error.
+
+The **Enhance video** button becomes available after import and opens the automatic
+BasicVSR++ workflow mockup. No enhancement service is called. The disabled
+**Run BasicVSR++ enhancement** action and the detection configuration both state
+that detection receives the original video. BasicVSR++ processing can be connected
+to this stage before the existing detection call when its implementation is added.
 
 Short clips are best for the defense, especially on CPU. Processing every frame
 can take several minutes. The UI remains responsive, but only one analysis runs
@@ -115,7 +125,7 @@ confidence scores, and review status in a large in-app dialog.
 **Save video + report** opens a destination-folder chooser. Cancelling it writes
 nothing. Confirming creates a uniquely named result folder there containing:
 
-- `forensic_report.pdf`: paginated report with separate automated and analyst results.
+- `forensic_report.pdf`: paginated detection report with analyst review information.
 - `forensic_report.html`: readable browser version with the same saved decisions.
 - `forensic_report.json`: report metadata and every structured detection record.
 - `forensic_records.csv`: one row per observation, including source and model references.
@@ -230,8 +240,9 @@ cannot be mistaken for the current run. Failed/incomplete processing is not
 presented as a completed result. Failed runs keep totals pending and disable
 playback/export; any partial files remain isolated under `temp/`.
 
-The application does not run video enhancement, training, multi-camera comparison,
-object tracking, or case management. Analyst decisions are entered manually.
+The application does not yet run video enhancement, training, multi-camera comparison,
+object tracking, or case management. The visible enhancement controls are a UI
+preview for BasicVSR++ integration. Analyst decisions are entered manually.
 
 ## What the results mean
 

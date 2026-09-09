@@ -18,11 +18,11 @@ import cv2
 import numpy as np
 from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
-from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox, QPushButton
+from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMessageBox, QPushButton, QSlider
 
 import mockup_ui.model_bridge as bridge_module
 import mockup_ui.observation_review as review_module
-from mockup_ui.app import MainWindow
+from mockup_ui.app import MainWindow, VideoEnhancementDialog
 from mockup_ui.model_bridge import (
     MOCKUP_DIR, TEMP_DIR, ModelBridge, ModelSetupError, VideoAnalysisResult,
     VideoInputError, read_video, save_result,
@@ -253,6 +253,8 @@ class VideoUiTests(unittest.TestCase):
     def test_import_never_starts_detection_cancel_preserves_video_and_manual_start_waits_for_model(self):
         self.checkpoint.unlink()
         self.window.bridge.analyze_video = lambda v, t, p: fixture_result(v)
+        self.assertFalse(self.window.enhancement_button.isEnabled())
+        self.assertIn("Import a video", self.window.enhancement_status.text())
         with patch.object(QFileDialog, "getOpenFileName") as dialog:
             self.window.load_video(str(self.video.path))
             dialog.assert_not_called()
@@ -262,8 +264,23 @@ class VideoUiTests(unittest.TestCase):
         self.assertEqual(self.window.status_title.text(), "Ready to analyze")
         self.assertTrue(self.window.analyze_button.isEnabled())
         self.assertEqual(self.window._config_dialog.slider.value(), 50)
+        self.assertIn("No enhanced video has been created", self.window._config_dialog.enhancement_notice.text())
+        self.assertIn("BasicVSR++ enhancement", self.window.enhancement_status.text())
+        self.assertTrue(self.window.enhancement_button.isEnabled())
         self.window._config_dialog.reject()
         QTest.qWait(20)
+        enhancement = VideoEnhancementDialog(self.video, self.window)
+        self.assertFalse(enhancement.source_preview.pixmap().isNull())
+        self.assertIn("BasicVSR++ output", enhancement.enhanced_preview.text())
+        self.assertFalse(enhancement.run_button.isEnabled())
+        self.assertEqual(enhancement.findChildren(QSlider), [])
+        visible_copy = " ".join(label.text() for label in enhancement.findChildren(QLabel))
+        self.assertIn("No manual adjustments required", visible_copy)
+        self.assertNotIn("ENGINE NOT CONNECTED", visible_copy)
+        enhancement.close()
+        with patch("mockup_ui.app.VideoEnhancementDialog.exec", return_value=0) as preview:
+            self.window.enhancement_button.click()
+            preview.assert_called_once()
         self.assertEqual(self.window.source_path, self.video.path)
         self.assertIsNone(self.window.result)
         self.assertIn("remains imported", self.window.status_detail.text())
@@ -288,6 +305,7 @@ class VideoUiTests(unittest.TestCase):
         self.assertEqual(self.window.bridge.model_path, self.checkpoint)
         self.assertFalse(self.window._model_retry.isActive())
         self.assertTrue(self.window.player.timer.isActive())
+        self.assertIn("not applied to this run", self.window.enhancement_status.text())
 
     def test_confirmed_import_uses_third_checkpoint_enables_report_and_destination_export(self):
         (self.checkpoint.parent / "best_weapon_detector_retrained.pth").write_text("TEST ONLY")

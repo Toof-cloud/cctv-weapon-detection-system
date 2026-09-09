@@ -124,6 +124,130 @@ class ReportTableModel(QAbstractTableModel):
                 review.get("decision", "Not reviewed"), review.get("notes", ""), review.get("reviewedAt", ""))[index.column()]
 
 
+class EnhancementFramePreview(QLabel):
+    """Responsive still-frame preview used only by the enhancement setup UI."""
+
+    def __init__(self, frame, parent=None):
+        super().__init__(parent)
+        height, width, _ = frame.shape
+        image = QImage(frame.data, width, height, frame.strides[0], QImage.Format.Format_BGR888)
+        self._source_pixmap = QPixmap.fromImage(image.copy())
+        self.setObjectName("enhancementPreview")
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.setMinimumSize(200, 230)
+        self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding)
+        self._fit()
+
+    def _fit(self):
+        if not self._source_pixmap.isNull():
+            self.setPixmap(self._source_pixmap.scaled(
+                self.size(), Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation,
+            ))
+
+    def resizeEvent(self, event):
+        self._fit()
+        super().resizeEvent(event)
+
+
+class VideoEnhancementDialog(QDialog):
+    """Visual surface for the automatic BasicVSR++ enhancement stage."""
+
+    def __init__(self, video: VideoInfo, parent=None):
+        super().__init__(parent)
+        self.setObjectName("videoEnhancementDialog")
+        self.setWindowTitle("Video Enhancement")
+        self.setModal(True)
+        self.resize(1040, 660)
+        self.setMinimumSize(880, 600)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(25, 22, 25, 20)
+        layout.setSpacing(14)
+
+        header = QHBoxLayout()
+        heading_copy = QVBoxLayout()
+        heading_copy.setSpacing(2)
+        heading = QLabel("Video Enhancement")
+        heading.setObjectName("dialogHeading")
+        detail = QLabel(
+            f"{video.path.name} · {video.width} × {video.height} · {video.fps:.2f} FPS · "
+            f"{timecode(video.duration)}"
+        )
+        detail.setObjectName("dialogDetail")
+        detail.setWordWrap(True)
+        heading_copy.addWidget(heading)
+        heading_copy.addWidget(detail)
+        header.addLayout(heading_copy)
+        header.addStretch()
+        layout.addLayout(header)
+
+        profile = QFrame()
+        profile.setObjectName("basicVsrProfile")
+        profile_layout = QHBoxLayout(profile)
+        profile_layout.setContentsMargins(13, 9, 13, 9)
+        profile_name = QLabel("BasicVSR++")
+        profile_name.setObjectName("enhancementModel")
+        profile_description = QLabel("Automatic video enhancement · No manual adjustments required")
+        profile_description.setObjectName("enhancementStatus")
+        profile_layout.addWidget(profile_name)
+        profile_layout.addSpacing(8)
+        profile_layout.addWidget(profile_description)
+        profile_layout.addStretch()
+        layout.addWidget(profile)
+
+        body = QHBoxLayout()
+        body.setSpacing(15)
+        previews = QFrame()
+        previews.setObjectName("enhancementPreviewArea")
+        preview_layout = QHBoxLayout(previews)
+        preview_layout.setContentsMargins(12, 12, 12, 12)
+        preview_layout.setSpacing(11)
+
+        original_card = QFrame()
+        original_card.setObjectName("enhancementPreviewCard")
+        original_layout = QVBoxLayout(original_card)
+        original_layout.setContentsMargins(10, 10, 10, 10)
+        original_title = QLabel("SOURCE FRAME")
+        original_title.setObjectName("enhancementPreviewTitle")
+        original_layout.addWidget(original_title)
+        self.source_preview = EnhancementFramePreview(video.first_frame)
+        original_layout.addWidget(self.source_preview, 1)
+
+        enhanced_card = QFrame()
+        enhanced_card.setObjectName("enhancementPreviewCard")
+        enhanced_layout = QVBoxLayout(enhanced_card)
+        enhanced_layout.setContentsMargins(10, 10, 10, 10)
+        enhanced_title = QLabel("ENHANCED PREVIEW")
+        enhanced_title.setObjectName("enhancementPreviewTitle")
+        enhanced_layout.addWidget(enhanced_title)
+        self.enhanced_preview = QLabel(
+            "Enhanced frame preview\n\nBasicVSR++ output will appear here"
+        )
+        self.enhanced_preview.setObjectName("enhancementPreviewPlaceholder")
+        self.enhanced_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.enhanced_preview.setWordWrap(True)
+        self.enhanced_preview.setMinimumSize(200, 230)
+        enhanced_layout.addWidget(self.enhanced_preview, 1)
+        preview_layout.addWidget(original_card, 1)
+        preview_layout.addWidget(enhanced_card, 1)
+        body.addWidget(previews, 1)
+        layout.addLayout(body, 1)
+
+        notice = QLabel(
+            "UI preview only: BasicVSR++ enhancement is automatic and requires no manual settings. "
+            "This mockup does not alter frames or detection input yet."
+        )
+        notice.setObjectName("enhancementNotice")
+        notice.setWordWrap(True)
+        layout.addWidget(notice)
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
+        self.run_button = buttons.addButton("Run BasicVSR++ enhancement", QDialogButtonBox.ButtonRole.AcceptRole)
+        self.run_button.setObjectName("primaryButton")
+        self.run_button.setEnabled(False)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+
 class DetectionConfigDialog(QDialog):
     def __init__(self, video: VideoInfo, threshold: int, parent=None):
         super().__init__(parent)
@@ -160,6 +284,14 @@ class DetectionConfigDialog(QDialog):
         note.setObjectName("dialogDetail")
         note.setWordWrap(True)
         layout.addWidget(note)
+        self.enhancement_notice = QLabel(
+            "VIDEO ENHANCEMENT\n"
+            "No enhanced video has been created. Detection will use the imported video. "
+            "Cancel and open Enhancement setup first if you want to review its UI."
+        )
+        self.enhancement_notice.setObjectName("enhancementNotice")
+        self.enhancement_notice.setWordWrap(True)
+        layout.addWidget(self.enhancement_notice)
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel)
         start = buttons.addButton("Start detection", QDialogButtonBox.ButtonRole.AcceptRole)
         start.setObjectName("primaryButton")
@@ -554,6 +686,36 @@ class MainWindow(QMainWindow):
         heading_row.addStretch()
         heading_row.addWidget(self.workspace_meta)
         layout.addLayout(heading_row)
+
+        enhancement = QFrame()
+        enhancement.setObjectName("enhancementCard")
+        enhancement.setToolTip("Open the automatic BasicVSR++ enhancement preview.")
+        enhancement_layout = QHBoxLayout(enhancement)
+        enhancement_layout.setContentsMargins(13, 10, 11, 10)
+        enhancement_layout.setSpacing(12)
+        enhancement_copy = QVBoxLayout()
+        enhancement_copy.setSpacing(2)
+        enhancement_heading = QHBoxLayout()
+        enhancement_title = QLabel("VIDEO ENHANCEMENT · BASICVSR++")
+        enhancement_title.setObjectName("enhancementTitle")
+        enhancement_heading.addWidget(enhancement_title)
+        enhancement_heading.addStretch()
+        enhancement_copy.addLayout(enhancement_heading)
+        self.enhancement_status = QLabel(
+            "Import a video to preview automatic enhancement before detection"
+        )
+        self.enhancement_status.setObjectName("enhancementStatus")
+        self.enhancement_status.setWordWrap(True)
+        enhancement_copy.addWidget(self.enhancement_status)
+        enhancement_layout.addLayout(enhancement_copy, 1)
+        self.enhancement_button = QPushButton("Enhance video")
+        self.enhancement_button.setObjectName("enhancementButton")
+        self.enhancement_button.setToolTip("Open the BasicVSR++ enhancement preview.")
+        self.enhancement_button.setEnabled(False)
+        self.enhancement_button.clicked.connect(self.show_video_enhancement)
+        enhancement_layout.addWidget(self.enhancement_button)
+        layout.addWidget(enhancement)
+
         self.player = VideoPlayer()
         self.canvas = self.player.canvas
         self.canvas.browse_requested.connect(self.choose_video)
@@ -698,8 +860,12 @@ class MainWindow(QMainWindow):
         self.report_button.setEnabled(False)
         self.save_button.setEnabled(False)
         self.analyze_button.setEnabled(True)
+        self.enhancement_button.setEnabled(True)
         self.threshold_slider.setEnabled(True)
         self.workspace_meta.setText("Imported · ready to configure")
+        self.enhancement_status.setText(
+            "Video ready · Preview automatic BasicVSR++ enhancement before detection"
+        )
         self._clear_results()
         self._update_model_label()
         self.status_title.setText("Ready to analyze")
@@ -718,6 +884,11 @@ class MainWindow(QMainWindow):
         self._config_dialog = dialog
         dialog.finished.connect(self._configuration_finished)
         dialog.open()
+
+    def show_video_enhancement(self):
+        if self.video_info is None or self._thread:
+            return
+        VideoEnhancementDialog(self.video_info, self).exec()
 
     @Slot(int)
     def _configuration_finished(self, code):
@@ -770,13 +941,16 @@ class MainWindow(QMainWindow):
             return
         for button in (self.open_button, self.save_button,
                        self.report_button, self.analyze_button, self.review_button, self.open_review_button,
-                       self.original_button, self.detected_button):
+                       self.original_button, self.detected_button, self.enhancement_button):
             button.setEnabled(False)
         self.threshold_slider.setEnabled(False)
         self.progress.setRange(0, 0)
         self.progress.show()
         self.status_title.setText("Loading detector")
         self.status_detail.setText("The detection service is loading the trained model to scan the entire video.")
+        self.enhancement_status.setText(
+            "Enhancement not applied · The detector is analyzing the original imported video"
+        )
         self.workspace_meta.setText("Scanning · please wait")
         self.summary_message.setText("Analyzing the video for weapons. Detection totals will appear after processing completes.")
         self.frame_message.setText("Awaiting the completed detection result.")
@@ -834,6 +1008,9 @@ class MainWindow(QMainWindow):
             f"{result.analyzed_frames:,} frames analyzed\n"
             f"{len(result.detections):,} frame detections · {result.elapsed_seconds:.1f} s"
         )
+        self.enhancement_status.setText(
+            "Enhancement not applied to this run · The original imported video was analyzed"
+        )
 
     @Slot(str, str)
     def _analysis_failed(self, message, details):
@@ -872,6 +1049,7 @@ class MainWindow(QMainWindow):
         self.open_button.setEnabled(True)
         self.open_review_button.setEnabled(True)
         self.analyze_button.setEnabled(self.video_info is not None)
+        self.enhancement_button.setEnabled(self.video_info is not None)
         self.report_button.setEnabled(self.result is not None)
         self.original_button.setEnabled(True)
         self.threshold_slider.setEnabled(True)
@@ -1008,7 +1186,11 @@ class MainWindow(QMainWindow):
         self.source_meta.setText(f"{result.video.width} × {result.video.height} pixels\n{result.video.fps:.2f} fps · {timecode(result.video.duration)}")
         self.threshold_slider.setValue(round(result.threshold * 100))
         self.analyze_button.setEnabled(result.video.path.is_file())
+        self.enhancement_button.setEnabled(result.video.path.is_file())
         self._analysis_succeeded(result)
+        self.enhancement_status.setText(
+            "Enhancement not applied to this saved run · The original imported video was analyzed"
+        )
         self.player.pause()
         self.show_observation_review()
 

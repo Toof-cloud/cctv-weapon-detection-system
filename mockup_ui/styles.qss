@@ -32,6 +32,36 @@ QFrame#workspace { background: #fafbfc; }
 QSplitter::handle { background: #e0e2e6; width: 1px; }
 QLabel#sectionTitle { color: #20262d; font-size: 12px; font-weight: 700; padding-bottom: 5px; }
 QLabel#workspaceTitle { font-size: 13px; font-weight: 650; }
+QFrame#enhancementCard {
+    background: #f5f5fc;
+    border: 1px solid #cfd1ea;
+    border-left: 4px solid #6568bd;
+    border-radius: 7px;
+}
+QLabel#enhancementTitle { color: #2f318e; font-size: 11px; font-weight: 700; }
+QLabel#enhancementStatus { color: #606b7a; font-size: 11px; }
+QPushButton#enhancementButton {
+    color: #2f318e;
+    background: #ffffff;
+    border: 1px solid #9ea1d3;
+    padding: 7px 12px;
+}
+QPushButton#enhancementButton:hover { background: #ededfb; border-color: #6568bd; }
+QPushButton#enhancementButton:disabled {
+    color: #737b89;
+    background: #ffffff;
+    border: 1px dashed #afb5c2;
+    padding: 7px 12px;
+}
+QLabel#enhancementNotice {
+    color: #505a70;
+    background: #f5f5fc;
+    border: 1px solid #cfd1ea;
+    border-left: 4px solid #6568bd;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 11px;
+}
 QFrame#selectedEvidence { background: #f8f8ff; border: 1px solid #b6b7d7; border-radius: 7px; }
 QLabel#evidenceTitle { font-weight: 600; color: #2f318e; }
 QLabel#mutedText { color: #66717d; font-size: 11px; }
@@ -64,6 +94,20 @@ QScrollBar::handle:vertical { background: #ccd1d9; min-height: 30px; border-radi
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
 QToolTip { background: #303841; color: white; border: none; padding: 6px; }
 QDialog#configurationDialog, QDialog#processingDialog, QDialog#forensicReportDialog { background: #ffffff; }
+QDialog#videoEnhancementDialog { background: #f7f8fb; }
+QFrame#basicVsrProfile { background: #f0f1fb; border: 1px solid #cfd1ea; border-radius: 6px; }
+QLabel#enhancementModel { color: #2f318e; font-size: 13px; font-weight: 700; }
+QFrame#enhancementPreviewArea { background: #eef0f5; border: 1px solid #d8dce5; border-radius: 8px; }
+QFrame#enhancementPreviewCard { background: #ffffff; border: 1px solid #d8dce5; border-radius: 6px; }
+QLabel#enhancementPreviewTitle { color: #3e4753; font-size: 10px; font-weight: 700; }
+QLabel#enhancementPreview { background: #171d24; border: none; border-radius: 4px; }
+QLabel#enhancementPreviewPlaceholder {
+    color: #aeb7c4;
+    background: #202730;
+    border: 1px dashed #697483;
+    border-radius: 4px;
+    font-size: 12px;
+}
 QDialog#observationReviewDialog { background: #ffffff; }
 QPushButton#decisionButton { padding: 10px 14px; border: 1px solid #c5cbd7; background: #ffffff; }
 QPushButton#decisionButton:checked { color: #ffffff; background: #2f318e; border: 2px solid #292b79; font-weight: 700; }
