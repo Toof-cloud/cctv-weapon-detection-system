@@ -1,0 +1,223 @@
+{
+  "schema_version": "2.0",
+  "report_id": "SYNTHETIC LAYOUT SAMPLE - NOT EVIDENCE",
+  "report_type": "forensic_detection_report",
+  "generated_at_utc": "2026-09-10T13:23:30+00:00",
+  "validation_status": "pending_human_validation",
+  "review_summary": "0 of 4 observations reviewed",
+  "counts_by_analyst_decision": {
+    "Not reviewed": 4
+  },
+  "metrics": {
+    "tcr": {
+      "status": "computed",
+      "value_percent": 50.0,
+      "reason": "Calculated from saved pipeline statuses.",
+      "n_ts": 2,
+      "n_isolated": 1,
+      "n_interrupted": 1,
+      "n_not_evaluable": 2,
+      "n_te": 4,
+      "per_video": [
+        {
+          "camera_id": "TEST-CAM01",
+          "source_video": "SYNTHETIC_LAYOUT_SAMPLE.mp4",
+          "n_ts": 2,
+          "n_isolated": 1,
+          "n_interrupted": 1,
+          "n_not_evaluable": 2,
+          "n_te": 4,
+          "tcr": 50.0,
+          "tcr_handgun": 66.67,
+          "tcr_knife": 0.0,
+          "hg_ts": 2,
+          "knife_ts": 0
+        }
+      ]
+    },
+    "mccr": {
+      "status": "unavailable",
+      "value_percent": null,
+      "reason": "Requires two camera feeds with camera identifiers and comparable timestamps. This run has fewer than two recorded cameras."
+    },
+    "temporal_consistency_enabled": true
+  },
+  "source": {
+    "reference": "C:\\Users\\howar\\Documents\\GitHub\\cctv-weapon-detection-system\\tmp\\pdfs\\metrics-layout\\SYNTHETIC_LAYOUT_SAMPLE.mp4",
+    "name": "SYNTHETIC_LAYOUT_SAMPLE.mp4",
+    "fps": 5.0,
+    "duration_seconds": 6.0,
+    "width": 240,
+    "height": 144,
+    "frame_count": 30,
+    "camera_id": null,
+    "camera_id_status": "not_recorded_by_current_pipeline",
+    "recording_start_timestamp": null,
+    "source_timestamp_status": "not_recorded_by_current_pipeline",
+    "file_at_report_generation": {
+      "path": "C:\\Users\\howar\\Documents\\GitHub\\cctv-weapon-detection-system\\tmp\\pdfs\\metrics-layout\\SYNTHETIC_LAYOUT_SAMPLE.mp4",
+      "sha256": null,
+      "size_bytes": null,
+      "checked_at_utc": "2026-09-10T13:23:30+00:00",
+      "status": "unavailable"
+    }
+  },
+  "processing": {
+    "status": "completed_saved_run",
+    "model_reference": "SYNTHETIC_MODEL_REFERENCE.pth",
+    "device": "cpu",
+    "confidence_threshold": 0.5,
+    "analyzed_frames": 30,
+    "elapsed_seconds": 1.0,
+    "completed_at_utc": null
+  },
+  "summary": {
+    "total_frame_detections": 4,
+    "counts_per_class": {
+      "handgun": 4
+    },
+    "frames_with_detections": 4
+  },
+  "definitions": {
+    "frame_numbering": "Zero-based: the first frame is frame 0.",
+    "timestamp_basis": "Video-relative offset: frame number / FPS, rounded by the detection pipeline. Not a recording date/time.",
+    "box_format": "[x1, y1, x2, y2] in source-frame pixels, origin at the upper-left corner.",
+    "count_definition": "Per-frame observations; the same weapon can appear in multiple frames. These are not unique-object counts.",
+    "validation_status": "Analyst Review Decision records the human assessment. Confidence and processing success never select an analyst decision.",
+    "missing_metadata": "Camera identifiers and original recording timestamps are not collected by the current system. They are not inferred from filenames or filesystem dates.",
+    "fingerprints": "SHA-256 values identify files read when this report was generated; no ingestion-time hash or chain-of-custody history is asserted."
+  },
+  "artifacts": {
+    "saved_summary": {
+      "path": "C:\\Users\\howar\\Documents\\GitHub\\cctv-weapon-detection-system\\tmp\\pdfs\\metrics-layout\\summary.json",
+      "sha256": "5df6ab1067f8e8336fd067555822b0b3f321ab9fcd38155994b5240c8b9ef04a",
+      "size_bytes": 1102,
+      "checked_at_utc": "2026-09-10T13:23:30+00:00",
+      "status": "fingerprinted_at_report_generation"
+    },
+    "metric_input": {
+      "path": "C:\\Users\\howar\\Documents\\GitHub\\cctv-weapon-detection-system\\tmp\\pdfs\\metrics-layout\\metric_input.csv",
+      "sha256": "575ad70a141d4971ee46feb9778d72b99f7c69a71baf48a1f447a1e3e175814b",
+      "size_bytes": 576,
+      "checked_at_utc": "2026-09-10T13:23:30+00:00",
+      "status": "fingerprinted_at_report_generation"
+    },
+    "metric_engine": {
+      "path": "C:\\Users\\howar\\Documents\\GitHub\\cctv-weapon-detection-system\\benchmarks\\calculate_tcr_and_mccr.py",
+      "sha256": "ff4ab2de2e7a1d7e06c15e1fc6dc087e442f9559d61e99767860cb2503a28c1b",
+      "size_bytes": 15661,
+      "checked_at_utc": "2026-09-10T13:23:30+00:00",
+      "status": "fingerprinted_at_report_generation"
+    },
+    "pipeline_detections": {
+      "path": "C:\\Users\\howar\\Documents\\GitHub\\cctv-weapon-detection-system\\tmp\\pdfs\\metrics-layout\\detections.csv",
+      "sha256": "6e59e45d6579e692173c09ccece034a6ef29ce8b98087dd6ec5b2c78b918b635",
+      "size_bytes": 196,
+      "checked_at_utc": "2026-09-10T13:23:30+00:00",
+      "status": "fingerprinted_at_report_generation"
+    },
+    "annotated_video": "C:\\Users\\howar\\Documents\\GitHub\\cctv-weapon-detection-system\\tmp\\pdfs\\metrics-layout\\annotated.mp4"
+  },
+  "detections": [
+    {
+      "report_id": "FR-20260910T132330Z-74a4e792",
+      "record_id": "FR-20260910T132330Z-74a4e792-D00001",
+      "source_video_reference": "C:\\Users\\howar\\Documents\\GitHub\\cctv-weapon-detection-system\\tmp\\pdfs\\metrics-layout\\SYNTHETIC_LAYOUT_SAMPLE.mp4",
+      "source_video_name": "SYNTHETIC_LAYOUT_SAMPLE.mp4",
+      "frame_number": 0,
+      "video_relative_timestamp_seconds": 0.0,
+      "source_timestamp": null,
+      "source_timestamp_status": "not_recorded_by_current_pipeline",
+      "camera_id": null,
+      "camera_id_status": "not_recorded_by_current_pipeline",
+      "object_label": "handgun",
+      "x1": 20,
+      "y1": 30,
+      "x2": 80,
+      "y2": 100,
+      "confidence_score": 0.8,
+      "validation_status": "pending_human_validation",
+      "reviewer": null,
+      "reviewed_at": null,
+      "model_reference": "SYNTHETIC_MODEL_REFERENCE.pth",
+      "observation_id": "5df6ab1067f8e8336fd067555822b0b3-OBS-00001",
+      "analyst_decision": null,
+      "analyst_notes": ""
+    },
+    {
+      "report_id": "FR-20260910T132330Z-74a4e792",
+      "record_id": "FR-20260910T132330Z-74a4e792-D00002",
+      "source_video_reference": "C:\\Users\\howar\\Documents\\GitHub\\cctv-weapon-detection-system\\tmp\\pdfs\\metrics-layout\\SYNTHETIC_LAYOUT_SAMPLE.mp4",
+      "source_video_name": "SYNTHETIC_LAYOUT_SAMPLE.mp4",
+      "frame_number": 1,
+      "video_relative_timestamp_seconds": 0.2,
+      "source_timestamp": null,
+      "source_timestamp_status": "not_recorded_by_current_pipeline",
+      "camera_id": null,
+      "camera_id_status": "not_recorded_by_current_pipeline",
+      "object_label": "handgun",
+      "x1": 20,
+      "y1": 30,
+      "x2": 80,
+      "y2": 100,
+      "confidence_score": 0.8,
+      "validation_status": "pending_human_validation",
+      "reviewer": null,
+      "reviewed_at": null,
+      "model_reference": "SYNTHETIC_MODEL_REFERENCE.pth",
+      "observation_id": "5df6ab1067f8e8336fd067555822b0b3-OBS-00002",
+      "analyst_decision": null,
+      "analyst_notes": ""
+    },
+    {
+      "report_id": "FR-20260910T132330Z-74a4e792",
+      "record_id": "FR-20260910T132330Z-74a4e792-D00003",
+      "source_video_reference": "C:\\Users\\howar\\Documents\\GitHub\\cctv-weapon-detection-system\\tmp\\pdfs\\metrics-layout\\SYNTHETIC_LAYOUT_SAMPLE.mp4",
+      "source_video_name": "SYNTHETIC_LAYOUT_SAMPLE.mp4",
+      "frame_number": 20,
+      "video_relative_timestamp_seconds": 4.0,
+      "source_timestamp": null,
+      "source_timestamp_status": "not_recorded_by_current_pipeline",
+      "camera_id": null,
+      "camera_id_status": "not_recorded_by_current_pipeline",
+      "object_label": "handgun",
+      "x1": 20,
+      "y1": 30,
+      "x2": 80,
+      "y2": 100,
+      "confidence_score": 0.8,
+      "validation_status": "pending_human_validation",
+      "reviewer": null,
+      "reviewed_at": null,
+      "model_reference": "SYNTHETIC_MODEL_REFERENCE.pth",
+      "observation_id": "5df6ab1067f8e8336fd067555822b0b3-OBS-00003",
+      "analyst_decision": null,
+      "analyst_notes": ""
+    },
+    {
+      "report_id": "FR-20260910T132330Z-74a4e792",
+      "record_id": "FR-20260910T132330Z-74a4e792-D00004",
+      "source_video_reference": "C:\\Users\\howar\\Documents\\GitHub\\cctv-weapon-detection-system\\tmp\\pdfs\\metrics-layout\\SYNTHETIC_LAYOUT_SAMPLE.mp4",
+      "source_video_name": "SYNTHETIC_LAYOUT_SAMPLE.mp4",
+      "frame_number": 21,
+      "video_relative_timestamp_seconds": 4.2,
+      "source_timestamp": null,
+      "source_timestamp_status": "not_recorded_by_current_pipeline",
+      "camera_id": null,
+      "camera_id_status": "not_recorded_by_current_pipeline",
+      "object_label": "handgun",
+      "x1": 20,
+      "y1": 30,
+      "x2": 80,
+      "y2": 100,
+      "confidence_score": 0.8,
+      "validation_status": "pending_human_validation",
+      "reviewer": null,
+      "reviewed_at": null,
+      "model_reference": "SYNTHETIC_MODEL_REFERENCE.pth",
+      "observation_id": "5df6ab1067f8e8336fd067555822b0b3-OBS-00004",
+      "analyst_decision": null,
+      "analyst_notes": ""
+    }
+  ]
+}

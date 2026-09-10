@@ -168,27 +168,27 @@ class ObservationReviewTests(unittest.TestCase):
         self.assertEqual(exported_reviews, self.store.observations)
         self.assertEqual(exported_reviews[0]["automatedValidationStatus"], "validated")
         html_text = (exported / "forensic_report.html").read_text(encoding="utf-8")
-        self.assertIn("This is a system-generated report and analyst review is provided here.", html_text)
+        self.assertIn("This is a system-generated report. All detections and validation results are subject to human analyst review and should be treated as reviewable observations, not conclusive findings.", html_text)
         self.assertNotIn("Automated Validation Result", html_text)
         document = QPdfDocument(self.application)
         self.assertEqual(document.load(str(exported / "forensic_report.pdf")), QPdfDocument.Error.None_)
         text = "\n".join(document.getAllText(i).text() for i in range(document.pageCount()))
-        for required in ("This is a system-generated report and analyst review is provided here.",
+        document.close()
+        from shiboken6 import delete
+        delete(document)  # Release the PDF even if a following assertion fails.
+        for required in ("This is a system-generated report. All detections and validation results are subject to human analyst review and should be treated as reviewable observations, not conclusive findings.",
                          "Video Metadata", "Video and Detection Information", "Interpretation",
-                         "Object Detection Observations and Reviews", "Analyst Review Information",
+                         "Object Detection Observations and Reviews", "TCR Information", "MCCR Information", "Analyst Review Information",
                          "Source References", "Traceability Report", "Analyst Review Decision",
                          "Reject", "Uncertain", "<not markup>", saved["reviewedAt"]):
-            self.assertIn(required, text)
+            self.assertIn(required, " ".join(text.split()))
         headings = ("Video Metadata", "Video and Detection Information", "Interpretation",
-                    "Object Detection Observations and Reviews", "Analyst Review Information",
+                    "Object Detection Observations and Reviews", "TCR Information", "MCCR Information", "Analyst Review Information",
                     "Source References", "Traceability Report")
         positions = [text.index(heading) for heading in headings]
         self.assertEqual(positions, sorted(positions))
         self.assertNotIn("Automated Validation Result", text)
         self.assertNotRegex(text, r"\bPART\b")
-        document.close()
-        from shiboken6 import delete
-        delete(document)  # Release Qt PDFium's Windows file handle before fixture cleanup.
         dialog = ForensicReportDialog(self.result)
         self.assertNotIn("Automated validation", dialog.model.HEADERS)
         self.assertEqual(dialog.model.data(dialog.model.index(0, 5)), "Reject")

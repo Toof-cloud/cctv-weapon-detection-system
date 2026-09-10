@@ -60,10 +60,10 @@ class ForensicReportTests(unittest.TestCase):
         self.assertNotIn("automated_validation_status", exported[0])
         rendered = html.read_text(encoding="utf-8")
         self.assertIn("80.72%", rendered)
-        self.assertIn("This is a system-generated report and analyst review is provided here.", rendered)
+        self.assertIn("This is a system-generated report. All detections and validation results are subject to human analyst review and should be treated as reviewable observations, not conclusive findings.", rendered)
         self.assertNotIn("Automated Validation Result", rendered)
         headings = ("Video Metadata", "Video and Detection Information", "Interpretation",
-                    "Object Detection Observations and Reviews", "Analyst Review Information",
+                    "Object Detection Observations and Reviews", "TCR Information", "MCCR Information", "Analyst Review Information",
                     "Source References", "Traceability Report")
         positions = [rendered.index(heading) for heading in headings]
         self.assertEqual(positions, sorted(positions))

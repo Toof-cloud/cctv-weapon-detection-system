@@ -174,7 +174,7 @@ class VideoAdapterTests(unittest.TestCase):
             with self.assertRaisesRegex(VideoInputError, "ended before"):
                 bridge.analyze_video(self.video)
 
-    def test_third_model_is_exclusive_despite_other_weights_and_legacy_settings(self):
+    def test_ninth_model_is_exclusive_despite_other_weights_and_legacy_settings(self):
         for name in ("best_weapon_detector.pth", "best_weapon_detector_retrained.pth"):
             (self.checkpoint.parent / name).write_text("TEST ONLY; never loaded as weights")
         other = self.checkpoint.parent / "best_weapon_detector_retrained.pth"
@@ -187,6 +187,9 @@ class VideoAdapterTests(unittest.TestCase):
             self.assertTrue(bridge.find_model())
             self.assertEqual(bridge.model_path, self.checkpoint)
             self.assertEqual(ModelBridge().model_path, self.checkpoint)
+            with self.assertRaises(ModelSetupError):
+                bridge.set_model_path(other)
+            self.assertEqual(bridge.model_path, self.checkpoint)
             self.checkpoint.unlink()
             self.assertFalse(bridge.find_model())
             self.assertIsNone(bridge.model_path)
@@ -336,7 +339,7 @@ class VideoUiTests(unittest.TestCase):
              patch.object(QMessageBox, "information"):
             self.window.save_current_result()
             save.assert_called_once_with(self.window.result, self.folder)
-        self.assertIn(bridge_module.MODEL_FILENAME, self.window.model_label.text())
+        self.assertIn(Path(self.window.result.model_path).name, self.window.model_label.text())
         self.assertFalse(hasattr(self.window, "model_settings_action"))
         self.assertFalse(self.window.model_label.actions())
         self.assertNotIn("Select model", [b.text() for b in self.window.findChildren(QPushButton)])

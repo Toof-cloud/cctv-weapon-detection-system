@@ -1,7 +1,7 @@
 # Forensikada video detection mockup
 
 The interface visualizes the existing weapon-detection system:
-**Import video → configure the video-enhancement stage → confirm threshold and start detection → scan with the third trained model → play the annotated
+**Import video → configure the video-enhancement stage → confirm threshold and start detection → scan with the ninth trained model → play the annotated
 video and show its detection summary.** BasicVSR++ processing is not implemented in the current mockup, so the detector still receives the original video. The service loads the trained model,
 detects its **handgun** and **knife** classes, and produces the boxes and report.
 
@@ -65,7 +65,7 @@ Importing never starts analysis. The toolbar contains **Import video**,
 the threshold confirmation whenever an imported video remains unprocessed.
 The app does not open a model picker. If the required model is missing after the
 user explicitly starts detection, the imported video waits while the required path
-is checked every two seconds. Adding `best_weapon_detector_third_model.pth` to
+is checked every two seconds. Adding `best_weapon_detector_ninth_model.pth` to
 `mockup_ui/models/` resumes that requested scan without reimporting the video.
 
 Importing displays a still preview and metadata. The player is a result viewer:
@@ -94,12 +94,12 @@ FPS regardless of how long analysis took.
 
 ## Trained checkpoint
 
-The UI uses **only `mockup_ui/models/best_weapon_detector_third_model.pth`** for
+The UI uses **only `mockup_ui/models/best_weapon_detector_ninth_model.pth`** for
 every video. The Trained model panel displays its filename and full-path tooltip.
-The baseline and retrained files may remain in the directory but are never selected.
-There is no fallback: if the third checkpoint is missing, scanning waits for it.
+The third, baseline and retrained checkpoints have been removed. Only the ninth model is offered in the detection configuration.
+There is no fallback: if the ninth checkpoint is missing, scanning waits for it.
 
-Model selection, its keyboard shortcut, and the `--model` option have been removed.
+The UI accepts only its installed ninth-model path; it cannot select another checkpoint.
 Legacy `settings.json` paths and `FORENSIKADA_MODEL_PATH` overrides are ignored.
 The application reads the required checkpoint in place without changing its weights
 or filename. `mockup_ui/models/` is created automatically and is excluded from Git.
@@ -108,13 +108,15 @@ The application has no simulated-detection mode.
 Class mapping remains the original service's mapping:
 `1 = handgun`, `2 = knife`, with background ignored.
 
-The original `get_model()` requests torchvision `weights="DEFAULT"` before loading
-your trained state dict. It therefore still needs its initialization-weight cache.
-If that cache is unavailable, the original loader may download it on first use;
-the mockup directs that cache into `mockup_ui/temp/torch/hub/`. An existing cache
-is read in place. This initialization requirement does not replace the trained
-weapon detector. Run a real clip with your checkpoint successfully before the
-presentation, then confirm a second run works offline.
+Inference creates the matching Faster R-CNN architecture without downloading
+pretrained initialization weights, then loads the ninth checkpoint with strict
+state-dictionary validation. Training still uses pretrained initialization by default.
+The ninth checkpoint uses anchor scales `(16, 32, 64, 128, 256)`.
+
+The installed file matches the Desktop source (SHA-256:
+`baf3b5b81b312add936a182a8cf1e1e32d30f5b9d7c98a466befc8951e0a53f8`).
+It loaded and processed a synthetic blank frame on CPU; this confirms runtime
+compatibility, not detection accuracy on representative videos.
 
 ## Forensic report
 
@@ -196,9 +198,25 @@ time. Older saved results leave unavailable fields blank with explicit statuses.
 
 The report begins with the system-generated/analyst-review disclaimer, followed by
 Video Metadata, Video and Detection Information, Interpretation, Object Detection
-Observations and Reviews, and Analyst Review Information. Source References and the
+Observations and Reviews, TCR Information, MCCR Information, and Analyst Review Information. Source References and the
 Traceability Report appear at the end. The PDF does not print guide labels such as
 section group numbers.
+
+TCR and MCCR use the functions in `benchmarks/calculate_tcr_and_mccr.py`.
+New runs preserve the unfiltered pipeline CSV as `metric_input.csv`, including
+suppressed flickers needed for TCR. This file is copied into each saved export;
+the report records its SHA-256 hash and the calculation script's hash. Analyst
+decisions do not affect these calculations. PDF, HTML and JSON share the results.
+TCR follows the benchmark's observed-frame boundary exclusion and class-based
+gap counting. MCCR requires two cameras and assumes aligned video starts, with
+a 1.5-second matching tolerance. The report describes these assumptions and shows
+N/A when inputs or eligible observations are missing. Earlier exports without
+the unfiltered records require processing the video again to obtain metrics.
+
+Focused report verification:
+```powershell
+.\mockup_ui\.venv\Scripts\python.exe -B -m unittest mockup_ui.test_report_metrics mockup_ui.test_forensic_report mockup_ui.test_observation_review -v
+```
 
 Create a report from an existing export without rerunning inference:
 
@@ -234,7 +252,7 @@ The existing `VideoService` supplies validation and metadata. Result playback
 and seeking use OpenCV with a Qt timer after the worker produces a valid result.
 
 The original helper initializes the detector once per video run.
-It handles all frames within that run with the same loaded third model. Choosing a new
+It handles all frames within that run with the same loaded ninth model. Choosing a new
 video or rerunning detection clears old results so they
 cannot be mistaken for the current run. Failed/incomplete processing is not
 presented as a completed result. Failed runs keep totals pending and disable
@@ -276,7 +294,7 @@ mockup_ui/
 ├── test_observation_review.py   Decision rules, reopening, persistence, and PDF checks
 ├── README.md                    These instructions
 ├── .gitignore                   Excludes runtime files
-├── models/                      Required location of best_weapon_detector_third_model.pth
+├── models/                      Required location of best_weapon_detector_ninth_model.pth
 ├── reviews/                     Persistent completed runs and analyst review records
 ├── assets/
 │   ├── forensikada-logo.png      Original Figma logo
