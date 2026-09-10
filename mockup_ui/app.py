@@ -420,6 +420,42 @@ class ForensicReportDialog(QDialog):
         disclaimer.setWordWrap(True)
         layout.addWidget(disclaimer)
 
+        # Calculate TCR and MCCR metrics from metric_input.csv
+        metric_path = getattr(result, "metric_input_path", None)
+        if not metric_path or not Path(metric_path).exists():
+            candidate = result.output_path.parent / "metric_input.csv"
+            metric_path = candidate if candidate.exists() else None
+
+        metrics = {}
+        if metric_path:
+            from mockup_ui.report_metrics import calculate_report_metrics
+            metrics = calculate_report_metrics(Path(metric_path))
+
+        tcr = metrics.get("tcr", {})
+        mccr = metrics.get("mccr", {})
+
+        if tcr.get("value_percent") is not None:
+            tcr_str = (
+                f"Rate: {tcr['value_percent']:.2f}%\n"
+                f"Supported (N_TS): {tcr.get('n_ts', 0)} · Isolated: {tcr.get('n_isolated', 0)}\n"
+                f"Total Eligible (N_TE): {tcr.get('n_te', 0)}"
+            )
+        elif tcr.get("status") == "per_video":
+            tcr_str = "Per-Video Calculation\nSee detailed forensic log records"
+        else:
+            tcr_str = f"Status: N/A\n{tcr.get('reason', 'Pipeline records not available for this run')}"
+
+        if mccr.get("value_percent") is not None:
+            mccr_str = (
+                f"Rate: {mccr['value_percent']:.2f}%\n"
+                f"Corroborated (N_CC): {mccr.get('n_cc', 0)} / {mccr.get('n_mc', 0)} eligible"
+            )
+        else:
+            mccr_str = (
+                "Status: N/A (Single Camera Feed)\n"
+                "Requires dual-camera layout with concurrent timestamps"
+            )
+
         info = QGridLayout()
         values = (
             ("VIDEO INFORMATION", f"{result.video.width} × {result.video.height} · {result.video.fps:.2f} FPS\n"
@@ -429,6 +465,8 @@ class ForensicReportDialog(QDialog):
                                   f"Handgun: {result.counts.get('handgun', 0):,} · Knife: {result.counts.get('knife', 0):,}"),
             ("PROCESSING", f"{result.analyzed_frames:,} frames analyzed on {result.device.upper()}\n"
                            f"Completed in {result.elapsed_seconds:.1f} seconds"),
+            ("TEMPORAL CONSISTENCY (TCR)", tcr_str),
+            ("MULTI-CAMERA CORROBORATION (MCCR)", mccr_str),
         )
         for index, (title, value) in enumerate(values):
             card = QFrame()

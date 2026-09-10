@@ -29,9 +29,34 @@ class ObservationReviewDialog(QDialog):
         heading = QLabel("Observation Review")
         heading.setObjectName("dialogHeading")
         layout.addWidget(heading)
+
+        # Compute TCR and MCCR metrics for review session
+        metric_path = getattr(result, "metric_input_path", None)
+        if not metric_path or not Path(metric_path).exists():
+            candidate = result.output_path.parent / "metric_input.csv"
+            metric_path = candidate if candidate.exists() else None
+
+        tcr_display = "TCR: N/A"
+        mccr_display = "MCCR: N/A"
+        if metric_path and Path(metric_path).exists():
+            from mockup_ui.report_metrics import calculate_report_metrics
+            metrics = calculate_report_metrics(Path(metric_path))
+            tcr_val = metrics.get("tcr", {}).get("value_percent")
+            mccr_val = metrics.get("mccr", {}).get("value_percent")
+            if tcr_val is not None:
+                tcr_display = f"TCR: {tcr_val:.1f}%"
+            if mccr_val is not None:
+                mccr_display = f"MCCR: {mccr_val:.1f}%"
+
+        header_bar = QHBoxLayout()
         self.progress_label = QLabel()
         self.progress_label.setObjectName("dialogDetail")
-        layout.addWidget(self.progress_label)
+        header_bar.addWidget(self.progress_label)
+        header_bar.addStretch()
+        self.metrics_badge = QLabel(f"{tcr_display}  ·  {mccr_display}")
+        self.metrics_badge.setObjectName("reviewBadge")
+        header_bar.addWidget(self.metrics_badge)
+        layout.addLayout(header_bar)
         splitter = QSplitter(Qt.Orientation.Horizontal)
         self.observation_list = QListWidget()
         self.observation_list.setMinimumWidth(255)
