@@ -35,15 +35,97 @@ Device: NVIDIA GeForce RTX 5060 Ti
 
 ---
 
-## 2. Launching the Graphical User Interface (Desktop App)
+## 2. Launching and Operating the Graphical User Interfaces (UI)
 
-To run the interactive desktop application built with PySide6:
+FORENSIKADA provides two interactive graphical desktop interfaces designed for surveillance operators, forensic examiners, and defense presentation:
 
+---
+
+### Interface A: Primary Forensic Analysis UI (`mockup_ui/app.py`)
+This is the primary forensic workstation application featuring the complete **BasicVSR++ Video Enhancement preview**, **Faster R-CNN weapon detection**, **In-App Forensic Report with TCR & MCCR**, and **Analyst Observation Review Panel**.
+
+#### How to Launch:
+```powershell
+# Standard launch:
+python mockup_ui/app.py
+
+# Or launch with a video pre-loaded directly:
+python mockup_ui/app.py --video "samples/handgun_test-video.mp4"
+```
+
+#### Step-by-Step UI Workflow:
+
+1. **Step 1: Import Surveillance Video**
+   * Click **"Import video"** (or drag-and-drop any MP4/AVI/MKV recording into the center video viewport).
+   * The video metadata (resolution, frame rate, total frame count, duration) loads immediately into the top status header without starting detection.
+
+2. **Step 2: Video Enhancement Preview (BasicVSR++)**
+   * Click the **"Enhance video"** button in the top action bar.
+   * Opens the **Video Enhancement Dialog**, presenting side-by-side viewports comparing the **Source Frame** against the **Enhanced Output Preview**.
+   * Demonstrates the automated super-resolution and frame restoration pipeline before feeding into the detection network.
+
+3. **Step 3: Configure Detection Thresholds & Filters**
+   * The **Detection Configuration Dialog** prompts you to confirm settings:
+     * **Confidence Threshold Slider:** Adjust sensitivity (default: `50%`).
+     * **CCTV Intelligence Filter:** Checked by default (enforces kinematic scale gating and suppresses environmental distractors).
+     * **Temporal Consensus Filter:** Checked by default (enforces multi-frame tracklet stability and suppresses 1-frame optical flickers).
+   * Click **"Start detection"**. A modal progress bar tracks frame-by-frame inference on your GPU.
+
+4. **Step 4: Interactive Video Playback & Timeline Review**
+   * Once scanning concludes, the annotated video automatically plays with burned bounding boxes, confidence tags, and class badges (Handgun / Knife).
+   * **Play / Pause / Seek:** Use the video control bar or slider.
+   * **Observation Table:** The right-hand panel displays every detection with its timestamp, object class, and confidence score. Clicking any row seeks the video directly to that exact frame.
+
+5. **Step 5: View the Forensic Report (with TCR and MCCR Metrics)**
+   * Click the **"Forensic report"** button.
+   * Opens the comprehensive **Forensic Analysis Report Dialog**, displaying six structured evidentiary metric cards:
+     * **Card 1 (Video Information):** Dimensions, FPS, duration, frame count.
+     * **Card 2 (Detection Configuration):** Operating threshold, checkpoint model version.
+     * **Card 3 (Detection Summary):** Total observations, positive frame count, handgun vs. knife tallies.
+     * **Card 4 (Processing):** Hardware acceleration device (CUDA), frames processed, elapsed seconds.
+     * **Card 5 (Temporal Consistency - TCR):** Displays the calculated **TCR percentage**, supported tracklet count ($N_{TS}$), isolated flicker count ($N_{ISO}$), and eligible total ($N_{TE}$).
+     * **Card 6 (Multi-Camera Corroboration - MCCR):** Displays cross-camera corroboration percentage ($N_{CC} / N_{MC}$) for multi-camera feeds or single-stream status.
+     * **Detection Timeline Table:** Full zero-based frame index, video-relative timecode, pixel bounding boxes, and initial automated validation statuses.
+
+6. **Step 6: Analyst Observation Review Panel**
+   * Click **"Observation review"** to access the human-in-the-loop audit surface.
+   * The header immediately reflects system performance badges:
+     ```
+     [Observation Review]
+     Review Progress: 0 / 12  ·  Temporal Consistency (TCR): 95.2%  ·  Multi-Camera (MCCR): N/A
+     ```
+   * Select individual observations on the left list to view high-resolution crops on the center canvas.
+   * Assign official human analyst decisions:
+     * `Accept` – Verified true positive weapon threat.
+     * `Reject` – False alarm / environmental distractor.
+     * `Uncertain` – Requires further forensic enhancement or secondary camera corroboration.
+   * Enter optional notes and click **"Save review"**.
+
+7. **Step 7: Exporting Reports & Evidence Packages**
+   * Click **"Save video + report"** and select a destination folder.
+   * Automatically exports:
+     * `annotated.mp4` – Annotated surveillance video recording.
+     * `detections.csv` – Structured forensic observations log.
+     * `metric_input.csv` – Unfiltered baseline pipeline records with cryptographic SHA-256 fingerprint.
+     * `observation_reviews.json` – Saved analyst decisions and audit notes.
+     * `summary.json` – Comprehensive run metadata and metric breakdown.
+     * `forensic_report.pdf` – Formal evidentiary PDF incident report complete with forensic disclaimers, TCR/MCCR tables, and traceability hashes.
+
+---
+
+### Interface B: Dual-Camera Surveillance Dashboard (`app/main.py`)
+Designed for simultaneous dual-channel multi-camera operations (e.g., Entrance `CAM-01` and Hallway `CAM-02`).
+
+#### How to Launch:
 ```powershell
 python app/main.py
 ```
 
-* **Function:** Opens the dual-camera surveillance dashboard where operators can upload video feeds, monitor live bounding boxes, view chronological detections, and export incident reports.
+#### Dual-Camera Features:
+* **Simultaneous Ingestion:** Load two independent CCTV streams side by side.
+* **Synchronized Live Feeds:** Dual playback viewports monitoring threat occurrences in real time.
+* **Interleaved Event Timeline:** Unifies detections from both cameras chronologically by timestamp.
+* **Multi-Camera Export:** Exports unified dual-camera CSV logs, HTML reports, and PDF audit dossiers.
 
 ---
 
