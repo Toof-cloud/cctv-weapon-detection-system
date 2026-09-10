@@ -59,10 +59,11 @@ python mockup_ui/app.py --video "samples/handgun_test-video.mp4"
    * Click **"Import video"** (or drag-and-drop any MP4/AVI/MKV recording into the center video viewport).
    * The video metadata (resolution, frame rate, total frame count, duration) loads immediately into the top status header without starting detection.
 
-2. **Step 2: Video Enhancement Preview (BasicVSR++)**
+2. **Step 2: Video Enhancement (BasicVSR++)**
    * Click the **"Enhance video"** button in the top action bar to open the **Video Enhancement Dialog**.
-   * **Why the "Run BasicVSR++ enhancement" button is non-clickable:** As designed in the UI mockup (`mockup_ui/README.md`), this dialog is an **architectural demonstration surface** that illustrates the automated BasicVSR++ super-resolution stage to the thesis panel. Because BasicVSR++ is an automated, parameter-free deep neural network running on GPU, it requires no manual operator adjustments. In this mockup, it displays the source frame beside the reserved enhancement preview, while the detector analyzes the imported video.
-   * **How to run real BasicVSR++ enhancement:** To execute actual frame-by-frame BasicVSR++ super-resolution through the WSL/CUDA backend, use the full pipeline command in Section 3 (`python run_full_pipeline.py --video <path> --output <dir>`).
+   * **Running Live Enhancement:** Click the **"Run BasicVSR++ enhancement"** button. The application triggers the WSL GPU super-resolution engine (`VideoEnhancementService`) on your PC, restores fine weapon contours, and populates the **ENHANCED PREVIEW** frame.
+   * Once completed, click **"Apply Enhanced Video"** to load the super-resolved footage directly into the player for weapon detection.
+   * *(Alternatively, you can close the dialog without running enhancement to analyze the original source video directly).*
 
 3. **Step 3: Configure Detection Thresholds & Filters**
    * The **Detection Configuration Dialog** prompts you to confirm settings:

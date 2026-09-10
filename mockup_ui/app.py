@@ -152,15 +152,59 @@ class EnhancementFramePreview(QLabel):
         super().resizeEvent(event)
 
 
+class EnhancementWorker(QThread):
+    progress = Signal(str)
+    succeeded = Signal(str, object)
+    failed = Signal(str)
+
+    def __init__(self, input_path: Path, output_path: Path, parent=None):
+        super().__init__(parent)
+        self.input_path = input_path
+        self.output_path = output_path
+
+    def run(self):
+        try:
+            from app.services.video_enhancement_service import VideoEnhancementService
+            enhancer = VideoEnhancementService()
+            self.progress.emit("Connecting to BasicVSR++ WSL environment...")
+            if not enhancer.verify_wsl_access():
+                self.failed.emit("WSL Linux environment is not accessible.")
+                return
+
+            self.progress.emit("Running BasicVSR++ video super-resolution on GPU... This may take a few moments.")
+            enhancer.enhance_video(str(self.input_path), str(self.output_path))
+
+            if not self.output_path.exists():
+                self.failed.emit("Enhanced video output was not created.")
+                return
+
+            import cv2
+            cap = cv2.VideoCapture(str(self.output_path))
+            ok, frame = cap.read()
+            cap.release()
+            if not ok or frame is None:
+                self.failed.emit("Could not decode first frame of enhanced video.")
+                return
+
+            self.succeeded.emit(str(self.output_path), frame)
+        except Exception as exc:
+            self.failed.emit(str(exc))
+
+
 class VideoEnhancementDialog(QDialog):
-    """Visual surface for the automatic BasicVSR++ enhancement stage."""
+    """Interactive surface for the automatic BasicVSR++ enhancement stage."""
 
     def __init__(self, video: VideoInfo, parent=None):
         super().__init__(parent)
+        self.video = video
+        self.enhanced_video_path: Path | None = None
+        self.enhanced_first_frame = None
+        self._worker: EnhancementWorker | None = None
+
         self.setObjectName("videoEnhancementDialog")
         self.setWindowTitle("Video Enhancement")
         self.setModal(True)
-        self.resize(1040, 660)
+        self.resize(1040, 680)
         self.setMinimumSize(880, 600)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(25, 22, 25, 20)
@@ -217,11 +261,11 @@ class VideoEnhancementDialog(QDialog):
 
         enhanced_card = QFrame()
         enhanced_card.setObjectName("enhancementPreviewCard")
-        enhanced_layout = QVBoxLayout(enhanced_card)
-        enhanced_layout.setContentsMargins(10, 10, 10, 10)
+        self.enhanced_layout = QVBoxLayout(enhanced_card)
+        self.enhanced_layout.setContentsMargins(10, 10, 10, 10)
         enhanced_title = QLabel("ENHANCED PREVIEW")
         enhanced_title.setObjectName("enhancementPreviewTitle")
-        enhanced_layout.addWidget(enhanced_title)
+        self.enhanced_layout.addWidget(enhanced_title)
         self.enhanced_preview = QLabel(
             "Enhanced frame preview\n\nBasicVSR++ output will appear here"
         )
@@ -229,25 +273,69 @@ class VideoEnhancementDialog(QDialog):
         self.enhanced_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.enhanced_preview.setWordWrap(True)
         self.enhanced_preview.setMinimumSize(200, 230)
-        enhanced_layout.addWidget(self.enhanced_preview, 1)
+        self.enhanced_layout.addWidget(self.enhanced_preview, 1)
         preview_layout.addWidget(original_card, 1)
         preview_layout.addWidget(enhanced_card, 1)
         body.addWidget(previews, 1)
         layout.addLayout(body, 1)
 
-        notice = QLabel(
-            "UI preview only: BasicVSR++ enhancement is automatic and requires no manual settings. "
-            "This mockup does not alter frames or detection input yet."
+        self.enhancement_progress = QProgressBar()
+        self.enhancement_progress.setRange(0, 0)
+        self.enhancement_progress.setVisible(False)
+        layout.addWidget(self.enhancement_progress)
+
+        self.notice = QLabel(
+            "BasicVSR++ super-resolves and restores compressed CCTV footage using bidirectional recurrent alignment on GPU."
         )
-        notice.setObjectName("enhancementNotice")
-        notice.setWordWrap(True)
-        layout.addWidget(notice)
+        self.notice.setObjectName("enhancementNotice")
+        self.notice.setWordWrap(True)
+        layout.addWidget(self.notice)
+
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
-        self.run_button = buttons.addButton("Run BasicVSR++ enhancement", QDialogButtonBox.ButtonRole.AcceptRole)
+        self.run_button = buttons.addButton("Run BasicVSR++ enhancement", QDialogButtonBox.ButtonRole.ActionRole)
         self.run_button.setObjectName("primaryButton")
-        self.run_button.setEnabled(False)
+        self.run_button.setEnabled(True)
+        self.run_button.clicked.connect(self._handle_run_or_apply)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
+
+    def _handle_run_or_apply(self):
+        if self.enhanced_video_path is not None:
+            self.accept()
+            return
+
+        self.run_button.setEnabled(False)
+        self.enhancement_progress.setVisible(True)
+        self.notice.setText("Initializing BasicVSR++ video enhancement on GPU... Please wait.")
+
+        out_dir = MOCKUP_DIR / "outputs" / "enhanced_videos"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_path = out_dir / f"{self.video.path.stem}_enhanced.mp4"
+
+        self._worker = EnhancementWorker(self.video.path, out_path, self)
+        self._worker.progress.connect(self.notice.setText)
+        self._worker.succeeded.connect(self._enhancement_succeeded)
+        self._worker.failed.connect(self._enhancement_failed)
+        self._worker.start()
+
+    def _enhancement_succeeded(self, enhanced_path: str, first_frame):
+        self.enhanced_video_path = Path(enhanced_path)
+        self.enhanced_first_frame = first_frame
+        self.enhancement_progress.setVisible(False)
+
+        self.enhanced_preview.setParent(None)
+        self.enhanced_preview = EnhancementFramePreview(first_frame)
+        self.enhanced_layout.addWidget(self.enhanced_preview, 1)
+
+        self.notice.setText("BasicVSR++ enhancement completed successfully! Click 'Apply Enhanced Video' to use this video for detection.")
+        self.run_button.setText("Apply Enhanced Video")
+        self.run_button.setEnabled(True)
+
+    def _enhancement_failed(self, error_msg: str):
+        self.enhancement_progress.setVisible(False)
+        self.notice.setText(f"Enhancement error: {error_msg}\nDetection can continue using the original video.")
+        self.run_button.setText("Retry BasicVSR++ enhancement")
+        self.run_button.setEnabled(True)
 
 
 class DetectionConfigDialog(QDialog):

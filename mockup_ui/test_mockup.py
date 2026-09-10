@@ -275,7 +275,7 @@ class VideoUiTests(unittest.TestCase):
         enhancement = VideoEnhancementDialog(self.video, self.window)
         self.assertFalse(enhancement.source_preview.pixmap().isNull())
         self.assertIn("BasicVSR++ output", enhancement.enhanced_preview.text())
-        self.assertFalse(enhancement.run_button.isEnabled())
+        self.assertTrue(enhancement.run_button.isEnabled())
         self.assertEqual(enhancement.findChildren(QSlider), [])
         visible_copy = " ".join(label.text() for label in enhancement.findChildren(QLabel))
         self.assertIn("No manual adjustments required", visible_copy)
