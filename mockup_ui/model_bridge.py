@@ -22,7 +22,7 @@ MOCKUP_DIR = Path(__file__).resolve().parent
 ROOT_DIR = MOCKUP_DIR.parent
 TEMP_DIR = MOCKUP_DIR / "temp"
 OUTPUT_DIR = MOCKUP_DIR / "outputs"
-MODEL_FILENAME = "best_weapon_detector_third_model.pth"
+MODEL_FILENAME = "best_weapon_detector_ninth_model.pth"
 MODEL_PATH = MOCKUP_DIR / "models" / MODEL_FILENAME
 VIDEO_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv", ".webm", ".m4v"}
 sys.dont_write_bytecode = True
@@ -40,52 +40,13 @@ class ModelSetupError(RuntimeError):
 
 
 def discover_available_models() -> list[tuple[str, Path]]:
-    """Discovers all available trained checkpoints in the project, prioritizing Model 9 SOTA."""
-    if MOCKUP_DIR != Path(__file__).resolve().parent or MODEL_PATH != MOCKUP_DIR / "models" / MODEL_FILENAME:
-        if MODEL_PATH.is_file():
-            return [(f"Active Test Model ({MODEL_PATH.name})", MODEL_PATH)]
-        return []
-    candidates = [
-        ("Model 9 (Ninth Model - SOTA 92.75% mAP)", ROOT_DIR / "best_weapon_detector_ninth_model.pth"),
-        ("Model 8 (Eighth Model - Retail Specular)", ROOT_DIR / "best_weapon_detector_eighth_model.pth"),
-        ("Model 7 (Seventh Model - Handheld Focus)", ROOT_DIR / "best_weapon_detector_seventh_model.pth"),
-        ("Model 6 (Sixth Model - USRT CCTV)", ROOT_DIR / "best_weapon_detector_sixth_model.pth"),
-        ("Model 5 (Fifth Model - VIRAT CCTV)", ROOT_DIR / "best_weapon_detector_fifth_model.pth"),
-        ("Model 4 (Fourth Model - Handgun Retrain)", ROOT_DIR / "best_weapon_detector_fourth_model.pth"),
-        ("Model 3 (Third Model - Knife Anchors)", ROOT_DIR / "best_weapon_detector_third_model.pth"),
-        ("Model 3 (Mockup Copy)", MODEL_PATH),
-        ("Baseline (Initial Trained Model)", ROOT_DIR / "best_weapon_detector.pth"),
-        ("Retrained (Model Retrain)", ROOT_DIR / "best_weapon_detector_retrained.pth"),
-    ]
-    seen = set()
-    found = []
-    for label, path in candidates:
-        if path.is_file():
-            try:
-                resolved = path.resolve()
-            except Exception:
-                resolved = path
-            if resolved not in seen:
-                seen.add(resolved)
-                found.append((label, path))
-    return found
+    """Only the installed ninth checkpoint is available to the UI."""
+    return [(f"Ninth model ({MODEL_FILENAME})", MODEL_PATH)] if MODEL_PATH.is_file() else []
 
 
 def default_model_path() -> Path | None:
-    """The UI uses the configured or discovered checkpoint, prioritizing Model 9 SOTA in production or MODEL_PATH in test sandbox."""
-    if MOCKUP_DIR != Path(__file__).resolve().parent or MODEL_PATH != MOCKUP_DIR / "models" / MODEL_FILENAME:
-        if MODEL_PATH.is_file():
-            return MODEL_PATH
-        return None
-    ninth = ROOT_DIR / "best_weapon_detector_ninth_model.pth"
-    if ninth.is_file():
-        return ninth
-    if MODEL_PATH.is_file():
-        return MODEL_PATH
-    models = discover_available_models()
-    if models:
-        return models[0][1]
-    return None
+    """Never fall back to another checkpoint when the ninth model is missing."""
+    return MODEL_PATH if MODEL_PATH.is_file() else None
 
 
 def timecode(seconds: float) -> str:
@@ -155,6 +116,8 @@ class VideoAnalysisResult:
     completed_at_utc: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat(timespec="seconds"))
     run_id: str = field(default_factory=lambda: uuid4().hex)
     review_path: Path | None = None
+    metric_input_path: Path | None = None
+    temporal_consistency_enabled: bool | None = None
 
     @property
     def counts(self) -> dict[str, int]:
@@ -204,21 +167,18 @@ class _PipelineOutput(io.TextIOBase):
 
 class ModelBridge:
     def __init__(self, model_path: Path | str | None = None):
-        self.selected_model_path: Path | None = Path(model_path) if model_path else None
-        self.model_path: Path | None = self.selected_model_path or default_model_path()
+        self.model_path: Path | None = None
+        self.set_model_path(model_path)
         self.device = ""
         self.enable_cctv_intelligence: bool = False
         self.enable_temporal_consistency: bool = False
 
     def set_model_path(self, path: Path | str | None):
-        self.selected_model_path = Path(path) if path else None
-        self.model_path = self.selected_model_path or default_model_path()
+        if path is not None and Path(path).resolve() != MODEL_PATH.resolve():
+            raise ModelSetupError(f"This application uses only {MODEL_FILENAME} in mockup_ui/models.")
+        self.model_path = default_model_path()
 
     def find_model(self) -> bool:
-        """Recheck the required file without falling back to a different model."""
-        if self.selected_model_path and self.selected_model_path.is_file():
-            self.model_path = self.selected_model_path
-            return True
         self.model_path = default_model_path()
         return self.model_path is not None
 
@@ -228,16 +188,9 @@ class ModelBridge:
         progress("Loading the original Faster R-CNN detection service…", -1)
         try:
             import torch
-            from torchvision.models.detection import FasterRCNN_ResNet50_FPN_V2_Weights
             from run_full_pipeline import detect_video_with_model
         except (ImportError, OSError, RuntimeError) as exc:
             raise ModelSetupError("The detector runtime could not load. Use the Python environment that already runs your trained model.") from exc
-        from urllib.parse import urlparse
-        cache_name = Path(urlparse(FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT.url).path).name
-        if not (Path(torch.hub.get_dir()) / "checkpoints" / cache_name).is_file():
-            torch.hub.set_dir(str(TEMP_DIR / "torch" / "hub"))
-            if not (Path(torch.hub.get_dir()) / "checkpoints" / cache_name).is_file():
-                progress("Preparing the model for first use… Internet may be needed for the original initialization cache.", -1)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         return detect_video_with_model
 
@@ -281,7 +234,12 @@ class ModelBridge:
             raise VideoInputError("The annotated video could not be written completely. Check available disk space and try again.")
         
         records = []
+        # Keep every original status, including suppressed flickers, for benchmark metrics.
+        # The display CSV below intentionally contains only active observations.
+        metric_input_path = None
         if csv_path.exists():
+            metric_input_path = run_dir / "metric_input.csv"
+            shutil.copy2(csv_path, metric_input_path)
             with csv_path.open(newline="", encoding="utf-8") as file:
                 for row in csv.DictReader(file):
                     cls_name = row.get("class_name") or row.get("object_label", "weapon")
@@ -341,7 +299,8 @@ class ModelBridge:
         progress("Analysis complete", 100)
         return VideoAnalysisResult(video, output_path, csv_path, records, str(self.model_path),
                                    self.device, perf_counter() - started, threshold,
-                                   int(details["analyzed_frames"]))
+                                   int(details["analyzed_frames"]), metric_input_path=metric_input_path,
+                                   temporal_consistency_enabled=enable_temporal_consistency)
 
 
 def result_summary(result: VideoAnalysisResult) -> dict:
@@ -358,6 +317,7 @@ def result_summary(result: VideoAnalysisResult) -> dict:
         "count_definition": "Per-frame observations; the same object may be counted in multiple frames. No tracking IDs are assigned.",
         "frame_numbering": "Zero-based", "box_format": "[x1, y1, x2, y2] in source-frame pixels",
         "elapsed_seconds": round(result.elapsed_seconds, 3), "detections": result.detections,
+        "temporal_consistency_enabled": result.temporal_consistency_enabled,
     }
 
 
@@ -375,6 +335,8 @@ def save_result(result: VideoAnalysisResult, output_dir: Path = OUTPUT_DIR) -> P
     summary["observations"] = store.observations
     shutil.copy2(result.output_path, destination / "annotated.mp4")
     shutil.copy2(result.csv_path, destination / "detections.csv")
+    if result.metric_input_path is not None:
+        shutil.copy2(result.metric_input_path, destination / "metric_input.csv")
     (destination / "summary.json").write_text(json.dumps(summary, indent=2, allow_nan=False), encoding="utf-8")
     snapshot = dict(store.data)
     snapshot["artifacts"] = {"annotatedVideo": str(destination / "annotated.mp4"), "detectionsCsv": str(destination / "detections.csv")}

@@ -415,7 +415,7 @@ class ForensicReportDialog(QDialog):
         top.addWidget(badge)
         layout.addLayout(top)
 
-        disclaimer = QLabel("This is a system-generated report and analyst review is provided here.")
+        disclaimer = QLabel("This is a system-generated report. All detections and validation results are subject to human analyst review and should be treated as reviewable observations, not conclusive findings.")
         disclaimer.setObjectName("reportObservation")
         disclaimer.setWordWrap(True)
         layout.addWidget(disclaimer)
@@ -955,15 +955,18 @@ class MainWindow(QMainWindow):
         self.analyze()
 
     def _update_model_label(self):
-        self.bridge.find_model()
-        path = self.bridge.model_path
-        available = bool(path and path.is_file())
-        if available:
+        # Completed/reopened results retain the checkpoint that produced them,
+        # even if another model is selected or the weights have since been moved.
+        path = Path(self.result.model_path) if self.result else self.bridge.model_path
+        if path and (self.result is not None or path.is_file()):
             self.model_label.setText(f"Faster R-CNN · Handgun / Knife\n{path.name}")
             self.model_label.setToolTip(str(path))
+        elif path:
+            self.model_label.setText(f"Selected checkpoint unavailable\n{path.name}")
+            self.model_label.setToolTip(str(path))
         else:
-            self.model_label.setText(f"Trained model not found\n{MODEL_FILENAME}")
-            self.model_label.setToolTip(f"Place {MODEL_FILENAME} in mockup_ui/models.")
+            self.model_label.setText("No checkpoint selected")
+            self.model_label.setToolTip("Select an available .pth checkpoint in the detection configuration.")
 
     def analyze(self):
         if self.video_info is None or self._thread or not self._analysis_requested:
@@ -978,9 +981,9 @@ class MainWindow(QMainWindow):
                 self._model_retry.start()
             return
         self._model_retry.stop()
-        self._update_model_label()
         self.player.pause()
         self.result = None
+        self._update_model_label()
         self._clear_results()
         self.original_button.setChecked(True)
         try:
@@ -1030,6 +1033,7 @@ class MainWindow(QMainWindow):
     @Slot(object)
     def _analysis_succeeded(self, result):
         self.result = result
+        self._update_model_label()
         if self._processing_dialog:
             self._processing_dialog.accept()
             self._processing_dialog = None

@@ -11,11 +11,13 @@ import json
 from pathlib import Path
 from uuid import uuid4
 from mockup_ui.observation_review import DETECTION_KEYS, make_observations, validate_observations
+from mockup_ui.report_metrics import (
+    ENGINE_PATH, METRIC_CSV_NAME, REPORT_DISCLAIMER, calculate_report_metrics, metric_fields,
+)
 
 MOCKUP_DIR = Path(__file__).resolve().parent
 VALIDATION_STATUS = "pending_human_validation"
 TIME_BASIS = "Video-relative offset: frame number / FPS, rounded by the detection pipeline. Not a recording date/time."
-REPORT_DISCLAIMER = "This is a system-generated report and analyst review is provided here."
 CSV_FIELDS = (
     "report_id", "record_id", "source_video_reference", "source_video_name",
     "frame_number", "video_relative_timestamp_seconds", "source_timestamp",
@@ -97,16 +99,26 @@ def build_report(summary_path: Path) -> dict:
     review_summary = f"{reviewed} of {len(observations)} observations reviewed"
     counts_by_decision = dict(Counter(row["analyst_decision"] or "Not reviewed" for row in rows))
     counts = dict(Counter(row["object_label"] for row in rows))
+    metric_path = summary_path.parent / METRIC_CSV_NAME
+    metrics = calculate_report_metrics(metric_path)
+    metrics["temporal_consistency_enabled"] = summary.get("temporal_consistency_enabled")
+    metric_videos = metrics["tcr"].get("per_video", [])
+    camera_id = metric_videos[0]["camera_id"] if len(metric_videos) == 1 else None
+    camera_id = camera_id or None
+    camera_status = "recorded_by_pipeline" if camera_id else "not_recorded_by_current_pipeline"
+    for row in rows:
+        row.update(camera_id=camera_id, camera_id_status=camera_status)
     return {
         "schema_version": "2.0", "report_id": report_id, "report_type": "forensic_detection_report",
         "generated_at_utc": utc_now(), "validation_status": "analyst_reviewed" if observations and reviewed == len(observations) else VALIDATION_STATUS,
         "review_summary": review_summary, "counts_by_analyst_decision": counts_by_decision,
+        "metrics": metrics,
         "source": {
             "reference": str(source), "name": source.name,
             "fps": summary["fps"], "duration_seconds": summary["duration_seconds"],
             "width": summary.get("width"), "height": summary.get("height"),
             "frame_count": summary.get("frame_count"),
-            "camera_id": None, "camera_id_status": "not_recorded_by_current_pipeline",
+            "camera_id": camera_id, "camera_id_status": camera_status,
             "recording_start_timestamp": None,
             "source_timestamp_status": "not_recorded_by_current_pipeline",
             "file_at_report_generation": file_reference(source),
@@ -125,10 +137,12 @@ def build_report(summary_path: Path) -> dict:
             "box_format": "[x1, y1, x2, y2] in source-frame pixels, origin at the upper-left corner.",
             "count_definition": "Per-frame observations; the same weapon can appear in multiple frames. These are not unique-object counts.",
             "validation_status": "Analyst Review Decision records the human assessment. Confidence and processing success never select an analyst decision.",
-            "missing_metadata": "Camera identifiers and original recording timestamps are not collected by the current system. They are not inferred from filenames or filesystem dates.",
+            "missing_metadata": "Camera identifiers are reported when supplied by the pipeline. Original recording timestamps are not collected and are not inferred from filenames or filesystem dates.",
             "fingerprints": "SHA-256 values identify files read when this report was generated; no ingestion-time hash or chain-of-custody history is asserted.",
         },
         "artifacts": {"saved_summary": file_reference(summary_path),
+                      "metric_input": file_reference(metric_path),
+                      "metric_engine": file_reference(ENGINE_PATH),
                       "pipeline_detections": file_reference(summary_path.parent / "detections.csv"),
                       "annotated_video": str(summary_path.parent / "annotated.mp4")},
         "detections": rows,
@@ -149,38 +163,6 @@ def render_html(report: dict) -> str:
     decision_summary = "; ".join(
         f"{decision}: {count}" for decision, count in sorted(report["counts_by_analyst_decision"].items())
     ) or "No observations"
-    # Compute TCR and MCCR
-    detections = report.get("detections", [])
-    if not detections:
-        tcr_str = "100.0% (0 observations)"
-        tcr_pct_str = "100.0%"
-        mccr_str = "N/A (No detections)"
-    else:
-        frame_numbers = sorted([int(d.get("frame_number", 0)) for d in detections])
-        if len(frame_numbers) <= 1:
-            tcr_str = "100.0% (1 supported observation)" if frame_numbers else "100.0% (0 observations)"
-            tcr_pct_str = "100.0%"
-        else:
-            n_ts = 0
-            n_iso = 0
-            for i, fn in enumerate(frame_numbers):
-                has_prev = (i > 0 and abs(fn - frame_numbers[i - 1]) <= 15)
-                has_next = (i < len(frame_numbers) - 1 and abs(frame_numbers[i + 1] - fn) <= 15)
-                if has_prev or has_next:
-                    n_ts += 1
-                else:
-                    n_iso += 1
-            total = n_ts + n_iso
-            tcr_pct = (n_ts / total * 100.0) if total > 0 else 100.0
-            tcr_pct_str = f"{tcr_pct:.1f}%"
-            tcr_str = f"{tcr_pct:.1f}% ({n_ts} supported tracklets, {n_iso} isolated flickers)"
-
-        cam_ids = {d.get("camera_id") for d in detections if d.get("camera_id") and d.get("camera_id") != "Not recorded"}
-        if len(cam_ids) >= 2:
-            mccr_str = "0.0% (Sequential Handover Topology: non-overlapping views)"
-        else:
-            mccr_str = "N/A (Single camera feed: requires multi-camera layout)"
-
     table_rows = "".join(
         f"<tr><td>{e(row['observation_id'])}</td><td>{e(row['frame_number'])}</td>"
         f"<td>{row['video_relative_timestamp_seconds']:.2f}</td><td>{e(row['object_label'].title())}</td>"
@@ -227,22 +209,24 @@ li{{margin:5px 0}}footer{{margin-top:28px;border-top:1px solid #dce0e8;padding-t
 <div class="metrics"><div class="metric"><strong>{summary['total_frame_detections']}</strong><span>Frame detections</span></div>
 <div class="metric"><strong>{counts.get('knife', 0)}</strong><span>Knife observations</span></div>
 <div class="metric"><strong>{counts.get('handgun', 0)}</strong><span>Handgun observations</span></div>
-<div class="metric"><strong>{tcr_pct_str}</strong><span>Temporal consistency (TCR)</span></div>
 <div class="metric"><strong>{processing['analyzed_frames']}</strong><span>Frames analyzed</span></div></div>
-{fields([('Model used', processing['model_reference']), ('Run status', 'Completed saved run'), ('Confidence threshold', f"{processing['confidence_threshold']:.0%}"), ('Frames analyzed', processing['analyzed_frames']), ('Processing device / time', f"{processing['device'].upper()} / {processing['elapsed_seconds']:.2f} seconds"), ('Analysis completed (UTC)', processing['completed_at_utc']), ('Detection summary', f"{summary['total_frame_detections']} observations; {summary['frames_with_detections']} positive frames; {class_summary}"), ('Temporal Consistency (TCR)', tcr_str), ('Multi-Camera Corroboration (MCCR)', mccr_str), ('Analyst review coverage', report['review_summary'])])}
+{fields([('Model used', processing['model_reference']), ('Run status', 'Completed saved run'), ('Confidence threshold', f"{processing['confidence_threshold']:.0%}"), ('Frames analyzed', processing['analyzed_frames']), ('Processing device / time', f"{processing['device'].upper()} / {processing['elapsed_seconds']:.2f} seconds"), ('Analysis completed (UTC)', processing['completed_at_utc']), ('Detection summary', f"{summary['total_frame_detections']} observations; {summary['frames_with_detections']} positive frames; {class_summary}"), ('Analyst review coverage', report['review_summary'])])}
 <h2>Interpretation</h2>
 <p>The model generated the listed handgun and knife observations at the configured confidence threshold. A confidence score describes model certainty and is not an analyst decision. Analyst decisions document a later human assessment and do not replace or delete the original model observation.</p>
-<p>Temporal Consistency Rate (TCR) measures detection stability across consecutive video frames (suppressing 1-frame optical flickers). Multi-Camera Corroboration Rate (MCCR) validates simultaneous threat confirmation across multiple synchronized viewpoints.</p>
 <p>Frame numbers are zero-based. Times are video-relative offsets and are not recording dates. Bounding boxes use [x1, y1, x2, y2] source-frame pixel coordinates. Counts represent frame observations, so the same physical object may appear more than once.</p>
 <h2>Object Detection Observations and Reviews</h2>
 <div class="table-wrap"><table><thead><tr><th>Observation</th><th>Frame (0-based)</th><th>Video offset (s)</th><th>Object label</th><th>Box [x1, y1, x2, y2]</th><th>Confidence</th><th>Analyst Review Decision</th></tr></thead><tbody>{table_rows}</tbody></table></div>
+<h2>TCR Information</h2>
+{fields(metric_fields(report.get("metrics", {}), "tcr"))}
+<h2>MCCR Information</h2>
+{fields(metric_fields(report.get("metrics", {}), "mccr"))}
 <h2>Analyst Review Information</h2>
 {fields([('Review coverage', report['review_summary']), ('Decision totals', decision_summary)])}
 {review_details}
 <h2>Source References</h2>
-{fields([('Source video', source['reference']), ('Model', processing['model_reference']), ('Annotated video', artifacts['annotated_video']), ('Saved summary', artifacts['saved_summary']['path']), ('Pipeline detections', artifacts['pipeline_detections']['path'])])}
+{fields([('Source video', source['reference']), ('Model', processing['model_reference']), ('Annotated video', artifacts['annotated_video']), ('Saved summary', artifacts['saved_summary']['path']), ('Pipeline detections', artifacts['pipeline_detections']['path']), ('Metric input records', artifacts['metric_input']['path']), ('Metric calculation script', artifacts['metric_engine']['path'])])}
 <h2>Traceability Report</h2>
-{fields([('Report identifier', report['report_id']), ('Generated (UTC)', report['generated_at_utc']), ('Source video fingerprint', source['file_at_report_generation']['sha256']), ('Source video check', source['file_at_report_generation']['status']), ('Saved summary fingerprint', artifacts['saved_summary']['sha256']), ('Saved summary check', artifacts['saved_summary']['status']), ('Pipeline detections fingerprint', artifacts['pipeline_detections']['sha256']), ('Pipeline detections check', artifacts['pipeline_detections']['status'])])}
+{fields([('Report identifier', report['report_id']), ('Generated (UTC)', report['generated_at_utc']), ('Source video fingerprint', source['file_at_report_generation']['sha256']), ('Source video check', source['file_at_report_generation']['status']), ('Saved summary fingerprint', artifacts['saved_summary']['sha256']), ('Saved summary check', artifacts['saved_summary']['status']), ('Pipeline detections fingerprint', artifacts['pipeline_detections']['sha256']), ('Pipeline detections check', artifacts['pipeline_detections']['status']), ('Metric input fingerprint', artifacts['metric_input']['sha256']), ('Metric input check', artifacts['metric_input']['status']), ('Metric script fingerprint', artifacts['metric_engine']['sha256'])])}
 <p>{e(report['definitions']['fingerprints'])}</p>
 <footer>Generated from saved detection records without rerunning or relabeling the model output.
 Companion files: forensic_report.json and forensic_records.csv. Use your browser's Print command to print or save this report as PDF.</footer>

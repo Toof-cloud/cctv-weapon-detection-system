@@ -3,11 +3,12 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.rpn import AnchorGenerator
 
 
-def get_model(num_classes=3, small_anchors=False, anchor_scales=None):
+def get_model(num_classes=3, small_anchors=False, anchor_scales=None, pretrained=True):
     model = (
         torchvision.models.detection
         .fasterrcnn_resnet50_fpn_v2(
-            weights="DEFAULT"
+            weights="DEFAULT" if pretrained else None,
+            weights_backbone=None,
         )
     )
 

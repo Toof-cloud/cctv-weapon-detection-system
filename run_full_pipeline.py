@@ -124,7 +124,7 @@ def resolve_model_path(model_arg: str | None) -> str | Path | None:
     if value in {"auto", "default"}:
         return None
     if value in {"ninth", "model9", "nine"}:
-        return ROOT_DIR / "best_weapon_detector_ninth_model.pth"
+        return ROOT_DIR / "mockup_ui" / "models" / "best_weapon_detector_ninth_model.pth"
     if value in {"eighth", "model8", "eight"}:
         return ROOT_DIR / "best_weapon_detector_eighth_model.pth"
     if value in {"seventh", "model7", "seven"}:

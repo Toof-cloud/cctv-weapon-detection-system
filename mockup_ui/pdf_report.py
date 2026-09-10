@@ -3,7 +3,7 @@ from pathlib import Path
 from xml.sax.saxutils import escape
 
 
-DISCLAIMER = "This is a system-generated report and analyst review is provided here."
+from mockup_ui.report_metrics import REPORT_DISCLAIMER as DISCLAIMER, metric_fields
 
 
 def write_pdf(report, path):
@@ -86,35 +86,6 @@ def write_pdf(report, path):
         f"{decision}: {count}" for decision, count in sorted(report["counts_by_analyst_decision"].items())
     ) or "No observations"
 
-    # Compute Temporal Consistency Rate (TCR) and Multi-Camera Corroboration (MCCR)
-    detections = report.get("detections", [])
-    if not detections:
-        tcr_str = "100.0% (0 observations)"
-        mccr_str = "N/A (No detections)"
-    else:
-        frame_numbers = sorted([int(d.get("frame_number", 0)) for d in detections])
-        if len(frame_numbers) <= 1:
-            tcr_str = "100.0% (1 supported observation)" if frame_numbers else "100.0% (0 observations)"
-        else:
-            n_ts = 0
-            n_iso = 0
-            for i, fn in enumerate(frame_numbers):
-                has_prev = (i > 0 and abs(fn - frame_numbers[i - 1]) <= 15)
-                has_next = (i < len(frame_numbers) - 1 and abs(frame_numbers[i + 1] - fn) <= 15)
-                if has_prev or has_next:
-                    n_ts += 1
-                else:
-                    n_iso += 1
-            total = n_ts + n_iso
-            tcr_pct = (n_ts / total * 100.0) if total > 0 else 100.0
-            tcr_str = f"{tcr_pct:.1f}% ({n_ts} supported tracklets, {n_iso} isolated flickers)"
-
-        cam_ids = {d.get("camera_id") for d in detections if d.get("camera_id") and d.get("camera_id") != "Not recorded"}
-        if len(cam_ids) >= 2:
-            mccr_str = "0.0% (Sequential Handover Topology: non-overlapping views)"
-        else:
-            mccr_str = "N/A (Single camera feed: requires multi-camera layout)"
-
     disclaimer = Table([[p(DISCLAIMER, styles["Disclaimer"])]], colWidths=[width], hAlign="LEFT")
     disclaimer.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#fff4da")),
@@ -150,15 +121,12 @@ def write_pdf(report, path):
             pair("Analysis completed (UTC)", processing["completed_at_utc"]),
             pair("Detection summary", f"{summary['total_frame_detections']} observations; "
                  f"{summary['frames_with_detections']} positive frames; {class_summary}"),
-            pair("Temporal Consistency (TCR)", tcr_str),
-            pair("Multi-Camera Corroboration (MCCR)", mccr_str),
             pair("Analyst review coverage", report["review_summary"]),
         ]),
         section("Interpretation"),
         p("The model generated the listed handgun and knife observations at the configured confidence threshold. "
           "A confidence score describes model certainty and is not an analyst decision. Analyst decisions document "
           "a later human assessment and do not replace or delete the original model observation."),
-        p("Temporal Consistency Rate (TCR) measures detection stability across consecutive video frames (suppressing 1-frame optical flickers). Multi-Camera Corroboration Rate (MCCR) validates simultaneous threat confirmation across multiple synchronized viewpoints."),
         p("Frame numbers are zero-based. Times are video-relative offsets and are not recording dates. "
           "Bounding boxes use [x1, y1, x2, y2] source-frame pixel coordinates. Counts represent frame observations, "
           "so the same physical object may appear more than once."),
@@ -185,6 +153,10 @@ def write_pdf(report, path):
         ])
 
     story.extend([
+        section("TCR Information"),
+        field_table([pair(label, value) for label, value in metric_fields(report.get("metrics", {}), "tcr")]),
+        section("MCCR Information"),
+        field_table([pair(label, value) for label, value in metric_fields(report.get("metrics", {}), "mccr")]),
         section("Analyst Review Information"),
         field_table([
             pair("Review coverage", report["review_summary"]),
@@ -212,6 +184,8 @@ def write_pdf(report, path):
             pair("Annotated video", artifacts["annotated_video"]),
             pair("Saved summary", artifacts["saved_summary"]["path"]),
             pair("Pipeline detections", artifacts["pipeline_detections"]["path"]),
+            pair("Metric input records", artifacts["metric_input"]["path"]),
+            pair("Metric calculation script", artifacts["metric_engine"]["path"]),
         ]),
         section("Traceability Report"),
         field_table([
@@ -223,6 +197,9 @@ def write_pdf(report, path):
             pair("Saved summary check", artifacts["saved_summary"]["status"]),
             pair("Pipeline detections fingerprint", artifacts["pipeline_detections"]["sha256"] or "Unavailable"),
             pair("Pipeline detections check", artifacts["pipeline_detections"]["status"]),
+            pair("Metric input fingerprint", artifacts["metric_input"]["sha256"] or "Unavailable"),
+            pair("Metric input check", artifacts["metric_input"]["status"]),
+            pair("Metric script fingerprint", artifacts["metric_engine"]["sha256"] or "Unavailable"),
         ]),
         Spacer(1, 5),
         p(report["definitions"]["fingerprints"]),

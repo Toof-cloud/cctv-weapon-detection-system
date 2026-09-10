@@ -13,13 +13,7 @@ if str(ROOT_DIR) not in sys.path:
 from dataset_analysis.build_model import get_model
 
 DEFAULT_MODEL_CANDIDATES = [
-    ROOT_DIR / "best_weapon_detector_ninth_model.pth",
-    ROOT_DIR / "best_weapon_detector_eighth_model.pth",
-    ROOT_DIR / "best_weapon_detector_seventh_model.pth",
-    ROOT_DIR / "best_weapon_detector_sixth_model.pth",
-    ROOT_DIR / "best_weapon_detector_fifth_model.pth",
-    ROOT_DIR / "best_weapon_detector_retrained.pth",
-    ROOT_DIR / "best_weapon_detector.pth",
+    ROOT_DIR / "mockup_ui" / "models" / "best_weapon_detector_ninth_model.pth",
 ]
 
 
@@ -46,11 +40,11 @@ class DetectionService:
 
         model_name = self.model_path.name.lower()
         if "ninth" in model_name or "eighth" in model_name:
-            self.model = get_model(num_classes=3, anchor_scales=(16, 32, 64, 128, 256))
+            self.model = get_model(num_classes=3, anchor_scales=(16, 32, 64, 128, 256), pretrained=False)
         elif "seventh" in model_name:
-            self.model = get_model(num_classes=3, small_anchors=True)
+            self.model = get_model(num_classes=3, small_anchors=True, pretrained=False)
         else:
-            self.model = get_model(num_classes=3, small_anchors=False)
+            self.model = get_model(num_classes=3, small_anchors=False, pretrained=False)
 
 
         if not self.model_path.exists():
@@ -61,6 +55,7 @@ class DetectionService:
         checkpoint = torch.load(
             self.model_path,
             map_location=self.device,
+            weights_only=True,
         )
         if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint:
             state_dict = checkpoint["model_state_dict"]
