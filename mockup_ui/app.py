@@ -318,11 +318,18 @@ class DetectionConfigDialog(QDialog):
         self.temporal_checkbox.setToolTip("Suppresses isolated single-frame flickers and enforces temporal weapon trajectory persistence.")
         layout.addWidget(self.temporal_checkbox)
 
-        self.enhancement_notice = QLabel(
-            "VIDEO ENHANCEMENT\n"
-            "No enhanced video has been created. Detection will use the imported video. "
-            "Cancel and open Enhancement setup first if you want to review its UI."
-        )
+        if hasattr(video, "path") and "_enhanced" in video.path.name.lower():
+            enh_text = (
+                "VIDEO ENHANCEMENT\n"
+                "BasicVSR++ enhanced video is active! Detection will analyze the super-resolved footage."
+            )
+        else:
+            enh_text = (
+                "VIDEO ENHANCEMENT\n"
+                "No enhanced video has been created. Detection will use the imported video. "
+                "Open Enhancement setup first if you want to run BasicVSR++ super-resolution."
+            )
+        self.enhancement_notice = QLabel(enh_text)
         self.enhancement_notice.setObjectName("enhancementNotice")
         self.enhancement_notice.setWordWrap(True)
         layout.addWidget(self.enhancement_notice)
@@ -971,7 +978,24 @@ class MainWindow(QMainWindow):
     def show_video_enhancement(self):
         if self.video_info is None or self._thread:
             return
-        VideoEnhancementDialog(self.video_info, self).exec()
+        dialog = VideoEnhancementDialog(self.video_info, self)
+        if dialog.exec() == QDialog.DialogCode.Accepted and dialog.enhanced_video_path:
+            try:
+                new_info = read_video(dialog.enhanced_video_path)
+                self.video_info = new_info
+                self.player.load(self.video_info)
+                self.enhancement_status.setText("BasicVSR++ Enhanced Video Active · Ready for detection")
+                self.status_detail.setText(f"Enhanced video loaded: {new_info.path.name} · Selected threshold: {self.threshold_slider.value()}%")
+                QMessageBox.information(
+                    self,
+                    "Enhanced Video Loaded",
+                    f"Successfully applied BasicVSR++ super-resolution!\n\n"
+                    f"Enhanced video: {new_info.path.name}\n"
+                    f"Resolution: {new_info.width} × {new_info.height}\n\n"
+                    "Click 'Analyze video' to run detection on the enhanced footage.",
+                )
+            except Exception as exc:
+                QMessageBox.warning(self, "Enhanced Video Load Error", f"Could not load enhanced video:\n{exc}")
 
     @Slot(int)
     def _configuration_finished(self, code):
