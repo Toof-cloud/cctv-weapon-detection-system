@@ -61,4 +61,10 @@ training/*/*_data/
 training/**_data/
 training/model_*/*_data/
 
+# Research artifacts (weights & generated output frames)
+research/model_improvement/checkpoints/
+research/model_improvement/evaluations/*_outputs/
+research/model_improvement/visual_comparisons*/
+research/model_improvement/dataset/hard_negatives*/
+
 

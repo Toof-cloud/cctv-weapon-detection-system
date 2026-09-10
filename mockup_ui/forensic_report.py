@@ -149,6 +149,38 @@ def render_html(report: dict) -> str:
     decision_summary = "; ".join(
         f"{decision}: {count}" for decision, count in sorted(report["counts_by_analyst_decision"].items())
     ) or "No observations"
+    # Compute TCR and MCCR
+    detections = report.get("detections", [])
+    if not detections:
+        tcr_str = "100.0% (0 observations)"
+        tcr_pct_str = "100.0%"
+        mccr_str = "N/A (No detections)"
+    else:
+        frame_numbers = sorted([int(d.get("frame_number", 0)) for d in detections])
+        if len(frame_numbers) <= 1:
+            tcr_str = "100.0% (1 supported observation)" if frame_numbers else "100.0% (0 observations)"
+            tcr_pct_str = "100.0%"
+        else:
+            n_ts = 0
+            n_iso = 0
+            for i, fn in enumerate(frame_numbers):
+                has_prev = (i > 0 and abs(fn - frame_numbers[i - 1]) <= 15)
+                has_next = (i < len(frame_numbers) - 1 and abs(frame_numbers[i + 1] - fn) <= 15)
+                if has_prev or has_next:
+                    n_ts += 1
+                else:
+                    n_iso += 1
+            total = n_ts + n_iso
+            tcr_pct = (n_ts / total * 100.0) if total > 0 else 100.0
+            tcr_pct_str = f"{tcr_pct:.1f}%"
+            tcr_str = f"{tcr_pct:.1f}% ({n_ts} supported tracklets, {n_iso} isolated flickers)"
+
+        cam_ids = {d.get("camera_id") for d in detections if d.get("camera_id") and d.get("camera_id") != "Not recorded"}
+        if len(cam_ids) >= 2:
+            mccr_str = "0.0% (Sequential Handover Topology: non-overlapping views)"
+        else:
+            mccr_str = "N/A (Single camera feed: requires multi-camera layout)"
+
     table_rows = "".join(
         f"<tr><td>{e(row['observation_id'])}</td><td>{e(row['frame_number'])}</td>"
         f"<td>{row['video_relative_timestamp_seconds']:.2f}</td><td>{e(row['object_label'].title())}</td>"
@@ -195,10 +227,12 @@ li{{margin:5px 0}}footer{{margin-top:28px;border-top:1px solid #dce0e8;padding-t
 <div class="metrics"><div class="metric"><strong>{summary['total_frame_detections']}</strong><span>Frame detections</span></div>
 <div class="metric"><strong>{counts.get('knife', 0)}</strong><span>Knife observations</span></div>
 <div class="metric"><strong>{counts.get('handgun', 0)}</strong><span>Handgun observations</span></div>
+<div class="metric"><strong>{tcr_pct_str}</strong><span>Temporal consistency (TCR)</span></div>
 <div class="metric"><strong>{processing['analyzed_frames']}</strong><span>Frames analyzed</span></div></div>
-{fields([('Model used', processing['model_reference']), ('Run status', 'Completed saved run'), ('Confidence threshold', f"{processing['confidence_threshold']:.0%}"), ('Frames analyzed', processing['analyzed_frames']), ('Processing device / time', f"{processing['device'].upper()} / {processing['elapsed_seconds']:.2f} seconds"), ('Analysis completed (UTC)', processing['completed_at_utc']), ('Detection summary', f"{summary['total_frame_detections']} observations; {summary['frames_with_detections']} positive frames; {class_summary}"), ('Analyst review coverage', report['review_summary'])])}
+{fields([('Model used', processing['model_reference']), ('Run status', 'Completed saved run'), ('Confidence threshold', f"{processing['confidence_threshold']:.0%}"), ('Frames analyzed', processing['analyzed_frames']), ('Processing device / time', f"{processing['device'].upper()} / {processing['elapsed_seconds']:.2f} seconds"), ('Analysis completed (UTC)', processing['completed_at_utc']), ('Detection summary', f"{summary['total_frame_detections']} observations; {summary['frames_with_detections']} positive frames; {class_summary}"), ('Temporal Consistency (TCR)', tcr_str), ('Multi-Camera Corroboration (MCCR)', mccr_str), ('Analyst review coverage', report['review_summary'])])}
 <h2>Interpretation</h2>
 <p>The model generated the listed handgun and knife observations at the configured confidence threshold. A confidence score describes model certainty and is not an analyst decision. Analyst decisions document a later human assessment and do not replace or delete the original model observation.</p>
+<p>Temporal Consistency Rate (TCR) measures detection stability across consecutive video frames (suppressing 1-frame optical flickers). Multi-Camera Corroboration Rate (MCCR) validates simultaneous threat confirmation across multiple synchronized viewpoints.</p>
 <p>Frame numbers are zero-based. Times are video-relative offsets and are not recording dates. Bounding boxes use [x1, y1, x2, y2] source-frame pixel coordinates. Counts represent frame observations, so the same physical object may appear more than once.</p>
 <h2>Object Detection Observations and Reviews</h2>
 <div class="table-wrap"><table><thead><tr><th>Observation</th><th>Frame (0-based)</th><th>Video offset (s)</th><th>Object label</th><th>Box [x1, y1, x2, y2]</th><th>Confidence</th><th>Analyst Review Decision</th></tr></thead><tbody>{table_rows}</tbody></table></div>

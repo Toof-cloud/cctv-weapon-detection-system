@@ -44,11 +44,13 @@ from PySide6.QtWidgets import (
     QTableView,
     QHeaderView,
     QAbstractItemView,
+    QCheckBox,
+    QComboBox,
 )
 
 from mockup_ui.model_bridge import (
     MODEL_FILENAME, ModelBridge, ModelSetupError, VideoAnalysisResult, VideoInfo, VideoInputError,
-    read_video, save_result, timecode,
+    discover_available_models, read_video, save_result, timecode,
 )
 from mockup_ui.video_player import VideoPlayer
 from mockup_ui.observation_review import REVIEW_DIR, ReviewStore
@@ -249,12 +251,12 @@ class VideoEnhancementDialog(QDialog):
 
 
 class DetectionConfigDialog(QDialog):
-    def __init__(self, video: VideoInfo, threshold: int, parent=None):
+    def __init__(self, video: VideoInfo, threshold: int, parent=None, current_model: Path | None = None):
         super().__init__(parent)
         self.setObjectName("configurationDialog")
         self.setWindowTitle("Detection configuration")
         self.setModal(True)
-        self.setMinimumWidth(480)
+        self.setMinimumWidth(500)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(26, 24, 26, 22)
         layout.setSpacing(14)
@@ -268,6 +270,25 @@ class DetectionConfigDialog(QDialog):
         detail.setObjectName("dialogDetail")
         detail.setWordWrap(True)
         layout.addWidget(detail)
+        layout.addSpacing(5)
+
+        layout.addWidget(QLabel("DETECTION MODEL"))
+        self.model_combo = QComboBox()
+        self.model_combo.setObjectName("dialogModelCombo")
+        models = discover_available_models()
+        active_idx = 0
+        for idx, (label, path) in enumerate(models):
+            self.model_combo.addItem(label, str(path))
+            if current_model:
+                try:
+                    if Path(path).resolve() == Path(current_model).resolve():
+                        active_idx = idx
+                except Exception:
+                    pass
+        if models:
+            self.model_combo.setCurrentIndex(active_idx)
+        layout.addWidget(self.model_combo)
+
         layout.addSpacing(5)
         layout.addWidget(QLabel("CONFIDENCE THRESHOLD"))
         row = QHBoxLayout()
@@ -284,6 +305,19 @@ class DetectionConfigDialog(QDialog):
         note.setObjectName("dialogDetail")
         note.setWordWrap(True)
         layout.addWidget(note)
+
+        layout.addSpacing(5)
+        layout.addWidget(QLabel("FORENSIC CCTV FILTERS"))
+        self.cctv_intel_checkbox = QCheckBox("Enable CCTV Intelligence (Kinematic & anthropometric scale gating)")
+        self.cctv_intel_checkbox.setChecked(True)
+        self.cctv_intel_checkbox.setToolTip("Suppresses false alarms when no person is present or when bounding box size violates human reach geometry.")
+        layout.addWidget(self.cctv_intel_checkbox)
+
+        self.temporal_checkbox = QCheckBox("Enable Temporal Consensus (Multi-frame trajectory verification)")
+        self.temporal_checkbox.setChecked(True)
+        self.temporal_checkbox.setToolTip("Suppresses isolated single-frame flickers and enforces temporal weapon trajectory persistence.")
+        layout.addWidget(self.temporal_checkbox)
+
         self.enhancement_notice = QLabel(
             "VIDEO ENHANCEMENT\n"
             "No enhanced video has been created. Detection will use the imported video. "
@@ -299,6 +333,14 @@ class DetectionConfigDialog(QDialog):
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
+
+    @property
+    def selected_model(self) -> Path | None:
+        if hasattr(self, "model_combo") and self.model_combo.count() > 0:
+            data = self.model_combo.currentData()
+            if data:
+                return Path(data)
+        return None
 
 
 class ProcessingDialog(QDialog):
@@ -880,7 +922,10 @@ class MainWindow(QMainWindow):
             self._config_dialog.raise_()
             self._config_dialog.activateWindow()
             return
-        dialog = DetectionConfigDialog(self.video_info, self.threshold_slider.value(), self)
+        dialog = DetectionConfigDialog(
+            self.video_info, self.threshold_slider.value(), self,
+            current_model=self.bridge.model_path,
+        )
         self._config_dialog = dialog
         dialog.finished.connect(self._configuration_finished)
         dialog.open()
@@ -899,6 +944,13 @@ class MainWindow(QMainWindow):
             self.status_detail.setText(f"Video remains imported · Selected threshold: {self.threshold_slider.value()}%")
             return
         self.threshold_slider.setValue(dialog.slider.value())
+        if hasattr(dialog, "selected_model") and dialog.selected_model:
+            self.bridge.set_model_path(dialog.selected_model)
+        if hasattr(dialog, "cctv_intel_checkbox"):
+            self.bridge.enable_cctv_intelligence = dialog.cctv_intel_checkbox.isChecked()
+        if hasattr(dialog, "temporal_checkbox"):
+            self.bridge.enable_temporal_consistency = dialog.temporal_checkbox.isChecked()
+        self._update_model_label()
         self._analysis_requested = True
         self.analyze()
 

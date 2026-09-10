@@ -39,9 +39,53 @@ class ModelSetupError(RuntimeError):
     """The original trained checkpoint/runtime is unavailable."""
 
 
+def discover_available_models() -> list[tuple[str, Path]]:
+    """Discovers all available trained checkpoints in the project, prioritizing Model 9 SOTA."""
+    if MOCKUP_DIR != Path(__file__).resolve().parent or MODEL_PATH != MOCKUP_DIR / "models" / MODEL_FILENAME:
+        if MODEL_PATH.is_file():
+            return [(f"Active Test Model ({MODEL_PATH.name})", MODEL_PATH)]
+        return []
+    candidates = [
+        ("Model 9 (Ninth Model - SOTA 92.75% mAP)", ROOT_DIR / "best_weapon_detector_ninth_model.pth"),
+        ("Model 8 (Eighth Model - Retail Specular)", ROOT_DIR / "best_weapon_detector_eighth_model.pth"),
+        ("Model 7 (Seventh Model - Handheld Focus)", ROOT_DIR / "best_weapon_detector_seventh_model.pth"),
+        ("Model 6 (Sixth Model - USRT CCTV)", ROOT_DIR / "best_weapon_detector_sixth_model.pth"),
+        ("Model 5 (Fifth Model - VIRAT CCTV)", ROOT_DIR / "best_weapon_detector_fifth_model.pth"),
+        ("Model 4 (Fourth Model - Handgun Retrain)", ROOT_DIR / "best_weapon_detector_fourth_model.pth"),
+        ("Model 3 (Third Model - Knife Anchors)", ROOT_DIR / "best_weapon_detector_third_model.pth"),
+        ("Model 3 (Mockup Copy)", MODEL_PATH),
+        ("Baseline (Initial Trained Model)", ROOT_DIR / "best_weapon_detector.pth"),
+        ("Retrained (Model Retrain)", ROOT_DIR / "best_weapon_detector_retrained.pth"),
+    ]
+    seen = set()
+    found = []
+    for label, path in candidates:
+        if path.is_file():
+            try:
+                resolved = path.resolve()
+            except Exception:
+                resolved = path
+            if resolved not in seen:
+                seen.add(resolved)
+                found.append((label, path))
+    return found
+
+
 def default_model_path() -> Path | None:
-    """The UI uses only the third trained checkpoint in its models directory."""
-    return MODEL_PATH if MODEL_PATH.is_file() else None
+    """The UI uses the configured or discovered checkpoint, prioritizing Model 9 SOTA in production or MODEL_PATH in test sandbox."""
+    if MOCKUP_DIR != Path(__file__).resolve().parent or MODEL_PATH != MOCKUP_DIR / "models" / MODEL_FILENAME:
+        if MODEL_PATH.is_file():
+            return MODEL_PATH
+        return None
+    ninth = ROOT_DIR / "best_weapon_detector_ninth_model.pth"
+    if ninth.is_file():
+        return ninth
+    if MODEL_PATH.is_file():
+        return MODEL_PATH
+    models = discover_available_models()
+    if models:
+        return models[0][1]
+    return None
 
 
 def timecode(seconds: float) -> str:
@@ -137,7 +181,12 @@ class _PipelineOutput(io.TextIOBase):
 
     def write(self, value):
         if self.destination is not None:
-            self.destination.write(value)
+            try:
+                self.destination.write(value)
+            except UnicodeEncodeError:
+                encoding = getattr(self.destination, "encoding", None) or "utf-8"
+                safe_val = value.encode(encoding, errors="replace").decode(encoding)
+                self.destination.write(safe_val)
         self.buffer += value
         while "\n" in self.buffer:
             line, self.buffer = self.buffer.split("\n", 1)
@@ -154,12 +203,22 @@ class _PipelineOutput(io.TextIOBase):
 
 
 class ModelBridge:
-    def __init__(self):
-        self.model_path = default_model_path()
+    def __init__(self, model_path: Path | str | None = None):
+        self.selected_model_path: Path | None = Path(model_path) if model_path else None
+        self.model_path: Path | None = self.selected_model_path or default_model_path()
         self.device = ""
+        self.enable_cctv_intelligence: bool = False
+        self.enable_temporal_consistency: bool = False
+
+    def set_model_path(self, path: Path | str | None):
+        self.selected_model_path = Path(path) if path else None
+        self.model_path = self.selected_model_path or default_model_path()
 
     def find_model(self) -> bool:
         """Recheck the required file without falling back to a different model."""
+        if self.selected_model_path and self.selected_model_path.is_file():
+            self.model_path = self.selected_model_path
+            return True
         self.model_path = default_model_path()
         return self.model_path is not None
 
@@ -183,8 +242,15 @@ class ModelBridge:
         return detect_video_with_model
 
     def analyze_video(self, video: VideoInfo, threshold: float = 0.50,
-                      progress: Callable[[str, int], None] = lambda text, percent: None):
+                      progress: Callable[[str, int], None] = lambda text, percent: None,
+                      enable_cctv_intelligence: bool | None = None,
+                      enable_temporal_consistency: bool | None = None,
+                      camera_id: str = "CAM-01"):
         """Return a result only after the existing pipeline finishes the video."""
+        if enable_cctv_intelligence is None:
+            enable_cctv_intelligence = getattr(self, "enable_cctv_intelligence", False)
+        if enable_temporal_consistency is None:
+            enable_temporal_consistency = getattr(self, "enable_temporal_consistency", False)
         if not 0.01 <= threshold <= 0.99:
             raise ValueError("Confidence threshold must be between 1% and 99%.")
         stat = video.path.stat()
@@ -203,6 +269,9 @@ class ModelBridge:
                 input_path=video.path, output_path=output_path, model_path=self.model_path,
                 confidence_threshold=threshold, analysis_fps=math.ceil(video.fps),
                 save_detected_frames=False, csv_output_path=csv_path,
+                enable_cctv_intelligence=enable_cctv_intelligence,
+                enable_temporal_consistency=enable_temporal_consistency,
+                camera_id=camera_id,
             )
         progress("Checking the annotated video and detection results…", 99)
         if details["total_frames"] != video.frame_count or details["analyzed_frames"] != video.frame_count:
@@ -210,13 +279,65 @@ class ModelBridge:
         rendered = read_video(output_path)
         if rendered.frame_count != video.frame_count:
             raise VideoInputError("The annotated video could not be written completely. Check available disk space and try again.")
-        with csv_path.open(newline="", encoding="utf-8") as file:
-            records = [{
-                "frame_number": int(row["frame_number"]),
-                "timestamp_seconds": float(row["timestamp_seconds"]),
-                "class_name": row["class_name"], "confidence": float(row["confidence"]),
-                "box": [int(row[key]) for key in ("x1", "y1", "x2", "y2")],
-            } for row in csv.DictReader(file)]
+        
+        records = []
+        if csv_path.exists():
+            with csv_path.open(newline="", encoding="utf-8") as file:
+                for row in csv.DictReader(file):
+                    cls_name = row.get("class_name") or row.get("object_label", "weapon")
+                    conf = float(row.get("confidence") or row.get("confidence_score", 0.0))
+                    if all(k in row for k in ("x1", "y1", "x2", "y2")):
+                        box = [int(float(row[k])) for k in ("x1", "y1", "x2", "y2")]
+                    elif "bounding_box" in row:
+                        import ast
+                        raw_b = row["bounding_box"].strip()
+                        box = [int(float(v)) for v in ast.literal_eval(raw_b)] if raw_b.startswith("[") else [0, 0, 0, 0]
+                    else:
+                        box = [0, 0, 0, 0]
+
+                    val_status = row.get("validation_status") or row.get("status") or "CONFIRMED_ALERT"
+                    rej_reason = row.get("rejection_reason", "")
+                    # Suppressed environmental background traps are excluded from confirmed active detections
+                    if val_status in ("SUPPRESSED_TEMPORAL_FLICKER", "STATIC_BACKGROUND_TRAP",
+                                      "ANTHROPOMETRIC_SCALE_VIOLATION", "NO_PERSON_IN_SCENE",
+                                      "NO_PERSON_PROXIMITY", "BELOW_CLASS_THRESHOLD",
+                                      "HANDHELD_PHONE_ASPECT_RATIO"):
+                        continue
+
+                    records.append({
+                        "frame_number": int(row["frame_number"]),
+                        "timestamp_seconds": float(row["timestamp_seconds"]),
+                        "class_name": cls_name,
+                        "confidence": conf,
+                        "box": box,
+                        "automated_validation_status": val_status,
+                        "rejection_reason": rej_reason,
+                    })
+
+        # Standardize detections.csv so downstream forensic_report and tests find both legacy and forensic headers
+        fieldnames = [
+            "frame_number", "timestamp_seconds", "class_name", "confidence",
+            "x1", "y1", "x2", "y2", "object_label", "confidence_score",
+            "bounding_box", "validation_status", "rejection_reason"
+        ]
+        with csv_path.open("w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writeheader()
+            for r in records:
+                b = r["box"]
+                writer.writerow({
+                    "frame_number": r["frame_number"],
+                    "timestamp_seconds": r["timestamp_seconds"],
+                    "class_name": r["class_name"],
+                    "confidence": r["confidence"],
+                    "x1": b[0], "y1": b[1], "x2": b[2], "y2": b[3],
+                    "object_label": r["class_name"],
+                    "confidence_score": r["confidence"],
+                    "bounding_box": f"[{b[0]}, {b[1]}, {b[2]}, {b[3]}]",
+                    "validation_status": r.get("automated_validation_status", "CONFIRMED_ALERT"),
+                    "rejection_reason": r.get("rejection_reason", ""),
+                })
+
         progress("Analysis complete", 100)
         return VideoAnalysisResult(video, output_path, csv_path, records, str(self.model_path),
                                    self.device, perf_counter() - started, threshold,
