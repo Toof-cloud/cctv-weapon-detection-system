@@ -244,18 +244,28 @@ def main():
         # Real CCTV Clips
         {
             "name": "RealCCTV_Clip01_StoreRobbery",
-            "path": ROOT / "dataset" / "evaluation_videos" / "Clip01_StoreRobbery.mp4",
+            "path": ROOT / "samples" / "unseen_samples" / "VIDEO_CLIPS_JABEZ_UNSEEN" / "VIDEO CLIPS" / "Screen Recording 2026-09-07 224743.mp4",
             "keyframes": [80, 108],
         },
         {
             "name": "RealCCTV_Clip05_StoreCustomer",
-            "path": ROOT / "dataset" / "evaluation_videos" / "Clip05_StoreRobberyCustomer.mp4",
+            "path": ROOT / "samples" / "unseen_samples" / "VIDEO_CLIPS_JABEZ_UNSEEN" / "VIDEO CLIPS" / "Screen Recording 2026-09-07 230249.mp4",
             "keyframes": [40],
         },
         {
             "name": "RealCCTV_Clip07_FastBladeDraw",
-            "path": ROOT / "dataset" / "evaluation_videos" / "Clip07_FastBladeDraw.mp4",
+            "path": ROOT / "samples" / "unseen_samples" / "VIDEO_CLIPS_JABEZ_UNSEEN" / "VIDEO CLIPS" / "Screen Recording 2026-09-07 230842.mp4",
             "keyframes": [20],
+        },
+        {
+            "name": "RealCCTV_Clip09_MultiPersonRobbery",
+            "path": ROOT / "samples" / "unseen_samples" / "VIDEO_CLIPS_JABEZ_UNSEEN" / "VIDEO CLIPS" / "Screen Recording 2026-09-07 231101.mp4",
+            "keyframes": [200],
+        },
+        {
+            "name": "RealCCTV_NewClip_KitchenKnife",
+            "path": ROOT / "samples" / "NEW-VIDEOS" / "NEW HANDGUNS VIDEO CLIPS" / "KNIFE" / "Screen Recording 2026-09-10 215511-KNIFE.mp4",
+            "keyframes": [160],
         },
     ]
 
