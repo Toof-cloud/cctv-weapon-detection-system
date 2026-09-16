@@ -150,7 +150,11 @@ def compute_mccr_for_multicam(unified_csv: Path, delta_t: float = 1.5) -> Dict[s
         vid_name = r.get("source_video", "")
         cid = r.get("camera_id", "")
         if cid == cam_a_id and duration_a == 0.0:
-            for cand in [ROOT / "samples" / vid_name, ROOT / "samples" / "staged_dataset" / "CAM01" / "CAMERA 01" / vid_name]:
+            for cand in [
+                ROOT / "samples" / vid_name,
+                ROOT / "samples" / "NEW_STAGED_CAM-01" / "NEW_CAMERA 01" / vid_name,
+                ROOT / "samples" / "staged_dataset" / "CAM01" / "CAMERA 01" / vid_name,
+            ]:
                 if cand.exists():
                     cap = cv2.VideoCapture(str(cand))
                     fps = cap.get(cv2.CAP_PROP_FPS)
@@ -159,7 +163,11 @@ def compute_mccr_for_multicam(unified_csv: Path, delta_t: float = 1.5) -> Dict[s
                     cap.release()
                     break
         elif cid == cam_b_id and duration_b == 0.0:
-            for cand in [ROOT / "samples" / vid_name, ROOT / "samples" / "staged_dataset" / "CAM02" / "CAMERA 02" / vid_name]:
+            for cand in [
+                ROOT / "samples" / vid_name,
+                ROOT / "samples" / "NEW_STAGED_CAM-02" / "NEW_CAMERA 02" / vid_name,
+                ROOT / "samples" / "staged_dataset" / "CAM02" / "CAMERA 02" / vid_name,
+            ]:
                 if cand.exists():
                     cap = cv2.VideoCapture(str(cand))
                     fps = cap.get(cv2.CAP_PROP_FPS)

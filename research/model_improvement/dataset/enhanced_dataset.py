@@ -97,9 +97,15 @@ class EnhancedWeaponDataset(Dataset):
             full_neg_dir = root / "research" / "model_improvement" / "dataset" / "hard_negatives_fullframe"
             if full_neg_dir.exists():
                 neg_paths.extend(sorted(list(full_neg_dir.glob("*.jpg"))))
+            v9_neg_dir = root / "research" / "model_improvement" / "dataset" / "hard_negatives_v9"
+            if v9_neg_dir.exists():
+                neg_paths.extend(sorted(list(v9_neg_dir.glob("*.jpg"))))
+            v10_neg_dir = root / "research" / "model_improvement" / "dataset" / "hard_negatives_v10"
+            if v10_neg_dir.exists():
+                neg_paths.extend(sorted(list(v10_neg_dir.glob("*.jpg"))))
             for np_path in neg_paths:
                 self.items.append({"type": "negative", "path": np_path})
-            print(f"  [EnhancedWeaponDataset] Injected {len(neg_paths)} targeted hard-negative background samples (crops + full-frame).")
+            print(f"  [EnhancedWeaponDataset] Injected {len(neg_paths)} targeted hard-negative background samples (crops + full-frame + V9/V10 residuals).")
 
     def __len__(self):
         return len(self.items)
@@ -160,6 +166,30 @@ class EnhancedWeaponDataset(Dataset):
             ir_noisy = np.clip(ir_np.astype(np.int16) + noise, 0, 255).astype(np.uint8)
             image = Image.fromarray(ir_noisy)
 
+        # 8. Multi-Scale Jittering for Close/Medium Distance Generalization (30% probability)
+        if random.random() < 0.30:
+            scale = random.uniform(0.80, 1.25)
+            new_w = max(32, int(round(w * scale)))
+            new_h = max(32, int(round(h * scale)))
+            image = image.resize((new_w, new_h), resample=Image.BILINEAR)
+            scaled_boxes = []
+            for box in boxes:
+                scaled_boxes.append([box[0] * scale, box[1] * scale, box[2] * scale, box[3] * scale])
+            boxes = scaled_boxes
+            w, h = new_w, new_h
+
+        # 9. CCTV Downward Angle Perspective Tilt (20% probability)
+        if random.random() < 0.20:
+            shear_factor = random.uniform(-0.12, 0.12)
+            image = image.transform((w, h), Image.AFFINE, (1, shear_factor, 0, 0, 1, 0), resample=Image.BILINEAR)
+            sheared_boxes = []
+            for box in boxes:
+                x1, y1, x2, y2 = box
+                nx1 = min(w - 1, max(0, x1 + shear_factor * y1))
+                nx2 = min(w - 1, max(0, x2 + shear_factor * y2))
+                sheared_boxes.append([min(nx1, nx2), y1, max(nx1, nx2), y2])
+            boxes = sheared_boxes
+
         return image, boxes
 
     def __getitem__(self, idx):
@@ -219,6 +249,18 @@ class EnhancedWeaponDataset(Dataset):
 
             if self.is_train:
                 image, boxes = self._apply_surveillance_augmentations(image, boxes, is_knife, is_handgun)
+
+        # Post-augmentation box validation guard (strictly guarantee positive width and height)
+        if len(boxes) > 0:
+            valid_boxes = []
+            valid_labels = []
+            for b, l in zip(boxes, labels):
+                x1, y1, x2, y2 = b
+                if (x2 - x1) >= 2.0 and (y2 - y1) >= 2.0:
+                    valid_boxes.append([float(x1), float(y1), float(x2), float(y2)])
+                    valid_labels.append(l)
+            boxes = valid_boxes
+            labels = valid_labels
 
         image_tensor = torch.from_numpy(np.array(image).transpose((2, 0, 1))).float() / 255.0
 

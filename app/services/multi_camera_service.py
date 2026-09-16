@@ -154,7 +154,7 @@ class MultiCameraService:
                 if frame_num % frame_interval == 0:
                     raw_dets = detector.detect_frame(
                         frame,
-                        min_threshold=min(self.confidence_threshold, 0.40),
+                        min_threshold=min(self.confidence_threshold, 0.30),
                     )
 
                     if cctv_filter:

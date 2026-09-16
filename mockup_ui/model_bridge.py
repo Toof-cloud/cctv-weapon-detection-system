@@ -24,6 +24,12 @@ TEMP_DIR = MOCKUP_DIR / "temp"
 OUTPUT_DIR = MOCKUP_DIR / "outputs"
 MODEL_FILENAME = "best_weapon_detector_ninth_model.pth"
 MODEL_PATH = MOCKUP_DIR / "models" / MODEL_FILENAME
+if not MODEL_PATH.is_file():
+    MODEL_PATH = ROOT_DIR / MODEL_FILENAME
+
+CANDIDATE_V10_PATH = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v10.pth"
+CANDIDATE_V9_PATH = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v9.pth"
+CANDIDATE_V8_PATH = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v8.pth"
 VIDEO_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv", ".webm", ".m4v"}
 sys.dont_write_bytecode = True
 if str(ROOT_DIR) in sys.path:
@@ -40,13 +46,26 @@ class ModelSetupError(RuntimeError):
 
 
 def discover_available_models() -> list[tuple[str, Path]]:
-    """Only the installed ninth checkpoint is available to the UI."""
-    return [(f"Ninth model ({MODEL_FILENAME})", MODEL_PATH)] if MODEL_PATH.is_file() else []
+    """Discover available trained checkpoints for the UI (Single final production model)."""
+    models: list[tuple[str, Path]] = []
+    if CANDIDATE_V10_PATH.is_file():
+        models.append(("Candidate Model V10 (Final Production SOTA: High Recall & Bounded Geometry)", CANDIDATE_V10_PATH))
+    elif MODEL_PATH.is_file():
+        models.append(("Model 9 Baseline (Fast R-CNN Standard)", MODEL_PATH))
+    elif CANDIDATE_V9_PATH.is_file():
+        models.append(("Candidate Model V9", CANDIDATE_V9_PATH))
+    return models
 
 
 def default_model_path() -> Path | None:
-    """Never fall back to another checkpoint when the ninth model is missing."""
-    return MODEL_PATH if MODEL_PATH.is_file() else None
+    """Default to Candidate Model V10 if available, otherwise Model 9 Baseline."""
+    if CANDIDATE_V10_PATH.is_file():
+        return CANDIDATE_V10_PATH
+    if MODEL_PATH.is_file():
+        return MODEL_PATH
+    if CANDIDATE_V9_PATH.is_file():
+        return CANDIDATE_V9_PATH
+    return None
 
 
 def timecode(seconds: float) -> str:
@@ -174,18 +193,23 @@ class ModelBridge:
         self.enable_temporal_consistency: bool = False
 
     def set_model_path(self, path: Path | str | None):
-        if path is not None and Path(path).resolve() != MODEL_PATH.resolve():
-            raise ModelSetupError(f"This application uses only {MODEL_FILENAME} in mockup_ui/models.")
+        if path is not None:
+            resolved = Path(path).resolve()
+            if resolved.is_file():
+                self.model_path = resolved
+                return
         self.model_path = default_model_path()
 
     def find_model(self) -> bool:
+        if self.model_path is not None and self.model_path.is_file():
+            return True
         self.model_path = default_model_path()
-        return self.model_path is not None
+        return self.model_path is not None and self.model_path.is_file()
 
     def _prepare_runtime(self, progress):
         if not self.find_model():
-            raise ModelSetupError(f"Trained model not found. Place {MODEL_FILENAME} in mockup_ui/models; the imported video will be analyzed automatically when it is found.")
-        progress("Loading the original Faster R-CNN detection service…", -1)
+            raise ModelSetupError("Trained model checkpoint not found. Check that model weights exist in research/model_improvement/checkpoints or mockup_ui/models.")
+        progress("Loading Faster R-CNN detection service…", -1)
         try:
             import torch
             from run_full_pipeline import detect_video_with_model

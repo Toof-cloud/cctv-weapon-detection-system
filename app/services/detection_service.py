@@ -13,6 +13,9 @@ if str(ROOT_DIR) not in sys.path:
 from dataset_analysis.build_model import get_model
 
 DEFAULT_MODEL_CANDIDATES = [
+    ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v10.pth",
+    ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v9.pth",
+    ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v8.pth",
     ROOT_DIR / "mockup_ui" / "models" / "best_weapon_detector_ninth_model.pth",
     ROOT_DIR / "best_weapon_detector_ninth_model.pth",
     ROOT_DIR / "best_weapon_detector_eighth_model.pth",
@@ -45,31 +48,54 @@ class DetectionService:
             2: "knife",
         }
 
-        model_name = self.model_path.name.lower()
-        if "ninth" in model_name or "eighth" in model_name:
-            self.model = get_model(num_classes=3, anchor_scales=(16, 32, 64, 128, 256), pretrained=False)
-        elif "seventh" in model_name:
-            self.model = get_model(num_classes=3, small_anchors=True, pretrained=False)
-        else:
-            self.model = get_model(num_classes=3, small_anchors=False, pretrained=False)
-
-
         if not self.model_path.exists():
             raise FileNotFoundError(
                 f"Model checkpoint was not found: {self.model_path}"
             )
 
-        checkpoint = torch.load(
-            self.model_path,
-            map_location=self.device,
-            weights_only=True,
-        )
-        if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint:
-            state_dict = checkpoint["model_state_dict"]
+        model_name = self.model_path.name.lower()
+        if "v10" in model_name:
+            checkpoint = torch.load(self.model_path, map_location=self.device)
+            scales = checkpoint.get("anchor_scales", (16, 32, 64, 128, 256))
+            self.model = get_model(num_classes=3, anchor_scales=scales, pretrained=False)
+            rpn_clip = checkpoint.get("rpn_bbox_xform_clip", math.log(1.4))
+            roi_clip = checkpoint.get("roi_bbox_xform_clip", math.log(1.4))
+            self.model.rpn.box_coder.bbox_xform_clip = rpn_clip
+            self.model.roi_heads.box_coder.bbox_xform_clip = roi_clip
+            state_dict = checkpoint["model_state_dict"] if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint else checkpoint
+            self.model.load_state_dict(state_dict)
+        elif "candidate" in model_name or "v8" in model_name or "v7" in model_name or "v6" in model_name or "v5" in model_name:
+            from research.model_improvement.training.model_builder import build_research_model
+            checkpoint = torch.load(self.model_path, map_location=self.device)
+            sizes = checkpoint.get("anchor_sizes", ((16,), (32,), (64,), (128,), (192,)))
+            ratios = checkpoint.get("aspect_ratios", (0.5, 0.75, 1.0, 1.5, 2.0))
+            rpn_clip = checkpoint.get("rpn_bbox_xform_clip", checkpoint.get("bbox_xform_clip"))
+            roi_clip = checkpoint.get("roi_bbox_xform_clip", checkpoint.get("bbox_xform_clip"))
+            self.model = build_research_model(
+                num_classes=3,
+                anchor_sizes=sizes,
+                aspect_ratios=ratios,
+                pretrained_backbone=False,
+                rpn_bbox_xform_clip=rpn_clip,
+                roi_bbox_xform_clip=roi_clip
+            )
+            state_dict = checkpoint["model_state_dict"] if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint else checkpoint
+            self.model.load_state_dict(state_dict)
+        elif "ninth" in model_name or "eighth" in model_name:
+            self.model = get_model(num_classes=3, anchor_scales=(16, 32, 64, 128, 256), pretrained=False)
+            checkpoint = torch.load(self.model_path, map_location=self.device)
+            state_dict = checkpoint["model_state_dict"] if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint else checkpoint
+            self.model.load_state_dict(state_dict)
+        elif "seventh" in model_name:
+            self.model = get_model(num_classes=3, small_anchors=True, pretrained=False)
+            checkpoint = torch.load(self.model_path, map_location=self.device)
+            state_dict = checkpoint["model_state_dict"] if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint else checkpoint
+            self.model.load_state_dict(state_dict)
         else:
-            state_dict = checkpoint
-
-        self.model.load_state_dict(state_dict)
+            self.model = get_model(num_classes=3, small_anchors=False, pretrained=False)
+            checkpoint = torch.load(self.model_path, map_location=self.device)
+            state_dict = checkpoint["model_state_dict"] if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint else checkpoint
+            self.model.load_state_dict(state_dict)
 
         self.model.to(self.device)
         self.model.eval()

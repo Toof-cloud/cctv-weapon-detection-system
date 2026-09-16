@@ -292,7 +292,29 @@ class VideoEnhancementDialog(QDialog):
         layout.addWidget(self.notice)
 
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
-        self.run_button = buttons.addButton("Run BasicVSR++ enhancement", QDialogButtonBox.ButtonRole.ActionRole)
+        btn_text = "Run BasicVSR++ enhancement"
+        out_dir = MOCKUP_DIR / "outputs" / "enhanced_videos"
+        out_path = out_dir / f"{self.video.path.stem}_enhanced.mp4"
+        if out_path.exists():
+            try:
+                import cv2
+                cap = cv2.VideoCapture(str(out_path))
+                ok, frame = cap.read()
+                cap.release()
+                if ok and frame is not None:
+                    self.enhanced_video_path = out_path
+                    self.enhanced_first_frame = frame
+                    self.enhanced_preview.setParent(None)
+                    self.enhanced_preview = EnhancementFramePreview(frame)
+                    self.enhanced_layout.addWidget(self.enhanced_preview, 1)
+                    self.notice.setText(
+                        "BasicVSR++ enhancement completed! Click 'Apply Enhanced Video' to use this video for detection."
+                    )
+                    btn_text = "Apply Enhanced Video"
+            except Exception:
+                pass
+
+        self.run_button = buttons.addButton(btn_text, QDialogButtonBox.ButtonRole.ActionRole)
         self.run_button.setObjectName("primaryButton")
         self.run_button.setEnabled(True)
         self.run_button.clicked.connect(self._handle_run_or_apply)
@@ -1071,7 +1093,13 @@ class MainWindow(QMainWindow):
             try:
                 new_info = read_video(dialog.enhanced_video_path)
                 self.video_info = new_info
-                self.player.load(self.video_info)
+                self.source_path = new_info.path
+                self.player.open(new_info.path)
+                self.player.set_locked(True)
+                self.source_name.setText(new_info.path.name)
+                self.source_name.setToolTip(str(new_info.path))
+                self.source_meta.setText(f"{new_info.width} × {new_info.height} pixels\n{new_info.fps:.2f} fps · {timecode(new_info.duration)}")
+                self.dimensions_label.setText(f"{new_info.frame_count:,} frames · Video only")
                 self.enhancement_status.setText("BasicVSR++ Enhanced Video Active · Ready for detection")
                 self.status_detail.setText(f"Enhanced video loaded: {new_info.path.name} · Selected threshold: {self.threshold_slider.value()}%")
                 QMessageBox.information(

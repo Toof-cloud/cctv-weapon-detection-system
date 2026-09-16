@@ -12,20 +12,29 @@ from torchvision.models.detection.rpn import AnchorGenerator, RPNHead
 
 def build_research_model(
     num_classes: int = 3,
-    anchor_sizes: tuple = ((12,), (20,), (36,), (64,), (96,)),
-    aspect_ratios: tuple = (0.5, 0.7, 1.0, 1.4, 2.0),
+    anchor_sizes: tuple = ((16,), (32,), (64,), (128,), (192,)),
+    aspect_ratios: tuple = (0.5, 0.75, 1.0, 1.5, 2.0),
     pretrained_backbone: bool = True,
     freeze_early_backbone: bool = False,
-    bbox_xform_clip: float = math.log(2.5),
+    bbox_xform_clip: float = None,
+    rpn_bbox_xform_clip: float = math.log(1.4),   # ~0.3365 (1.4x coarse proposal expansion)
+    roi_bbox_xform_clip: float = math.log(1.3),   # ~0.2624 (1.3x fine refinement)
 ):
     """
-    Constructs a Faster R-CNN ResNet-50 FPN V2 with Candidate V3/V5 calibrated anchor geometry:
-    - Bounded aspect ratios (0.5, 0.7, 1.0, 1.4, 2.0) provide realistic knife/gun shapes
-      while mathematically preventing 500+ pixel furniture baseboard traps.
-    - Capped scales ((12,), (20,), (36,), (64,), (96,)) strictly bounded by human hand/reach bounds.
-      Maximum anchor proposal size is 96 * sqrt(2) = 135px.
-    - bbox_xform_clip (default math.log(2.5) = 0.916) mathematically clamps maximum box expansion
-      to 2.5x anchor dimension (max box <= 240px). 1000+ px counter proposals are rendered impossible.
+    Constructs a Faster R-CNN ResNet-50 FPN V2 with Candidate V8 calibrated anchor geometry:
+    - Multi-scale anchor pyramid ((16,), (32,), (64,), (128,), (192,)) covers:
+        P2 (16px): Distant CCTV weapons (15-30px)
+        P3 (32px): Lower-medium range (30-65px)
+        P4 (64px): Mid-medium range near median (65-120px)
+        P5 (128px): Close-range handguns (120-180px, e.g. robbery counter)
+        P6 (192px): Close-range knives & handguns (180-250px)
+    - 5 calibrated aspect ratios (0.5, 0.75, 1.0, 1.5, 2.0) cover natural handheld weapon shapes
+      without degenerate vertical (0.4) or horizontal (2.5) anchors that match architectural fixtures.
+    - Stage-decoupled box regression clamping:
+        RPN clamp = ln(1.4) (1.4x)
+        RoI clamp = ln(1.3) (1.3x)
+        Compound theoretical limit: 1.4 * 1.3 = 1.82x
+        Maximum reachable dimension: 271.5px * 1.82 = 494.1px (105px safety gap below 600px counter/door danger zone).
     """
     weights = "DEFAULT" if pretrained_backbone else None
     model = torchvision.models.detection.fasterrcnn_resnet50_fpn_v2(weights=weights)
@@ -44,12 +53,16 @@ def build_research_model(
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
 
-    # 4. Box regression delta clamping (mathematically limits proposal expansion to 2.5x anchor size)
-    if bbox_xform_clip is not None:
-        model.rpn.box_coder.bbox_xform_clip = bbox_xform_clip
-        model.roi_heads.box_coder.bbox_xform_clip = bbox_xform_clip
+    # 4. Stage-decoupled box regression delta clamping
+    clip_rpn = rpn_bbox_xform_clip if rpn_bbox_xform_clip is not None else bbox_xform_clip
+    clip_roi = roi_bbox_xform_clip if roi_bbox_xform_clip is not None else bbox_xform_clip
 
-    # 5. Optional early backbone freezing to preserve low-level handgun edge kernels
+    if clip_rpn is not None:
+        model.rpn.box_coder.bbox_xform_clip = clip_rpn
+    if clip_roi is not None:
+        model.roi_heads.box_coder.bbox_xform_clip = clip_roi
+
+    # 5. Optional early backbone freezing to preserve low-level edge kernels
     if freeze_early_backbone and hasattr(model.backbone, "body"):
         body = model.backbone.body
         for param in [body.conv1.parameters(), body.bn1.parameters(), body.layer1.parameters()]:

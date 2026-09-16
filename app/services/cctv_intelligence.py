@@ -1,7 +1,7 @@
 import math
 from collections import deque
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import cv2
 import numpy as np
@@ -372,8 +372,8 @@ class CCTVIntelligenceFilter:
         max_edge_distance: float = 45.0,
         max_person_area_ratio: float = 0.20,
         max_person_width_ratio: float = 0.75,
-        max_person_height_ratio: float = 0.45,
-        min_person_reach_y: float = 0.18,
+        max_person_height_ratio: Union[float, Dict[str, float]] = 0.35,
+        min_person_reach_y: float = 0.20,
         max_person_reach_y: float = 0.95,
         enable_person_gating: bool = True,
         enable_anthropometric_gating: bool = True,
@@ -392,7 +392,15 @@ class CCTVIntelligenceFilter:
         self.max_edge_distance = max_edge_distance
         self.max_person_area_ratio = max_person_area_ratio
         self.max_person_width_ratio = max_person_width_ratio
-        self.max_person_height_ratio = max_person_height_ratio
+        if isinstance(max_person_height_ratio, dict):
+            self.max_person_height_ratios = max_person_height_ratio
+            self.max_person_height_ratio = max_person_height_ratio.get("knife", 0.35)
+        else:
+            self.max_person_height_ratio = float(max_person_height_ratio)
+            self.max_person_height_ratios = {
+                "handgun": min(0.25, float(max_person_height_ratio)),
+                "knife": float(max_person_height_ratio),
+            }
         self.min_person_reach_y = min_person_reach_y
         self.max_person_reach_y = max_person_reach_y
         self.enable_person_gating = enable_person_gating
@@ -480,10 +488,8 @@ class CCTVIntelligenceFilter:
                     aspect_ratio = box_w / box_h
                     if aspect_ratio > 7.0 or aspect_ratio < 0.12:
                         rejection_reason = f"UNPHYSICAL_ASPECT_RATIO ({aspect_ratio:.2f})"
-                    # Handheld Smartphone rejection: Vertical phone in hand has aspect ratio <= 0.52 (h/w >= 1.9)
-                    # Handguns in grip have aspect ratios typically 0.65 to 1.5. Knives have length/width variations.
                     elif cname == "handgun" and aspect_ratio < 0.50:
-                        rejection_reason = f"HANDHELD_PHONE_ASPECT_RATIO (aspect_ratio={aspect_ratio:.2f} typical of vertical smartphone)"
+                        rejection_reason = f"UNPHYSICAL_HANDGUN_ASPECT_RATIO (AR={aspect_ratio:.2f} < 0.50 vertical distractor)"
 
             # Human proximity assessment & closest person association
             is_adjacent_to_person = False
@@ -522,23 +528,26 @@ class CCTVIntelligenceFilter:
                     p_h = max(1, pbox[3] - pbox[1])
                     allowed_reach = max(self.max_edge_distance, 0.50 * p_h)
                     rel_y = (cy - pbox[1]) / max(1, p_h)
+                    is_bottom_truncated = (pbox[3] >= h - 40)
+                    effective_max_reach_y = 1.15 if is_bottom_truncated else self.max_person_reach_y
                     # Handheld objects must fall within realistic arm/hand manipulation envelope.
-                    if self.min_person_reach_y <= rel_y <= self.max_person_reach_y and not det.get("is_static", False):
+                    # A suspect holding a weapon steady remains is_held_by_person = True.
+                    is_overhead = (wbox[1] < pbox[1])
+                    if (self.min_person_reach_y <= rel_y <= effective_max_reach_y) or is_overhead:
                         is_held_by_person = True
                 elif closest_person is not None:
                     associated_person = closest_person
                     allowed_reach = closest_person_reach
                     if min_edge_dist <= allowed_reach:
                         is_adjacent_to_person = True
-
-            # Relative motion check: If the candidate weapon is stationary (drift < 8px)
-            # but the closest person is actively walking/moving across the room,
-            # the person is merely walking past a background fixture, not holding it!
-            if is_held_by_person and associated_person is not None:
-                w_disp = det.get("displacement", 0.0)
-                w_tf = det.get("track_frames", 1)
-                if w_tf >= 6 and w_disp < 8.0:
-                    is_held_by_person = False
+                        pbox = associated_person["box"]
+                        p_h = max(1, pbox[3] - pbox[1])
+                        rel_y = (cy - pbox[1]) / max(1, p_h)
+                        is_bottom_truncated = (pbox[3] >= h - 40)
+                        effective_max_reach_y = 1.15 if is_bottom_truncated else self.max_person_reach_y
+                        is_overhead = (wbox[1] < pbox[1])
+                        if (self.min_person_reach_y <= rel_y <= effective_max_reach_y) or is_overhead:
+                            is_held_by_person = True
 
             # Check 3: Spatial person presence & proximity gating
             if rejection_reason is None and self.enable_person_gating:
@@ -568,14 +577,26 @@ class CCTVIntelligenceFilter:
                 is_bottom_truncated = (pbox[3] >= h - 40)
                 effective_max_reach_y = 1.15 if is_bottom_truncated else self.max_person_reach_y
 
+                base_max_h = (
+                    self.max_person_height_ratios.get(cname, self.max_person_height_ratio)
+                    if hasattr(self, "max_person_height_ratios") and isinstance(self.max_person_height_ratios, dict)
+                    else self.max_person_height_ratio
+                )
+                # Stationary fixtures (e.g. stair posts) strictly capped at base_max_h (0.35 for knife, 0.25 for handgun).
+                # Handheld weapons in dynamic motion (displacement >= 8.0px) can reach up to 45% for long blades and rifles.
+                w_disp = det.get("displacement", 0.0)
+                is_moving = w_disp >= 8.0
+                max_h_ratio = min(0.45, base_max_h * 1.25) if is_moving else base_max_h
+
                 if p_area_ratio > self.max_person_area_ratio:
                     rejection_reason = f"ANTHROPOMETRIC_SCALE_VIOLATION (area {p_area_ratio:.1%} > {self.max_person_area_ratio:.1%} of person)"
                 elif p_w_ratio > self.max_person_width_ratio:
                     rejection_reason = f"ANTHROPOMETRIC_SCALE_VIOLATION (width {p_w_ratio:.1%} > {self.max_person_width_ratio:.1%} of person)"
-                elif p_h_ratio > self.max_person_height_ratio:
-                    rejection_reason = f"ANTHROPOMETRIC_SCALE_VIOLATION (height {p_h_ratio:.1%} > {self.max_person_height_ratio:.1%} of person)"
-                elif rel_y < self.min_person_reach_y:
-                    rejection_reason = f"UNPHYSICAL_PERSON_LOCATION (rel_y={rel_y:.2f} above reach/head)"
+                elif p_h_ratio > max_h_ratio:
+                    rejection_reason = f"ANTHROPOMETRIC_SCALE_VIOLATION (height {p_h_ratio:.1%} > {max_h_ratio:.1%} of person)"
+                is_overhead = (wbox[1] < pbox[1])
+                if rel_y < self.min_person_reach_y and not is_overhead:
+                    rejection_reason = f"UNPHYSICAL_PERSON_LOCATION (rel_y={rel_y:.2f} head/hair region)"
                 elif rel_y > effective_max_reach_y:
                     rejection_reason = f"UNPHYSICAL_PERSON_LOCATION (rel_y={rel_y:.2f} below feet)"
 
@@ -587,8 +608,8 @@ class CCTVIntelligenceFilter:
                         tf = det.get("track_frames", 0)
                         disp = det.get("displacement", 0.0)
                         rejection_reason = f"STATIC_BACKGROUND_TRAP ({tf} frames, drift={disp}px)"
-                        # Register in persistent exclusion memory
-                        if self.motion_tracker:
+                        # Register in persistent exclusion memory only if unheld and no person adjacent
+                        if self.motion_tracker and not is_adjacent_to_person:
                             self.motion_tracker.register_static_zone(cx, cy, cname)
 
             eval_entry = {

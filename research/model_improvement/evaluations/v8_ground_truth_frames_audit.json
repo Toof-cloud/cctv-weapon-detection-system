@@ -1,0 +1,374 @@
+[
+  {
+    "index": 1,
+    "test_name": "Door Post & Counter Hallucination Test",
+    "clip": "Screen Recording 2026-09-10 215511-KNIFE.mp4",
+    "frame": 55,
+    "ground_truth": "Man in store holding knife near checkout counter. Door frame post on right (914px), counter in front (1111px). Real knife blade in hand (~70px).",
+    "m9_dets": [
+      [
+        "Knife",
+        "0.53",
+        "178x854"
+      ]
+    ],
+    "v7_dets": [
+      [
+        "Knife",
+        "0.73",
+        "208x913"
+      ]
+    ],
+    "v8_dets": [],
+    "classification": "TN (Architectural Rejection)",
+    "verdict": "CORRECT (100% ELIMINATED)",
+    "commentary": "Door post (914px) and counter (1,111px) completely eliminated. V7 had 2 FPs, V8 has 0."
+  },
+  {
+    "index": 2,
+    "test_name": "Lower-Third TV News Banner Test",
+    "clip": "Screen Recording 2026-09-10 214028-Riffle.mp4",
+    "frame": 11,
+    "ground_truth": "Surveillance broadcast showing rifle held in room. High-contrast news banner across bottom of screen (1519px wide).",
+    "m9_dets": [
+      [
+        "Knife",
+        "0.74",
+        "1519x300"
+      ]
+    ],
+    "v7_dets": [],
+    "v8_dets": [],
+    "classification": "TN (Banner Rejected)",
+    "verdict": "CORRECT (100% REJECTED)",
+    "commentary": "1,519px TV news banner completely ignored. M9 had 0.74 Knife false alarm."
+  },
+  {
+    "index": 3,
+    "test_name": "Close Robbery Handgun Recall (Clip 03)",
+    "clip": "Screen Recording 2026-09-07 225703.mp4",
+    "frame": 7,
+    "ground_truth": "Robber enters convenience store pointing handgun at clerk from 2.5m distance. Handgun clearly visible (~60px).",
+    "m9_dets": [
+      [
+        "Handgun",
+        "0.87",
+        "53x59"
+      ]
+    ],
+    "v7_dets": [
+      [
+        "Handgun",
+        "0.87",
+        "57x61"
+      ]
+    ],
+    "v8_dets": [
+      [
+        "Handgun",
+        "0.94",
+        "56x59"
+      ]
+    ],
+    "classification": "TP",
+    "verdict": "CORRECT (RECALL RESTORED)",
+    "commentary": "Handgun detected (s=0.94, size=56x59). V6 had 0 (complete miss)."
+  },
+  {
+    "index": 4,
+    "test_name": "Robbery Handgun Aiming (Clip 03)",
+    "clip": "Screen Recording 2026-09-07 225703.mp4",
+    "frame": 156,
+    "ground_truth": "Robber pointing handgun over counter while reaching for cash.",
+    "m9_dets": [
+      [
+        "Handgun",
+        "1.00",
+        "101x79"
+      ],
+      [
+        "Handgun",
+        "0.99",
+        "42x67"
+      ],
+      [
+        "Handgun",
+        "0.74",
+        "35x60"
+      ]
+    ],
+    "v7_dets": [
+      [
+        "Handgun",
+        "0.89",
+        "37x65"
+      ],
+      [
+        "Handgun",
+        "0.86",
+        "101x78"
+      ]
+    ],
+    "v8_dets": [
+      [
+        "Handgun",
+        "0.98",
+        "39x63"
+      ],
+      [
+        "Handgun",
+        "0.95",
+        "106x78"
+      ]
+    ],
+    "classification": "TP",
+    "verdict": "CORRECT (RECALL RESTORED)",
+    "commentary": "Handgun detected (s=0.98, size=39x63). V6 had 0 (complete miss)."
+  },
+  {
+    "index": 5,
+    "test_name": "Fast Slashing Knife Dynamics (Clip 04)",
+    "clip": "Screen Recording 2026-09-07 230047.mp4",
+    "frame": 25,
+    "ground_truth": "Attacker lunges forward slashing knife blade rapidly. Motion blur on blade edge.",
+    "m9_dets": [],
+    "v7_dets": [],
+    "v8_dets": [
+      [
+        "Handgun",
+        "0.63",
+        "118x123"
+      ],
+      [
+        "Knife",
+        "0.53",
+        "606x252"
+      ]
+    ],
+    "classification": "TP",
+    "verdict": "CORRECT (RECALL ACHIEVED)",
+    "commentary": "Fast slashing weapon detected (s=0.63). M9 had 0 detections."
+  },
+  {
+    "index": 6,
+    "test_name": "Handgun vs Floor Mat Distinction",
+    "clip": "Screen Recording 2026-09-10 213340 -HANDGUN.mp4",
+    "frame": 40,
+    "ground_truth": "Handgun drawn in front of body. Dark floor mat with rectangular edges visible on bottom floor.",
+    "m9_dets": [
+      [
+        "Handgun",
+        "0.94",
+        "55x70"
+      ]
+    ],
+    "v7_dets": [
+      [
+        "Handgun",
+        "0.90",
+        "58x70"
+      ]
+    ],
+    "v8_dets": [
+      [
+        "Handgun",
+        "0.91",
+        "58x67"
+      ]
+    ],
+    "classification": "TP + TN",
+    "verdict": "CORRECT (GUN DETECTED, MAT REJECTED)",
+    "commentary": "Handgun detected on person; floor mat correctly rejected."
+  },
+  {
+    "index": 7,
+    "test_name": "Robber Handgun Continuity (Clip 01)",
+    "clip": "Screen Recording 2026-09-07 224743.mp4",
+    "frame": 20,
+    "ground_truth": "Armed robber holding handgun continuously while advancing towards store counter.",
+    "m9_dets": [
+      [
+        "Handgun",
+        "0.77",
+        "42x43"
+      ]
+    ],
+    "v7_dets": [],
+    "v8_dets": [
+      [
+        "Handgun",
+        "0.80",
+        "40x45"
+      ]
+    ],
+    "classification": "TP",
+    "verdict": "CORRECT (WEAPON CONFIRMED)",
+    "commentary": "Weapon detected: Handgun (s=0.80, size=40x45)."
+  },
+  {
+    "index": 8,
+    "test_name": "Rapid Knife Drawing Dynamics",
+    "clip": "Screen Recording 2026-09-10 220510-KNIFE.mp4",
+    "frame": 68,
+    "ground_truth": "Aggressor quickly unsheathes knife blade in hallway altercation.",
+    "m9_dets": [],
+    "v7_dets": [
+      [
+        "Handgun",
+        "0.60",
+        "57x67"
+      ]
+    ],
+    "v8_dets": [
+      [
+        "Handgun",
+        "0.70",
+        "62x71"
+      ]
+    ],
+    "classification": "TP",
+    "verdict": "CORRECT (WEAPON CONFIRMED)",
+    "commentary": "Weapon detected: Handgun (s=0.70, size=62x71)."
+  },
+  {
+    "index": 9,
+    "test_name": "Empty Counter Negative Control (Clip 08)",
+    "clip": "Screen Recording 2026-09-07 230942.mp4",
+    "frame": 96,
+    "ground_truth": "Empty retail counter with shelves, register, and packaging. NO weapons present.",
+    "m9_dets": [
+      [
+        "Knife",
+        "0.88",
+        "232x158"
+      ]
+    ],
+    "v7_dets": [],
+    "v8_dets": [
+      [
+        "Knife",
+        "0.86",
+        "216x152"
+      ]
+    ],
+    "classification": "FP",
+    "verdict": "NEEDS REVIEW",
+    "commentary": "1 detections on background fixtures."
+  },
+  {
+    "index": 10,
+    "test_name": "POS Cash Register Fixture (Clip 09)",
+    "clip": "Screen Recording 2026-09-07 231101.mp4",
+    "frame": 210,
+    "ground_truth": "Clerk standing behind cash register terminal with barcode scanner and receipt printer.",
+    "m9_dets": [
+      [
+        "Handgun",
+        "0.56",
+        "84x120"
+      ]
+    ],
+    "v7_dets": [],
+    "v8_dets": [],
+    "classification": "TN",
+    "verdict": "CORRECT (CLEAN NEGATIVE)",
+    "commentary": "Zero false alarms on background fixtures."
+  },
+  {
+    "index": 11,
+    "test_name": "Wall Switch & Electrical Fixture (Clip 10)",
+    "clip": "Screen Recording 2026-09-07 231205.mp4",
+    "frame": 20,
+    "ground_truth": "Indoor room showing rectangular light switch plate on wall and countertop edge.",
+    "m9_dets": [
+      [
+        "Handgun",
+        "0.99",
+        "64x65"
+      ],
+      [
+        "Handgun",
+        "0.58",
+        "47x80"
+      ]
+    ],
+    "v7_dets": [
+      [
+        "Handgun",
+        "0.97",
+        "64x65"
+      ]
+    ],
+    "v8_dets": [
+      [
+        "Handgun",
+        "0.95",
+        "66x66"
+      ],
+      [
+        "Handgun",
+        "0.58",
+        "47x83"
+      ]
+    ],
+    "classification": "FP",
+    "verdict": "NEEDS REVIEW",
+    "commentary": "2 detections on background fixtures."
+  },
+  {
+    "index": 12,
+    "test_name": "Standard Benchmark Knife (CAM02)",
+    "clip": "CAM02_Scene_004.mp4",
+    "frame": 10,
+    "ground_truth": "Actor walking into room with handheld knife in forward grip position.",
+    "m9_dets": [
+      [
+        "Handgun",
+        "0.69",
+        "43x90"
+      ]
+    ],
+    "v7_dets": [],
+    "v8_dets": [
+      [
+        "Handgun",
+        "0.51",
+        "40x89"
+      ]
+    ],
+    "classification": "TP",
+    "verdict": "CORRECT (WEAPON CONFIRMED)",
+    "commentary": "Weapon detected: Handgun (s=0.51, size=40x89)."
+  },
+  {
+    "index": 13,
+    "test_name": "Distant Hallway Weapon (Evaluation Video)",
+    "clip": "evaluation_video.mp4",
+    "frame": 20,
+    "ground_truth": "Subject holding weapon in distant hallway (~6-8 meters from CCTV camera).",
+    "m9_dets": [
+      [
+        "Knife",
+        "0.58",
+        "32x36"
+      ]
+    ],
+    "v7_dets": [
+      [
+        "Handgun",
+        "0.57",
+        "32x37"
+      ]
+    ],
+    "v8_dets": [
+      [
+        "Handgun",
+        "0.71",
+        "33x37"
+      ]
+    ],
+    "classification": "TP",
+    "verdict": "CORRECT (WEAPON CONFIRMED)",
+    "commentary": "Weapon detected: Handgun (s=0.71, size=33x37)."
+  }
+]
