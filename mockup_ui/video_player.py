@@ -3,7 +3,7 @@ from pathlib import Path
 import math
 
 import cv2
-from PySide6.QtCore import Qt, QTimer, Signal
+from PySide6.QtCore import QPoint, Qt, QTimer, Signal
 from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QSlider, QVBoxLayout, QWidget
 
@@ -17,6 +17,10 @@ class VideoCanvas(QLabel):
     def __init__(self):
         super().__init__()
         self._source_pixmap = QPixmap()
+        self._zoom = 1.0
+        self._center_x = .5
+        self._center_y = .5
+        self._pan_start = QPoint()
         self.setObjectName("imageCanvas")
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setMinimumSize(440, 245)
@@ -35,17 +39,77 @@ class VideoCanvas(QLabel):
 
     def _fit(self):
         if not self._source_pixmap.isNull():
-            self.setPixmap(self._source_pixmap.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatio,
-                                                    Qt.TransformationMode.SmoothTransformation))
+            if self._zoom <= 1.001:
+                shown = self._source_pixmap
+            else:
+                width = max(1, round(self._source_pixmap.width() / self._zoom))
+                height = max(1, round(self._source_pixmap.height() / self._zoom))
+                left = round(self._center_x * self._source_pixmap.width() - width / 2)
+                top = round(self._center_y * self._source_pixmap.height() - height / 2)
+                left = min(max(0, left), self._source_pixmap.width() - width)
+                top = min(max(0, top), self._source_pixmap.height() - height)
+                shown = self._source_pixmap.copy(left, top, width, height)
+            self.setPixmap(shown.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatio,
+                                        Qt.TransformationMode.SmoothTransformation))
+
+    @property
+    def zoom(self):
+        return self._zoom
+
+    def set_zoom(self, value):
+        self._zoom = min(4.0, max(1.0, float(value)))
+        if self._zoom == 1.0:
+            self._center_x = self._center_y = .5
+        self.setCursor(Qt.CursorShape.OpenHandCursor if self._zoom > 1 else Qt.CursorShape.ArrowCursor)
+        self._fit()
+
+    def wheelEvent(self, event):
+        if not self._source_pixmap.isNull():
+            self.set_zoom(self._zoom + (.25 if event.angleDelta().y() > 0 else -.25))
+            event.accept()
+            return
+        super().wheelEvent(event)
+
+    def mouseDoubleClickEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton and not self._source_pixmap.isNull():
+            self.set_zoom(1.0)
+            event.accept()
+            return
+        super().mouseDoubleClickEvent(event)
 
     def resizeEvent(self, event):
         self._fit()
         super().resizeEvent(event)
 
     def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton and self._zoom > 1:
+            self._pan_start = event.position().toPoint()
+            self.setCursor(Qt.CursorShape.ClosedHandCursor)
+            event.accept()
+            return
         if event.button() == Qt.MouseButton.LeftButton and self._source_pixmap.isNull():
             self.browse_requested.emit()
         super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() & Qt.MouseButton.LeftButton and self._zoom > 1 and not self._pan_start.isNull():
+            point = event.position().toPoint()
+            delta = point - self._pan_start
+            self._pan_start = point
+            self._center_x = min(1.0, max(0.0, self._center_x - delta.x() / max(1, self.width()) / self._zoom))
+            self._center_y = min(1.0, max(0.0, self._center_y - delta.y() / max(1, self.height()) / self._zoom))
+            self._fit()
+            event.accept()
+            return
+        super().mouseMoveEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton and self._zoom > 1:
+            self._pan_start = QPoint()
+            self.setCursor(Qt.CursorShape.OpenHandCursor)
+            event.accept()
+            return
+        super().mouseReleaseEvent(event)
 
     def dragEnterEvent(self, event):
         urls = event.mimeData().urls()

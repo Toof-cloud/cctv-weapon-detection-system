@@ -12,9 +12,10 @@ from mockup_ui.video_player import VideoCanvas
 
 
 class ObservationReviewDialog(QDialog):
-    def __init__(self, result, parent=None):
+    def __init__(self, result, parent=None, cross_view=None, session_mccr=None):
         super().__init__(parent)
         self.result = result
+        self.cross_view = cross_view or {}
         self.store = ReviewStore.for_result(result)
         self.current_index = -1
         self._loading = False
@@ -48,6 +49,8 @@ class ObservationReviewDialog(QDialog):
             if mccr_val is not None:
                 mccr_display = f"MCCR: {mccr_val:.1f}%"
 
+        if cross_view is not None:
+            mccr_display = f"Session MCCR: {session_mccr:.1f}%" if session_mccr is not None else "Session MCCR: N/A"
         header_bar = QHBoxLayout()
         self.progress_label = QLabel()
         self.progress_label.setObjectName("dialogDetail")
@@ -200,6 +203,11 @@ class ObservationReviewDialog(QDialog):
         )
         self.automated_label.setText(f"Automated Validation Result: {status_label(observation['automatedValidationStatus'])}")
         self.automated_label.setToolTip("The current detection pipeline does not perform separate observation validation. This value is never changed by analyst decisions.")
+        context = self.cross_view.get(observation["observationId"])
+        if context:
+            self.details.setText(self.details.text() + f"\nCamera: {context['camera_id']} · Scene: {context['scene_id'] or 'Not recorded'} · Session time: {context['session_seconds']:.3f}s")
+            self.automated_label.setText(self.automated_label.text() + f"\nCross-view: {context['corroboration_status']}\n{context['reason']}")
+            self.automated_label.setToolTip("Automatic temporal and cross-camera observations are independent of the analyst decision.")
         self.feedback.setText("Unsaved changes" if index in self._drafts else
                               f"Saved {review['reviewedAt']}" if review else "Choose a decision to complete this observation review.")
         self._show_frame(row)
