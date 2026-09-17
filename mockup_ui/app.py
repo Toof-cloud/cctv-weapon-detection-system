@@ -361,91 +361,97 @@ class VideoEnhancementDialog(QDialog):
 
 
 class DetectionConfigDialog(QDialog):
-    def __init__(self, video: VideoInfo, threshold: int, parent=None, current_model: Path | None = None):
+    def __init__(self, video: VideoInfo, threshold: int, parent=None, current_model: Path | None = None, videos=None):
         super().__init__(parent)
+        videos = videos or [video]
         self.setObjectName("configurationDialog")
         self.setWindowTitle("Detection configuration")
         self.setModal(True)
-        self.setMinimumWidth(500)
+        self.setMinimumWidth(540)
+        self.resize(600, 680)
+        self.setStyleSheet((MOCKUP_DIR / "styles.qss").read_text(encoding="utf-8"))
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(26, 24, 26, 22)
+        layout.setContentsMargins(24, 22, 24, 20)
         layout.setSpacing(14)
-        heading = QLabel("Analyze imported video")
-        heading.setObjectName("dialogHeading")
-        layout.addWidget(heading)
-        detail = QLabel(
-            f"{video.path.name}\n{video.width} × {video.height} · {video.fps:.2f} FPS · "
-            f"{video.frame_count:,} frames · {timecode(video.duration)}"
-        )
-        detail.setObjectName("dialogDetail")
-        detail.setWordWrap(True)
-        layout.addWidget(detail)
-        layout.addSpacing(5)
 
-        layout.addWidget(QLabel("DETECTION MODEL"))
+        def note(text, name="dialogDetail"):
+            widget = QLabel(text)
+            widget.setWordWrap(True)
+            widget.setTextFormat(Qt.TextFormat.PlainText)
+            widget.setObjectName(name)
+            return widget
+
+        layout.addWidget(note("DETECTION SETUP", "sectionTitle"))
+        layout.addWidget(note(f"Analyze {len(videos)} camera recordings" if len(videos) > 1 else "Analyze imported video", "dialogHeading"))
+        detail = (f"{len(videos)} cameras · {sum(v.frame_count for v in videos):,} total frames · One shared detector configuration"
+                  if len(videos) > 1 else f"{video.path.name}\n{video.width} × {video.height} · {video.fps:.2f} FPS · {timecode(video.duration)}")
+        layout.addWidget(note(detail))
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        body = QWidget()
+        stack = QVBoxLayout(body)
+        stack.setContentsMargins(0, 0, 8, 0)
+        stack.setSpacing(12)
+
+        def card(title):
+            frame = QFrame()
+            frame.setObjectName("configCard")
+            box = QVBoxLayout(frame)
+            box.setContentsMargins(16, 14, 16, 14)
+            box.setSpacing(10)
+            box.addWidget(note(title, "sectionTitle"))
+            stack.addWidget(frame)
+            return box
+
+        model_box = card("01 / DETECTION MODEL")
         self.model_combo = QComboBox()
         self.model_combo.setObjectName("dialogModelCombo")
-        models = discover_available_models()
-        active_idx = 0
-        for idx, (label, path) in enumerate(models):
-            self.model_combo.addItem(label, str(path))
-            if current_model:
-                try:
-                    if Path(path).resolve() == Path(current_model).resolve():
-                        active_idx = idx
-                except Exception:
-                    pass
-        if models:
-            self.model_combo.setCurrentIndex(active_idx)
-        layout.addWidget(self.model_combo)
-
-        layout.addSpacing(5)
-        layout.addWidget(QLabel("CONFIDENCE THRESHOLD"))
+        self.model_combo.setMinimumHeight(38)
+        self.model_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        for _, path in discover_available_models():
+            self.model_combo.addItem(path.name, str(path))
+            self.model_combo.setItemData(self.model_combo.count() - 1, str(path), Qt.ItemDataRole.ToolTipRole)
+            if current_model and path.resolve() == Path(current_model).resolve():
+                self.model_combo.setCurrentIndex(self.model_combo.count() - 1)
+        model_box.addWidget(self.model_combo)
+        model_box.addWidget(note("Faster R-CNN · Handgun and knife observations. The selected checkpoint is recorded with each result."))
+        threshold_box = card("02 / CONFIDENCE THRESHOLD")
         row = QHBoxLayout()
         self.slider = QSlider(Qt.Orientation.Horizontal)
         self.slider.setRange(10, 95)
         self.slider.setValue(threshold)
-        self.value_label = QLabel(f"{threshold}%")
-        self.value_label.setObjectName("dialogThreshold")
+        self.value_label = note(f"{threshold}%", "dialogThreshold")
         self.slider.valueChanged.connect(lambda value: self.value_label.setText(f"{value}%"))
         row.addWidget(self.slider, 1)
         row.addWidget(self.value_label)
-        layout.addLayout(row)
-        note = QLabel("Only detections meeting this confidence score will appear in the result. You can cancel and configure the video later.")
-        note.setObjectName("dialogDetail")
-        note.setWordWrap(True)
-        layout.addWidget(note)
-
-        layout.addSpacing(5)
-        layout.addWidget(QLabel("FORENSIC CCTV FILTERS"))
-        self.cctv_intel_checkbox = QCheckBox("Enable CCTV Intelligence (Kinematic & anthropometric scale gating)")
+        threshold_box.addLayout(row)
+        threshold_box.addWidget(note("Sets the minimum detection confidence. Enabled CCTV filters may apply stricter class thresholds."))
+        filters = card("03 / VALIDATION FILTERS")
+        self.cctv_intel_checkbox = QCheckBox("CCTV intelligence")
         self.cctv_intel_checkbox.setChecked(True)
-        self.cctv_intel_checkbox.setToolTip("Suppresses false alarms when no person is present or when bounding box size violates human reach geometry.")
-        layout.addWidget(self.cctv_intel_checkbox)
-
-        self.temporal_checkbox = QCheckBox("Enable Temporal Consensus (Multi-frame trajectory verification)")
+        filters.addWidget(self.cctv_intel_checkbox)
+        filters.addWidget(note("Checks person proximity, motion and object scale to help filter background detections."))
+        self.temporal_checkbox = QCheckBox("Temporal consistency")
         self.temporal_checkbox.setChecked(True)
-        self.temporal_checkbox.setToolTip("Suppresses isolated single-frame flickers and enforces temporal weapon trajectory persistence.")
-        layout.addWidget(self.temporal_checkbox)
-
-        if hasattr(video, "path") and "_enhanced" in video.path.name.lower():
-            enh_text = (
-                "VIDEO ENHANCEMENT\n"
-                "BasicVSR++ enhanced video is active! Detection will analyze the super-resolved footage."
-            )
-        else:
-            enh_text = (
-                "VIDEO ENHANCEMENT\n"
-                "No enhanced video has been created. Detection will use the imported video. "
-                "Open Enhancement setup first if you want to run BasicVSR++ super-resolution."
-            )
-        self.enhancement_notice = QLabel(enh_text)
-        self.enhancement_notice.setObjectName("enhancementNotice")
-        self.enhancement_notice.setWordWrap(True)
-        layout.addWidget(self.enhancement_notice)
+        filters.addWidget(self.temporal_checkbox)
+        filters.addWidget(note("Checks persistence across nearby frames, independently for each camera recording."))
+        def toggle_temporal(enabled):
+            self.temporal_checkbox.setEnabled(enabled)
+            if not enabled:
+                self.temporal_checkbox.setChecked(False)
+        self.cctv_intel_checkbox.toggled.connect(toggle_temporal)
+        self.enhancement_notice = note(
+            "INPUT FOOTAGE\nNo enhanced video has been created. Detection uses the recordings currently imported. "
+            "Apply BasicVSR++ enhancement before analysis if needed.",
+            "enhancementNotice")
+        stack.addWidget(self.enhancement_notice)
+        scroll.setWidget(body)
+        layout.addWidget(scroll, 1)
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel)
-        start = buttons.addButton("Start detection", QDialogButtonBox.ButtonRole.AcceptRole)
+        start = buttons.addButton("Analyze all cameras" if len(videos) > 1 else "Start detection", QDialogButtonBox.ButtonRole.AcceptRole)
         start.setObjectName("primaryButton")
+        start.setEnabled(self.model_combo.count() > 0)
         start.setDefault(True)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
@@ -453,11 +459,8 @@ class DetectionConfigDialog(QDialog):
 
     @property
     def selected_model(self) -> Path | None:
-        if hasattr(self, "model_combo") and self.model_combo.count() > 0:
-            data = self.model_combo.currentData()
-            if data:
-                return Path(data)
-        return None
+        data = self.model_combo.currentData()
+        return Path(data) if data else None
 
 
 class ProcessingDialog(QDialog):
@@ -728,9 +731,9 @@ class MainWindow(QMainWindow):
         layout.addLayout(brand)
         layout.addStretch()
 
-        self.open_button = QPushButton("Import video")
+        self.open_button = QPushButton("Import videos")
         self.open_button.setObjectName("primaryButton")
-        self.open_button.setToolTip("Import a video and review detection settings before analysis.")
+        self.open_button.setToolTip("Select one video for single-camera analysis, or multiple videos for the multi-camera workspace.")
         self.open_button.setIcon(QIcon(str(MOCKUP_DIR / "assets" / "import-image.png")))
         self.open_button.clicked.connect(self.choose_video)
         self.report_button = QPushButton("Forensic report")
@@ -1023,12 +1026,38 @@ class MainWindow(QMainWindow):
     def choose_video(self):
         if self._thread:
             return
-        filename, _ = QFileDialog.getOpenFileName(
-            self, "Import CCTV video", str(ROOT_DIR),
+        filenames, _ = QFileDialog.getOpenFileNames(
+            self, "Import CCTV recordings (select one or more)", str(ROOT_DIR),
             "Videos (*.mp4 *.avi *.mov *.mkv *.webm *.m4v)",
         )
-        if filename:
-            self.load_video(filename)
+        if len(filenames) == 1:
+            self.load_video(filenames[0])
+        elif filenames:
+            self.open_multi_camera(filenames)
+
+    def open_multi_camera(self, filenames):
+        from mockup_ui.multi_camera_panel import MultiCameraDialog
+        existing = getattr(self, "_multi_camera_window", None)
+        if existing and existing.isVisible():
+            existing.raise_()
+            existing.activateWindow()
+            QMessageBox.information(existing, "Camera workspace already open", "Use Add camera recordings in the open workspace, or close it before importing a new session.")
+            return
+        try:
+            videos = [read_video(path) for path in dict.fromkeys(filenames)]
+            if len(videos) < 2:
+                raise ValueError("Select at least two different camera recordings.")
+            window = MultiCameraDialog(videos, self)
+        except (VideoInputError, OSError, ValueError) as exc:
+            self._show_error("Camera recordings unavailable", str(exc))
+            return
+        self.player.pause()
+        if self._config_dialog:
+            self._config_dialog.reject()
+        self._multi_camera_window = window
+        window.show()
+        window.raise_()
+        window.activateWindow()
 
     def load_video(self, filename):
         if self._thread:
@@ -1440,11 +1469,18 @@ class MainWindow(QMainWindow):
         QMessageBox.warning(self, title, message)
 
     def closeEvent(self, event):
+        multi_camera = getattr(self, "_multi_camera_window", None)
+        if multi_camera and multi_camera.worker:
+            multi_camera.raise_()
+            event.ignore()
+            return
         if self._thread:
             QMessageBox.information(self, "Video analysis in progress", "Let the current video analysis finish before closing the window.")
             event.ignore()
             return
         self.player.release()
+        if multi_camera:
+            multi_camera.close()
         self._model_retry.stop()
         event.accept()
 

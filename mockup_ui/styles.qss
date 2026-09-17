@@ -139,3 +139,20 @@ QFrame#playerControls QSlider::handle:horizontal { background: white; border-col
 QFrame#observationsPanel { background: white; border: 1px solid #dfe2e7; }
 QTableView { background: white; alternate-background-color: #f6f7fa; gridline-color: #e1e4e9; border: 1px solid #dfe2e7; selection-background-color: #eeeeff; selection-color: #2f318e; font-size: 12px; }
 QHeaderView::section { background: #f5f6f8; color: #303841; border: none; border-bottom: 1px solid #dfe2e7; padding: 7px; font-weight: 600; font-size: 11px; }
+QDialog#multiCameraDialog, QDialog#cameraSetupDialog { background: #f6f7fb; }
+QDialog#cameraPreviewDialog { background: #20262d; }
+QDialog#cameraPreviewDialog QLabel#dialogHeading, QDialog#cameraPreviewDialog QLabel#dialogDetail { color: #f2f4f7; }
+QDialog#cameraPreviewDialog QPushButton { min-width: 34px; }
+QFrame#configCard, QFrame#cameraCard, QFrame#cameraEditor { background: white; border: 1px solid #dce1eb; border-radius: 9px; }
+QDialog#configurationDialog QScrollArea, QDialog#configurationDialog QScrollArea QWidget { background: white; }
+QDialog#multiCameraDialog QScrollArea { background: transparent; border: none; }
+QLineEdit, QDoubleSpinBox, QComboBox { background: #ffffff; color: #263142; border: 1px solid #cbd2df; border-radius: 6px; padding: 8px; min-height: 18px; selection-background-color: #e5e7fa; selection-color: #272a78; }
+QLineEdit:focus, QDoubleSpinBox:focus, QComboBox:focus { border-color: #676bd0; }
+QComboBox::drop-down { border: none; width: 25px; }
+QComboBox::down-arrow { image: url(mockup_ui/assets/chevron-down.svg); width: 14px; height: 14px; }
+QComboBox QAbstractItemView { background: white; color: #263142; selection-background-color: #e8eafa; selection-color: #2f318e; padding: 5px; }
+QCheckBox { spacing: 9px; color: #303a49; padding: 5px 0; }
+QCheckBox::indicator { width: 17px; height: 17px; border: 1px solid #aeb8c9; border-radius: 4px; background: white; }
+QCheckBox::indicator:checked { background: #494cb0; border-color: #494cb0; image: url(mockup_ui/assets/checkbox-check.svg); }
+QCheckBox:disabled { color: #9ca4b3; }
+QLabel#cameraStatus { background: #f0f2fa; color: #4c5870; border-radius: 4px; padding: 5px 8px; font-size: 11px; }

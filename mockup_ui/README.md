@@ -1,8 +1,9 @@
 # Forensikada video detection mockup
 
 The interface visualizes the existing weapon-detection system:
-**Import video → configure the video-enhancement stage → confirm threshold and start detection → scan with the ninth trained model → play the annotated
-video and show its detection summary.** BasicVSR++ processing is not implemented in the current mockup, so the detector still receives the original video. The service loads the trained model,
+**Import videos → configure detection → scan with the selected trained model → review annotated
+videos and detection summaries.** Select one recording for the existing single-camera workflow,
+or multiple recordings for the multi-camera workspace. The service loads the trained model,
 detects its **handgun** and **knife** classes, and produces the boxes and report.
 
 **Original project files modified: NONE.** Changes are confined to `mockup_ui/`.
@@ -15,6 +16,56 @@ From the repository root:
 
 ```powershell
 .\mockup_ui\.venv\Scripts\python.exe -B .\mockup_ui\app.py
+```
+
+## Multi-camera workspace
+
+Choose **Import videos**, then Ctrl-select two or more recordings. The workspace
+shows camera views together and offers a shared playback/seek control. Processing
+uses the existing full-video `ModelBridge` separately for each camera, in sequence;
+playback switches to the annotated recordings when all cameras finish.
+
+1. Enter an incident name or ID. The workspace assigns unique camera IDs for you.
+   Use **Camera and timing details** only if you need to rename cameras, record their
+   locations, document the alignment method, or adjust a recording's start offset.
+2. Confirm correspondence only after verifying the same incident and alignment.
+   Without this confirmation, cross-view observations are **Not Applicable**.
+3. Choose **Analyze cameras**. Model, confidence, CCTV intelligence and temporal
+   consistency settings apply to all cameras. Temporal validation remains separate
+   within each recording. Inputs are processed as imported; use enhanced recordings
+   as inputs if you have already prepared them with BasicVSR++.
+4. Use **Preview** on any camera to open a large player with a single Play/Pause
+   control and timeline. Scroll over the video to zoom, drag to pan, and
+   double-click to fit it again. The standard Windows title-bar controls remain
+   available.
+5. Review the combined timeline and each camera's **Review** panel. Selecting a
+   timeline row seeks all views to that session time. A view outside its recording
+   interval displays a placeholder rather than a stale frame.
+6. **Save session** writes `session.json`, `combined_observations.csv`, and the
+   existing video/PDF/HTML/JSON/review export package for each camera. The combined
+   session's MCCR, alignment information, matching observation IDs and analyst
+   decisions are in its JSON/CSV. Per-camera PDFs retain their single-camera scope;
+   this update does not add a consolidated multi-camera PDF.
+
+The manuscript's printed pages 70-72 (PDF pages 75-77) require same-incident
+correspondence, different camera IDs, class agreement and a predefined alignment
+window. The default window is ±1.5 seconds and is adjustable before processing.
+There is no cross-camera bounding-box IoU or automatic physical-object identity claim.
+Conflicting classes are **Uncertain**; eligible observations without support are
+**Not Corroborated**. Uncertain and Not Applicable are counted separately and
+excluded from the session MCCR denominator, following the manuscript's separate
+reporting rule. This differs from the older two-camera benchmark's inclusion of
+Uncertain in its denominator. Analyst decisions never alter automatic matches.
+
+Camera setup is locked after completion so it cannot silently relabel existing
+results. **Edit setup / new analysis** clears the displayed results before editing;
+previous saved exports and review records remain intact. Session exports preserve
+the source paths and offset settings, but reopening a whole multi-camera workspace
+from a manifest is not implemented. Individual reviews can still be reopened.
+
+Focused verification:
+```powershell
+.\mockup_ui\.venv\Scripts\python.exe -B -m unittest mockup_ui.test_multi_camera mockup_ui.test_observation_review -v
 ```
 
 Or use the existing working detector environment:
