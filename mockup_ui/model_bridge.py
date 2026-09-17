@@ -27,6 +27,7 @@ MODEL_PATH = MOCKUP_DIR / "models" / MODEL_FILENAME
 if not MODEL_PATH.is_file():
     MODEL_PATH = ROOT_DIR / MODEL_FILENAME
 
+CANDIDATE_V11_PATH = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v11.pth"
 CANDIDATE_V10_PATH = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v10.pth"
 CANDIDATE_V9_PATH = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v9.pth"
 CANDIDATE_V8_PATH = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v8.pth"
@@ -48,8 +49,10 @@ class ModelSetupError(RuntimeError):
 def discover_available_models() -> list[tuple[str, Path]]:
     """Discover available trained checkpoints for the UI (Single final production model)."""
     models: list[tuple[str, Path]] = []
-    if CANDIDATE_V10_PATH.is_file():
-        models.append(("Candidate Model V10 (Final Production SOTA: High Recall & Bounded Geometry)", CANDIDATE_V10_PATH))
+    if CANDIDATE_V11_PATH.is_file():
+        models.append(("Candidate Model V11 (Final Production SOTA: Multi-Angle & Hand-Shadow Immunity)", CANDIDATE_V11_PATH))
+    elif CANDIDATE_V10_PATH.is_file():
+        models.append(("Candidate Model V10 (Production SOTA: High Recall & Bounded Geometry)", CANDIDATE_V10_PATH))
     elif MODEL_PATH.is_file():
         models.append(("Model 9 Baseline (Fast R-CNN Standard)", MODEL_PATH))
     elif CANDIDATE_V9_PATH.is_file():
@@ -58,7 +61,9 @@ def discover_available_models() -> list[tuple[str, Path]]:
 
 
 def default_model_path() -> Path | None:
-    """Default to Candidate Model V10 if available, otherwise Model 9 Baseline."""
+    """Default to Candidate Model V11 if available, otherwise V10, then Model 9 Baseline."""
+    if CANDIDATE_V11_PATH.is_file():
+        return CANDIDATE_V11_PATH
     if CANDIDATE_V10_PATH.is_file():
         return CANDIDATE_V10_PATH
     if MODEL_PATH.is_file():
@@ -189,8 +194,8 @@ class ModelBridge:
         self.model_path: Path | None = None
         self.set_model_path(model_path)
         self.device = ""
-        self.enable_cctv_intelligence: bool = False
-        self.enable_temporal_consistency: bool = False
+        self.enable_cctv_intelligence: bool = True
+        self.enable_temporal_consistency: bool = True
 
     def set_model_path(self, path: Path | str | None):
         if path is not None:
@@ -225,9 +230,9 @@ class ModelBridge:
                       camera_id: str = "CAM-01"):
         """Return a result only after the existing pipeline finishes the video."""
         if enable_cctv_intelligence is None:
-            enable_cctv_intelligence = getattr(self, "enable_cctv_intelligence", False)
+            enable_cctv_intelligence = getattr(self, "enable_cctv_intelligence", True)
         if enable_temporal_consistency is None:
-            enable_temporal_consistency = getattr(self, "enable_temporal_consistency", False)
+            enable_temporal_consistency = getattr(self, "enable_temporal_consistency", True)
         if not 0.01 <= threshold <= 0.99:
             raise ValueError("Confidence threshold must be between 1% and 99%.")
         stat = video.path.stat()
@@ -279,11 +284,10 @@ class ModelBridge:
 
                     val_status = row.get("validation_status") or row.get("status") or "CONFIRMED_ALERT"
                     rej_reason = row.get("rejection_reason", "")
-                    # Suppressed environmental background traps are excluded from confirmed active detections
-                    if val_status in ("SUPPRESSED_TEMPORAL_FLICKER", "STATIC_BACKGROUND_TRAP",
-                                      "ANTHROPOMETRIC_SCALE_VIOLATION", "NO_PERSON_IN_SCENE",
-                                      "NO_PERSON_PROXIMITY", "BELOW_CLASS_THRESHOLD",
-                                      "HANDHELD_PHONE_ASPECT_RATIO"):
+                    # Only confirmed active detections meeting the configured threshold are displayed
+                    if val_status not in ("CONFIRMED_ALERT", "VALIDATED_TEMPORAL"):
+                        continue
+                    if conf < threshold:
                         continue
 
                     records.append({

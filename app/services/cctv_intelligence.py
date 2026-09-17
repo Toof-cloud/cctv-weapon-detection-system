@@ -41,11 +41,11 @@ def box_iou(b1: List[int], b2: List[int]) -> float:
     return inter / max(1.0, union)
 
 
-def resolve_cross_class_conflicts(detections: List[Dict[str, Any]], iou_threshold: float = 0.45) -> List[Dict[str, Any]]:
+def resolve_cross_class_conflicts(detections: List[Dict[str, Any]], iou_threshold: float = 0.30, containment_threshold: float = 0.50) -> List[Dict[str, Any]]:
     """
     Resolves competing multi-class weapon proposals on the exact same physical object.
-    When multiple proposals overlap with IoU >= iou_threshold on the same hand,
-    retains the candidate with highest confidence and preserves secondary class telemetry.
+    When multiple proposals overlap with IoU >= iou_threshold or containment >= containment_threshold,
+    retains the candidate with highest confidence and suppresses secondary class ghost proposals.
     """
     if len(detections) <= 1:
         return detections
@@ -55,10 +55,18 @@ def resolve_cross_class_conflicts(detections: List[Dict[str, Any]], iou_threshol
 
     while sorted_dets:
         winner = sorted_dets.pop(0)
+        w_box = winner["box"]
+        w_area = float(max(1, w_box[2] - w_box[0]) * max(1, w_box[3] - w_box[1]))
         i = 0
         while i < len(sorted_dets):
             cand = sorted_dets[i]
-            if box_iou(winner["box"], cand["box"]) >= iou_threshold:
+            c_box = cand["box"]
+            c_area = float(max(1, c_box[2] - c_box[0]) * max(1, c_box[3] - c_box[1]))
+            inter = box_overlap_area(w_box, c_box)
+            iou = inter / max(1.0, w_area + c_area - inter) if inter > 0 else 0.0
+            containment = inter / min(w_area, c_area) if inter > 0 else 0.0
+
+            if iou >= iou_threshold or containment >= containment_threshold:
                 if "secondary_proposals" not in winner:
                     winner["secondary_proposals"] = []
                 winner["secondary_proposals"].append({
@@ -90,9 +98,10 @@ class PersonDetector:
         self.model.eval()
 
         self.person_class_id = 1
+        self.tracker = TemporalPersonTracker(max_decay_frames=6, iou_threshold=0.25)
 
     def detect_persons(self, frame_bgr: np.ndarray) -> List[Dict[str, Any]]:
-        """Detect all humans in the current BGR frame."""
+        """Detect all humans in the current BGR frame with temporal persistence decay."""
         h, w = frame_bgr.shape[:2]
         frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
         tensor = torch.from_numpy(frame_rgb).permute(2, 0, 1).float() / 255.0
@@ -105,7 +114,8 @@ class PersonDetector:
         scores = predictions["scores"].detach().cpu().numpy()
         labels = predictions["labels"].detach().cpu().numpy()
 
-        persons = []
+        raw_persons = []
+        frame_area = float(h * w)
         for box, score, label in zip(boxes, scores, labels):
             if label == self.person_class_id and score >= self.score_threshold:
                 x1, y1, x2, y2 = [int(v) for v in box]
@@ -113,14 +123,81 @@ class PersonDetector:
                 y1 = max(0, min(h - 1, y1))
                 x2 = max(0, min(w - 1, x2))
                 y2 = max(0, min(h - 1, y2))
-                persons.append({
+                pw = max(1, x2 - x1)
+                ph = max(1, y2 - y1)
+                p_ar = pw / float(ph)
+                p_area_rat = (pw * ph) / frame_area
+                p_w_rat = pw / float(w)
+                # Reject unphysical crowd/counter cluster hallucinations:
+                # A single person cannot span > 55% of screen width or have AR (w/h) > 1.35
+                if p_w_rat > 0.55 or p_ar > 1.35:
+                    continue
+                raw_persons.append({
                     "box": [x1, y1, x2, y2],
                     "confidence": float(score),
                     "center": ((x1 + x2) / 2.0, (y1 + y2) / 2.0),
-                    "width": x2 - x1,
-                    "height": y2 - y1,
+                    "width": pw,
+                    "height": ph,
                 })
-        return persons
+        return self.tracker.update(raw_persons)
+
+
+class TemporalPersonTracker:
+    """Maintains a temporal decay memory buffer of detected humans across video frames.
+    
+    In real surveillance footage, humans do not vanish between consecutive 0.2s frames.
+    Maintains a 1.2-second (6-frame) decay persistence buffer so that momentary single-frame
+    person detector dropouts (caused by motion blur, head turns, or cashier counter occlusions)
+    do not falsely trigger NO_PERSON_IN_SCENE rejections on genuine armed suspects.
+    """
+    def __init__(self, max_decay_frames: int = 6, iou_threshold: float = 0.25):
+        self.max_decay_frames = max_decay_frames
+        self.iou_threshold = iou_threshold
+        self.buffered_persons: List[Dict[str, Any]] = []
+
+    def update(self, current_detections: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        updated = []
+        matched_buffer_indices = set()
+
+        for det in current_detections:
+            for idx, buf in enumerate(self.buffered_persons):
+                if idx in matched_buffer_indices:
+                    continue
+                iou = self._compute_iou(det["box"], buf["box"])
+                if iou >= self.iou_threshold:
+                    matched_buffer_indices.add(idx)
+                    break
+            updated.append({
+                **det,
+                "decay_frames": 0,
+                "is_buffered": False,
+            })
+
+        for idx, buf in enumerate(self.buffered_persons):
+            if idx not in matched_buffer_indices:
+                new_decay = buf.get("decay_frames", 0) + 1
+                if new_decay <= self.max_decay_frames:
+                    decayed_conf = buf["confidence"] * 0.92
+                    updated.append({
+                        **buf,
+                        "confidence": decayed_conf,
+                        "decay_frames": new_decay,
+                        "is_buffered": True,
+                    })
+
+        self.buffered_persons = updated
+        return updated
+
+    @staticmethod
+    def _compute_iou(box1, box2):
+        x1 = max(box1[0], box2[0])
+        y1 = max(box1[1], box2[1])
+        x2 = min(box1[2], box2[2])
+        y2 = min(box1[3], box2[3])
+        inter = max(0, x2 - x1) * max(0, y2 - y1)
+        a1 = max(1, (box1[2] - box1[0]) * (box1[3] - box1[1]))
+        a2 = max(1, (box2[2] - box2[0]) * (box2[3] - box2[1]))
+        return inter / (a1 + a2 - inter)
 
 
 class CentroidMotionTracker:
@@ -133,7 +210,7 @@ class CentroidMotionTracker:
     def __init__(
         self,
         max_drift_pixels: float = 30.0,
-        static_frame_limit: int = 10,
+        static_frame_limit: int = 3,
         max_missing_frames: int = 30,
     ):
         self.max_drift_pixels = max_drift_pixels
@@ -207,25 +284,20 @@ class CentroidMotionTracker:
                     track["class_max_conf"] = {track["class_name"]: 0.0}
                 track["class_max_conf"][cname] = max(track["class_max_conf"].get(cname, 0.0), conf)
 
-                init_cx, init_cy, _ = track["history"][0]
-                displacement = math.hypot(cand["cx"] - init_cx, cand["cy"] - init_cy)
-                track["displacement"] = displacement
+                recent_history = list(track["history"])[-max(3, self.static_frame_limit):]
+                recent_cx, recent_cy, _ = recent_history[0]
+                recent_drift = math.hypot(cand["cx"] - recent_cx, cand["cy"] - recent_cy)
+                track["displacement"] = round(recent_drift, 1)
 
-                # Physical motion release: If the candidate undergoes genuine displacement
-                # beyond the drift threshold, it is actively moving and cannot be a static background trap.
-                if displacement >= (self.max_drift_pixels * 1.5):
-                    is_static = False
-                else:
-                    is_static = (
-                        in_known_static_zone
-                        or track.get("is_static", False)
-                        or (track["total_frames"] >= self.static_frame_limit)
-                    )
+                # An object is static if it resides in a registered static zone,
+                # or has sustained minimal recent drift (< max_drift_pixels * 0.75) across static_frame_limit frames
+                has_minimal_recent_drift = (len(recent_history) >= self.static_frame_limit) and (recent_drift < self.max_drift_pixels * 0.75)
+                is_static = in_known_static_zone or has_minimal_recent_drift
                 track["is_static"] = is_static
 
                 cand["det"]["track_id"] = best_t_id
                 cand["det"]["track_frames"] = track["total_frames"]
-                cand["det"]["displacement"] = round(displacement, 1)
+                cand["det"]["displacement"] = round(recent_drift, 1)
                 cand["det"]["is_static"] = is_static
             else:
                 t_id = self.next_track_id
@@ -281,7 +353,7 @@ class TemporalConsistencyFilter:
         self,
         min_hits: int = 2,
         max_missing_frames: int = 15,
-        max_match_distance: float = 65.0,
+        max_match_distance: float = 115.0,
         enable_label_smoothing: bool = True,
     ):
         self.min_hits = min_hits
@@ -348,9 +420,7 @@ class TemporalConsistencyFilter:
                 }
                 matched_tracks.add(t_id)
                 cand["temporal_track_id"] = t_id
-                # Ultra-high confidence detection bypass: Detections with confidence >= 0.85
-                # are prioritized to avoid dropping brief draw/conceal weapon events.
-                cand["is_temporally_consistent"] = (self.min_hits <= 1 or cand.get("confidence", 0.0) >= 0.85)
+                cand["is_temporally_consistent"] = (self.min_hits <= 1)
 
         # Decay missing tracks
         for t_id in list(self.active_tracks.keys()):
@@ -373,15 +443,15 @@ class CCTVIntelligenceFilter:
         max_person_area_ratio: float = 0.20,
         max_person_width_ratio: float = 0.75,
         max_person_height_ratio: Union[float, Dict[str, float]] = 0.35,
-        min_person_reach_y: float = 0.20,
+        min_person_reach_y: float = 0.22,
         max_person_reach_y: float = 0.95,
         enable_person_gating: bool = True,
         enable_anthropometric_gating: bool = True,
         enable_motion_filtering: bool = True,
         enable_geometric_filtering: bool = True,
         enable_temporal_consistency: bool = True,
-        min_temporal_hits: int = 2,
-        static_frame_limit: int = 10,
+        min_temporal_hits: int = 3,
+        static_frame_limit: int = 3,
         device: Optional[torch.device] = None,
     ):
         self.class_thresholds = class_thresholds or {
@@ -428,7 +498,7 @@ class CCTVIntelligenceFilter:
             TemporalConsistencyFilter(
                 min_hits=min_temporal_hits,
                 max_missing_frames=15,
-                max_match_distance=65.0,
+                max_match_distance=115.0,
                 enable_label_smoothing=True,
             )
             if enable_temporal_consistency
@@ -471,11 +541,9 @@ class CCTVIntelligenceFilter:
 
             rejection_reason = None
 
-            # Check 1: Calibrated class-specific confidence threshold with two-tier hysteresis
-            # An isolated proposal requires full threshold (>= 0.50).
-            # An ongoing tracked weapon (track_frames >= 2) persists through 30 FPS motion blur down to 0.38.
-            is_ongoing_track = det.get("track_frames", 1) >= 2
-            req_threshold = 0.38 if is_ongoing_track else self.class_thresholds.get(cname, 0.50)
+            # Check 1: Strict class-specific confidence threshold
+            # Proposals must meet or exceed the user-configured confidence threshold.
+            req_threshold = float(self.class_thresholds.get(cname, 0.50))
             if conf < req_threshold:
                 rejection_reason = f"BELOW_CLASS_THRESHOLD ({conf:.1%} < {req_threshold:.1%})"
 
@@ -490,6 +558,30 @@ class CCTVIntelligenceFilter:
                         rejection_reason = f"UNPHYSICAL_ASPECT_RATIO ({aspect_ratio:.2f})"
                     elif cname == "handgun" and aspect_ratio < 0.50:
                         rejection_reason = f"UNPHYSICAL_HANDGUN_ASPECT_RATIO (AR={aspect_ratio:.2f} < 0.50 vertical distractor)"
+
+            # Check 2b: Photometric Material & Cast Shadow Feasibility
+            # Real firearms exhibit dark blued steel/polymer features (trigger guard, ejection port, muzzle).
+            # Empty hand gestures casting faint translucent shadows on bright doors/walls have virtually zero
+            # deep-black pixels (deep_dark < 1.2%) despite high background brightness (mean_V > 115).
+            # Smooth dark fabric folds/creases have low Laplacian variance (< 10.0) without metallic weapon edges.
+            if rejection_reason is None and self.enable_geometric_filtering:
+                crop = frame_bgr[max(0, y1):min(h, y2), max(0, x1):min(w, x2)]
+                if crop.size > 0:
+                    crop_hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
+                    v_channel = crop_hsv[:, :, 2]
+                    deep_dark_ratio = float(np.mean(v_channel < 50))
+                    mean_v = float(np.mean(v_channel))
+                    if cname == "handgun" and deep_dark_ratio < 0.012 and mean_v > 115.0:
+                        rejection_reason = f"TRANSLUCENT_WALL_SHADOW (deep_dark={deep_dark_ratio:.1%} < 1.2% on bright surface)"
+                    elif cname == "handgun":
+                        gray_crop = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+                        lap_var = float(cv2.Laplacian(gray_crop, cv2.CV_64F).var())
+                        if lap_var < 10.0 and mean_v < 80.0:
+                            rejection_reason = f"SMOOTH_FABRIC_CREASE_TRAP (laplacian={lap_var:.1f} < 10.0 on dark fabric)"
+                        else:
+                            bright_bg_ratio = float(np.mean((v_channel > 130) & (crop_hsv[:, :, 1] < 40)))
+                            if bright_bg_ratio > 0.48 and deep_dark_ratio < 0.25:
+                                rejection_reason = f"EMPTY_SILHOUETTE_BACKGROUND_TRAP (bright_bg={bright_bg_ratio:.1%} > 48% on dangling limb)"
 
             # Human proximity assessment & closest person association
             is_adjacent_to_person = False
@@ -508,7 +600,7 @@ class CCTVIntelligenceFilter:
                 for p in persons:
                     pbox = p["box"]
                     p_h = max(1, pbox[3] - pbox[1])
-                    person_reach = max(self.max_edge_distance, 0.50 * p_h)
+                    person_reach = max(self.max_edge_distance, 0.35 * p_h)
                     dist = box_edge_distance(wbox, pbox)
                     overlap = box_overlap_area(wbox, pbox)
 
@@ -525,14 +617,19 @@ class CCTVIntelligenceFilter:
                     associated_person = best_overlapping_person
                     is_adjacent_to_person = True
                     pbox = associated_person["box"]
+                    p_w = max(1, pbox[2] - pbox[0])
                     p_h = max(1, pbox[3] - pbox[1])
-                    allowed_reach = max(self.max_edge_distance, 0.50 * p_h)
+                    allowed_reach = max(self.max_edge_distance, 0.35 * p_h)
                     rel_y = (cy - pbox[1]) / max(1, p_h)
                     is_bottom_truncated = (pbox[3] >= h - 40)
                     effective_max_reach_y = 1.15 if is_bottom_truncated else self.max_person_reach_y
                     # Handheld objects must fall within realistic arm/hand manipulation envelope.
-                    # A suspect holding a weapon steady remains is_held_by_person = True.
-                    is_overhead = (wbox[1] < pbox[1])
+                    # Genuine overhead weapon: bottom of weapon is within 22% of head, horizontally aligned with torso
+                    is_overhead = (
+                        (wbox[3] <= pbox[1] + 0.12 * p_h)
+                        and (wbox[3] >= pbox[1] - 0.22 * p_h)
+                        and (pbox[0] - 0.20 * p_w <= cx <= pbox[2] + 0.20 * p_w)
+                    )
                     if (self.min_person_reach_y <= rel_y <= effective_max_reach_y) or is_overhead:
                         is_held_by_person = True
                 elif closest_person is not None:
@@ -541,12 +638,21 @@ class CCTVIntelligenceFilter:
                     if min_edge_dist <= allowed_reach:
                         is_adjacent_to_person = True
                         pbox = associated_person["box"]
+                        p_w = max(1, pbox[2] - pbox[0])
                         p_h = max(1, pbox[3] - pbox[1])
                         rel_y = (cy - pbox[1]) / max(1, p_h)
                         is_bottom_truncated = (pbox[3] >= h - 40)
                         effective_max_reach_y = 1.15 if is_bottom_truncated else self.max_person_reach_y
-                        is_overhead = (wbox[1] < pbox[1])
-                        if (self.min_person_reach_y <= rel_y <= effective_max_reach_y) or is_overhead:
+                        is_overhead = (
+                            (wbox[3] <= pbox[1] + 0.12 * p_h)
+                            and (wbox[3] >= pbox[1] - 0.22 * p_h)
+                            and (pbox[0] - 0.20 * p_w <= cx <= pbox[2] + 0.20 * p_w)
+                        )
+                        # Physical detachment rule: If the object does NOT overlap the person box (overlap == 0)
+                        # and has had negligible displacement (< 8.0px), it is a stationary fixture (e.g. POS terminal on counter)
+                        # and cannot be held by the person.
+                        is_moving = det.get("displacement", 0.0) >= 8.0
+                        if ((self.min_person_reach_y <= rel_y <= effective_max_reach_y) or is_overhead) and (overlap > 0 or is_moving or min_edge_dist <= 15.0):
                             is_held_by_person = True
 
             # Check 3: Spatial person presence & proximity gating
@@ -588,17 +694,44 @@ class CCTVIntelligenceFilter:
                 is_moving = w_disp >= 8.0
                 max_h_ratio = min(0.45, base_max_h * 1.25) if is_moving else base_max_h
 
-                if p_area_ratio > self.max_person_area_ratio:
-                    rejection_reason = f"ANTHROPOMETRIC_SCALE_VIOLATION (area {p_area_ratio:.1%} > {self.max_person_area_ratio:.1%} of person)"
+                if is_bottom_truncated:
+                    max_h_ratio = min(0.55, max_h_ratio * 1.35)
+                    p_area_limit = self.max_person_area_ratio * 1.35
+                else:
+                    p_area_limit = self.max_person_area_ratio
+
+                if p_area_ratio > p_area_limit:
+                    rejection_reason = f"ANTHROPOMETRIC_SCALE_VIOLATION (area {p_area_ratio:.1%} > {p_area_limit:.1%} of person)"
                 elif p_w_ratio > self.max_person_width_ratio:
                     rejection_reason = f"ANTHROPOMETRIC_SCALE_VIOLATION (width {p_w_ratio:.1%} > {self.max_person_width_ratio:.1%} of person)"
                 elif p_h_ratio > max_h_ratio:
                     rejection_reason = f"ANTHROPOMETRIC_SCALE_VIOLATION (height {p_h_ratio:.1%} > {max_h_ratio:.1%} of person)"
-                is_overhead = (wbox[1] < pbox[1])
+                # Genuine overhead weapon: bottom of weapon box must be near or above top of head (wbox[3] <= pbox[1] + 0.12 * p_h)
+                is_overhead = (
+                    (wbox[3] <= pbox[1] + 0.12 * p_h)
+                    and (wbox[3] >= pbox[1] - 0.22 * p_h)
+                    and (pbox[0] - 0.20 * p_w <= cx <= pbox[2] + 0.20 * p_w)
+                )
                 if rel_y < self.min_person_reach_y and not is_overhead:
-                    rejection_reason = f"UNPHYSICAL_PERSON_LOCATION (rel_y={rel_y:.2f} head/hair region)"
+                    rejection_reason = f"UNPHYSICAL_PERSON_LOCATION (rel_y={rel_y:.2f} head/hair/hat region)"
                 elif rel_y > effective_max_reach_y:
                     rejection_reason = f"UNPHYSICAL_PERSON_LOCATION (rel_y={rel_y:.2f} below feet)"
+
+                # Architectural vertical post/column suppression (e.g. stair support poles, door frames):
+                # An object cannot be a tall vertical column (height > 140px, aspect_ratio < 0.38) reaching near the floor
+                # (wbox[3] >= pbox[3] - 0.20 * p_h) while the person is upright.
+                if rejection_reason is None and cname in ["knife", "handgun"]:
+                    aspect_ratio = box_w / max(1, box_h)
+                    if box_h > 140 and aspect_ratio < 0.38 and wbox[3] >= pbox[3] - 0.20 * p_h:
+                        rejection_reason = f"UNPHYSICAL_ARCHITECTURAL_COLUMN (vertical post h={box_h}px, AR={aspect_ratio:.2f})"
+
+                # Far-away torso accessory / cross-body sling-bag discrimination:
+                # When a person is distant/mid-distance (p_h <= 320px), dark pouches/bags resting on the chest/torso/hip
+                # without arm extension are sling bags or pouches, not handheld weapons.
+                if rejection_reason is None and cname == "handgun" and p_h <= 320:
+                    torso_x_center = (cx - pbox[0]) / max(1, p_w)
+                    if 0.05 <= torso_x_center <= 1.15 and 0.20 <= rel_y <= 0.70:
+                        rejection_reason = f"FAR_FIELD_TORSO_ACCESSORY (torso pouch rel_x={torso_x_center:.2f}, rel_y={rel_y:.2f} on distant person)"
 
             # Check 4: Static environmental trap suppression
             # If an object is static, it is suppressed UNLESS it is physically held by a person (e.g. suspect aiming steadily).
@@ -608,8 +741,8 @@ class CCTVIntelligenceFilter:
                         tf = det.get("track_frames", 0)
                         disp = det.get("displacement", 0.0)
                         rejection_reason = f"STATIC_BACKGROUND_TRAP ({tf} frames, drift={disp}px)"
-                        # Register in persistent exclusion memory only if unheld and no person adjacent
-                        if self.motion_tracker and not is_adjacent_to_person:
+                        # Register in persistent exclusion memory for unheld fixtures (e.g. counter POS terminals, railings)
+                        if self.motion_tracker and (not is_adjacent_to_person or not is_held_by_person):
                             self.motion_tracker.register_static_zone(cx, cy, cname)
 
             eval_entry = {
@@ -628,8 +761,9 @@ class CCTVIntelligenceFilter:
                 eval_entry["temporal_track_id"] = t_id
                 eval_entry["temporal_hits"] = hits
 
-                if self.min_temporal_hits > 1 and hits < self.min_temporal_hits:
+                if self.min_temporal_hits > 1 and hits < self.min_temporal_hits and not is_consistent:
                     # In online processing, first hit is pending temporal confirmation
+                    # UNLESS it is verified as an ultra-high confidence in-hand threat (is_consistent = True)
                     status = "PENDING_CONFIRMATION"
                     validation_status = "PENDING_TEMPORAL"
                 else:
@@ -663,12 +797,29 @@ class CCTVIntelligenceFilter:
         
         1. If a tracklet achieved >= min_hits total detections across the video, its initial
            frames (previously marked PENDING_CONFIRMATION) are elevated to CONFIRMED_ALERT.
-        2. If a tracklet had fewer than min_hits total detections (isolated 1-frame transient flicker),
+        2. If an in-hand weapon achieved ultra-high confidence (>= 0.85), it is elevated
+           to prevent brief fast-draw weapon presentations from being lost.
+        3. If a tracklet had fewer than min_hits total detections (isolated 1-frame transient flicker),
            it is permanently marked SUPPRESSED with rejection_reason 'SUPPRESSED_TEMPORAL_FLICKER'.
         """
         required_hits = min_hits if min_hits is not None else self.min_temporal_hits
         if required_hits <= 1:
             return records
+
+        # If any detection in a tracklet was confirmed as STATIC_BACKGROUND_TRAP,
+        # then all earlier unconfirmed frames in that stationary tracklet are also static background traps.
+        static_track_ids = set()
+        for r in records:
+            t_id = r.get("temporal_track_id")
+            if t_id is not None and "STATIC_BACKGROUND_TRAP" in str(r.get("rejection_reason", "")):
+                static_track_ids.add(t_id)
+
+        for r in records:
+            t_id = r.get("temporal_track_id")
+            if t_id in static_track_ids:
+                r["status"] = "SUPPRESSED"
+                r["validation_status"] = "STATIC_BACKGROUND_TRAP"
+                r["rejection_reason"] = "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
 
         # Group valid proposals by temporal_track_id
         track_totals: Dict[int, int] = {}
@@ -681,6 +832,7 @@ class CCTVIntelligenceFilter:
             t_id = r.get("temporal_track_id")
             if t_id is not None and not r.get("rejection_reason"):
                 total = track_totals.get(t_id, 0)
+                conf_score = float(r.get("confidence_score") or r.get("confidence") or 0.0)
                 if total >= required_hits:
                     r["status"] = "CONFIRMED_ALERT"
                     r["validation_status"] = "VALIDATED_TEMPORAL"
@@ -710,18 +862,19 @@ class CCTVIntelligenceFilter:
             knife_stats = stats.get("knife", {"count": 0, "max_conf": 0.0, "sum_conf": 0.0})
             handgun_stats = stats.get("handgun", {"count": 0, "max_conf": 0.0, "sum_conf": 0.0})
 
-            # Physical consistency rule: In surveillance CCTV, knives held pointing forward at distance
-            # have foreshortened blades where only the dark grip/fist is visible, yielding handgun proposals.
-            # When the suspect approaches or swings the weapon, the blade becomes clearly visible.
-            # In physical reality, a handgun cannot transform into an optical knife with a shiny blade.
-            # Therefore, if a tracklet achieves definitive optical knife confirmation (>= 0.85)
-            # and its peak confidence rivals or exceeds the distant handgun proposals, the track resolves to knife.
-            if knife_stats["max_conf"] >= 0.85 and knife_stats["max_conf"] >= handgun_stats["max_conf"]:
+            # Physical consistency rule: In surveillance CCTV, a track's true weapon identity
+            # is governed by majority evidence across its trajectory.
+            # If handgun detections clearly dominate (count >= 1.5 * knife count or sum_conf >= 1.5 * knife sum_conf),
+            # reconcile all detections in that track to handgun.
+            if handgun_stats["count"] >= max(2, int(knife_stats["count"] * 1.5)) or (handgun_stats["sum_conf"] > knife_stats["sum_conf"] * 1.5 and handgun_stats["count"] >= 2):
+                track_consensus[t_id] = "handgun"
+            elif knife_stats["count"] >= max(2, int(handgun_stats["count"] * 1.5)) or (knife_stats["sum_conf"] > handgun_stats["sum_conf"] * 1.5 and knife_stats["count"] >= 2):
                 track_consensus[t_id] = "knife"
-            elif handgun_stats["max_conf"] >= 0.85 and handgun_stats["max_conf"] >= knife_stats["max_conf"]:
+            elif knife_stats["max_conf"] >= 0.90 and knife_stats["max_conf"] > handgun_stats["max_conf"] + 0.10:
+                track_consensus[t_id] = "knife"
+            elif handgun_stats["max_conf"] >= 0.90 and handgun_stats["max_conf"] > knife_stats["max_conf"] + 0.10:
                 track_consensus[t_id] = "handgun"
             else:
-                # Dominant class decided by total accumulated confidence and vote count
                 track_consensus[t_id] = max(stats.keys(), key=lambda c: (stats[c]["count"], stats[c]["sum_conf"]))
 
         # Apply tracklet consensus strictly to each distinct physical weapon track

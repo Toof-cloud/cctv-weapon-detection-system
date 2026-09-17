@@ -103,9 +103,12 @@ class EnhancedWeaponDataset(Dataset):
             v10_neg_dir = root / "research" / "model_improvement" / "dataset" / "hard_negatives_v10"
             if v10_neg_dir.exists():
                 neg_paths.extend(sorted(list(v10_neg_dir.glob("*.jpg"))))
+            v11_neg_dir = root / "research" / "model_improvement" / "dataset" / "hard_negatives_v11"
+            if v11_neg_dir.exists():
+                neg_paths.extend(sorted(list(v11_neg_dir.glob("*.jpg"))))
             for np_path in neg_paths:
                 self.items.append({"type": "negative", "path": np_path})
-            print(f"  [EnhancedWeaponDataset] Injected {len(neg_paths)} targeted hard-negative background samples (crops + full-frame + V9/V10 residuals).")
+            print(f"  [EnhancedWeaponDataset] Injected {len(neg_paths)} targeted hard-negative background samples (crops + full-frame + V9/V10/V11 residuals).")
 
     def __len__(self):
         return len(self.items)
@@ -178,17 +181,22 @@ class EnhancedWeaponDataset(Dataset):
             boxes = scaled_boxes
             w, h = new_w, new_h
 
-        # 9. CCTV Downward Angle Perspective Tilt (20% probability)
-        if random.random() < 0.20:
-            shear_factor = random.uniform(-0.12, 0.12)
-            image = image.transform((w, h), Image.AFFINE, (1, shear_factor, 0, 0, 1, 0), resample=Image.BILINEAR)
-            sheared_boxes = []
+        # 10. Synthetic Hand-Grip Occlusion (CutMix on grip/handle: 25% probability)
+        # Forces model to recognize knives by blade bevel/spine and guns by slide serrations/barrel
+        if random.random() < 0.25 and boxes:
+            img_np = np.array(image)
             for box in boxes:
-                x1, y1, x2, y2 = box
-                nx1 = min(w - 1, max(0, x1 + shear_factor * y1))
-                nx2 = min(w - 1, max(0, x2 + shear_factor * y2))
-                sheared_boxes.append([min(nx1, nx2), y1, max(nx1, nx2), y2])
-            boxes = sheared_boxes
+                bx1, by1, bx2, by2 = [int(v) for v in box]
+                bw, bh = bx2 - bx1, by2 - by1
+                if bw > 15 and bh > 15:
+                    occ_y1 = int(by1 + bh * 0.65)
+                    occ_y2 = by2
+                    c_val = random.choice([
+                        [random.randint(160, 220), random.randint(120, 180), random.randint(90, 150)],
+                        [random.randint(20, 45), random.randint(20, 45), random.randint(20, 45)]
+                    ])
+                    img_np[occ_y1:occ_y2, bx1:bx2] = c_val
+            image = Image.fromarray(img_np)
 
         return image, boxes
 

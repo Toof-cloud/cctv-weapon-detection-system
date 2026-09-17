@@ -53,6 +53,7 @@ CHAT_CONTEXT/repository_structure.txt
 
 # Scratch diagnostic files
 scratch/
+research/model_improvement/evaluations/sample_inspection_frames/
 
 # Generated dataset folders
 training/*_data/

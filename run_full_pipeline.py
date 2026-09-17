@@ -155,6 +155,7 @@ def detect_video_with_model(
     enable_cctv_intelligence: bool = True,
     enable_temporal_consistency: bool = True,
     camera_id: str = "CAM-01",
+    min_temporal_hits: int = 3,
 ):
     input_file = Path(input_path)
     output_file = Path(output_path)
@@ -201,17 +202,17 @@ def detect_video_with_model(
 
     cctv_filter = None
     if enable_cctv_intelligence:
-        print("[CCTV Intelligence] Activated: Centroid Motion Tracker + MobileNetV3 Person Proximity Gate + Geometric Area Filter + Temporal Consistency")
+        print(f"[CCTV Intelligence] Activated: Centroid Motion Tracker + MobileNetV3 Person Proximity Gate + Geometric Area Filter + Temporal Consistency (min_hits={min_temporal_hits})")
         cctv_filter = CCTVIntelligenceFilter(
             device=detector.device,
             enable_person_gating=True,
             enable_motion_filtering=True,
             enable_geometric_filtering=True,
             enable_temporal_consistency=enable_temporal_consistency,
-            min_temporal_hits=2,
+            min_temporal_hits=min_temporal_hits,
             class_thresholds={
-                "handgun": max(0.50, confidence_threshold),
-                "knife": max(0.50, confidence_threshold),
+                "handgun": float(confidence_threshold),
+                "knife": float(confidence_threshold),
             },
         )
 
@@ -231,11 +232,14 @@ def detect_video_with_model(
 
         if frame_number % frame_interval == 0:
             if cctv_filter is not None:
-                raw_detections = detector.detect_frame(frame, min_threshold=0.35)
+                raw_detections = detector.detect_frame(frame, min_threshold=min(0.35, float(confidence_threshold)))
                 confirmed_detections, audit_records = cctv_filter.process_frame(
                     frame, raw_detections, frame_idx=analyzed_frames
                 )
-                active_detections = confirmed_detections
+                active_detections = [
+                    d for d in confirmed_detections
+                    if float(d.get("confidence", 0.0)) >= float(confidence_threshold)
+                ]
                 evaluated_to_log = audit_records
             else:
                 raw_detections = detector.detect_frame(frame)
@@ -322,7 +326,7 @@ def detect_video_with_model(
 
     # Reconcile temporal consistency across whole video
     if cctv_filter and enable_temporal_consistency:
-        detection_records = cctv_filter.reconcile_video_records(detection_records, min_hits=2)
+        detection_records = cctv_filter.reconcile_video_records(detection_records, min_hits=min_temporal_hits)
 
         # Re-render video and detected PNG frames with final reconciled forensic labels
         confirmed_by_frame = {}
@@ -370,6 +374,12 @@ def detect_video_with_model(
                 if output_file.exists():
                     output_file.unlink()
                 temp_output.rename(output_file)
+        else:
+            # If all detections were reconciled as transient flickers/distractors (0 confirmed alerts),
+            # remove any lingering PNG frames that were saved during online pass
+            if save_detected_frames and detected_frames_dir.exists():
+                for p in detected_frames_dir.glob("*.png"):
+                    p.unlink()
 
     # Export via ReportService (CSV, JSON, HTML, PDF)
     report_service = ReportService(output_dir=csv_path.parent)
@@ -443,7 +453,7 @@ def detect_video_with_model(
         "height": height,
         "total_frames": frame_number,
         "analyzed_frames": analyzed_frames,
-        "total_detections": total_detections,
+        "total_detections": sum(1 for r in detection_records if r.get("status") == "CONFIRMED_ALERT" or r.get("validation_status") == "VALIDATED_TEMPORAL"),
         "duration_seconds": duration,
         "csv_report": str(csv_path),
         "detected_frames_dir": str(detected_frames_dir),

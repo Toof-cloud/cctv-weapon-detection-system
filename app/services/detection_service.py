@@ -55,9 +55,9 @@ class DetectionService:
             )
 
         model_name = self.model_path.name.lower()
-        if "v10" in model_name:
+        if "v11" in model_name or "v10" in model_name:
             checkpoint = torch.load(self.model_path, map_location=self.device)
-            scales = checkpoint.get("anchor_scales", (16, 32, 64, 128, 256))
+            scales = checkpoint.get("anchor_scales", (8, 16, 32, 64, 128) if "v11" in model_name else (16, 32, 64, 128, 256))
             self.model = get_model(num_classes=3, anchor_scales=scales, pretrained=False)
             rpn_clip = checkpoint.get("rpn_bbox_xform_clip", math.log(1.4))
             roi_clip = checkpoint.get("roi_bbox_xform_clip", math.log(1.4))

@@ -818,9 +818,7 @@ class MainWindow(QMainWindow):
         self.threshold_slider.setValue(50)
         self.threshold_value = QLabel("50%")
         self.threshold_value.setObjectName("thresholdValue")
-        self.threshold_slider.valueChanged.connect(
-            lambda value: self.threshold_value.setText(f"{value}%")
-        )
+        self.threshold_slider.valueChanged.connect(self._on_threshold_slider_changed)
         threshold_row.addWidget(self.threshold_slider, 1)
         threshold_row.addWidget(self.threshold_value)
         layout.addLayout(threshold_row)
@@ -1289,6 +1287,35 @@ class MainWindow(QMainWindow):
         self.threshold_slider.setEnabled(True)
         self._thread = None
         self._update_model_label()
+
+    def _on_threshold_slider_changed(self, value):
+        self.threshold_value.setText(f"{value}%")
+        if self.video_info is not None and self.result is None:
+            self.status_detail.setText(f"Selected threshold: {value}%. Review the settings to continue.")
+        if self.result is not None and hasattr(self.result, "detections"):
+            thresh_float = value / 100.0
+            filtered = [r for r in self.result.detections if float(r.get("confidence", 0.0)) >= thresh_float]
+            self.observation_model.set_records(filtered)
+            self.total_metric.setText(f"{len(filtered):,}")
+            h_count = sum(1 for r in filtered if r.get("class_name") == "handgun")
+            k_count = sum(1 for r in filtered if r.get("class_name") == "knife")
+            self.handgun_metric.setText(f"{h_count:,}")
+            self.knife_metric.setText(f"{k_count:,}")
+            by_frame = {}
+            for r in filtered:
+                by_frame.setdefault(r["frame_number"], []).append(r)
+            self._detections_by_frame = by_frame
+            curr_fn = getattr(self.player, "current_frame_number", None)
+            if curr_fn is not None:
+                self._frame_changed(curr_fn)
+            if filtered:
+                self.summary_message.setText(
+                    f"{len(filtered):,} detection(s) meet the {value}% threshold across {len(by_frame):,} frame(s)."
+                )
+            else:
+                self.summary_message.setText(
+                    f"No handgun or knife met the {value}% confidence threshold in this video."
+                )
 
     def _render_results(self, result):
         self.observation_model.set_records(result.detections)
