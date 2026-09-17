@@ -1,0 +1,2189 @@
+[
+  {
+    "video_name": "Screen Recording 2026-09-10 214028-Riffle.mp4",
+    "category": "1 RIFFLE VIDEO",
+    "total_frames": 435,
+    "elapsed_seconds": 69.7,
+    "model9": {
+      "total_detections": 350,
+      "by_class": {
+        "Handgun": 171,
+        "Knife": 179
+      }
+    },
+    "candidate_v6": {
+      "total_detections": 190,
+      "by_class": {
+        "Handgun": 160,
+        "Knife": 30
+      }
+    },
+    "diff_count": 6,
+    "diff_records": [
+      {
+        "frame": 11,
+        "image": "Screen_Recording_2026_09_10_214028_Riffle_frame_0011_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.7360000014305115,
+            [
+              211,
+              673,
+              1730,
+              972
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 12,
+        "image": "Screen_Recording_2026_09_10_214028_Riffle_frame_0012_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.6570000052452087,
+            [
+              0,
+              692,
+              1763,
+              987
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 13,
+        "image": "Screen_Recording_2026_09_10_214028_Riffle_frame_0013_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.6700000166893005,
+            [
+              0,
+              692,
+              1763,
+              987
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 15,
+        "image": "Screen_Recording_2026_09_10_214028_Riffle_frame_0015_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.5130000114440918,
+            [
+              0,
+              697,
+              1749,
+              971
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.7860000133514404,
+            [
+              1168,
+              246,
+              1278,
+              397
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 16,
+        "image": "Screen_Recording_2026_09_10_214028_Riffle_frame_0016_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.9380000233650208,
+            [
+              0,
+              698,
+              1741,
+              972
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 17,
+        "image": "Screen_Recording_2026_09_10_214028_Riffle_frame_0017_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.9139999747276306,
+            [
+              64,
+              694,
+              1494,
+              975
+            ]
+          ],
+          [
+            "Handgun",
+            0.8220000267028809,
+            [
+              1197,
+              242,
+              1284,
+              385
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.953000009059906,
+            [
+              1196,
+              245,
+              1284,
+              387
+            ]
+          ]
+        ]
+      }
+    ],
+    "annotated_video": "C:\\Users\\pc\\Documents\\THESIS 1\\cctv-weapon-detection-system\\research\\model_improvement\\evaluations\\new_videos_outputs\\Screen_Recording_2026_09_10_214028_Riffle_annotated.mp4"
+  },
+  {
+    "video_name": "Screen Recording 2026-09-10 215511-KNIFE.mp4",
+    "category": "KNIFE",
+    "total_frames": 884,
+    "elapsed_seconds": 139.9,
+    "model9": {
+      "total_detections": 402,
+      "by_class": {
+        "Handgun": 217,
+        "Knife": 185
+      }
+    },
+    "candidate_v6": {
+      "total_detections": 248,
+      "by_class": {
+        "Handgun": 139,
+        "Knife": 109
+      }
+    },
+    "diff_count": 6,
+    "diff_records": [
+      {
+        "frame": 22,
+        "image": "Screen_Recording_2026_09_10_215511_KNIFE_frame_0022_diff.jpg",
+        "m9": [],
+        "v6": [
+          [
+            "Knife",
+            0.5920000076293945,
+            [
+              1132,
+              495,
+              1390,
+              705
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 23,
+        "image": "Screen_Recording_2026_09_10_215511_KNIFE_frame_0023_diff.jpg",
+        "m9": [],
+        "v6": [
+          [
+            "Knife",
+            0.550000011920929,
+            [
+              1132,
+              494,
+              1390,
+              705
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 24,
+        "image": "Screen_Recording_2026_09_10_215511_KNIFE_frame_0024_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.7839999794960022,
+            [
+              1142,
+              490,
+              1378,
+              704
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Knife",
+            0.9409999847412109,
+            [
+              1137,
+              489,
+              1380,
+              706
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 26,
+        "image": "Screen_Recording_2026_09_10_215511_KNIFE_frame_0026_diff.jpg",
+        "m9": [],
+        "v6": [
+          [
+            "Knife",
+            0.640999972820282,
+            [
+              1133,
+              486,
+              1389,
+              712
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 29,
+        "image": "Screen_Recording_2026_09_10_215511_KNIFE_frame_0029_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.5099999904632568,
+            [
+              269,
+              34,
+              456,
+              1006
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 55,
+        "image": "Screen_Recording_2026_09_10_215511_KNIFE_frame_0055_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.5320000052452087,
+            [
+              301,
+              19,
+              480,
+              872
+            ]
+          ]
+        ],
+        "v6": []
+      }
+    ],
+    "annotated_video": "C:\\Users\\pc\\Documents\\THESIS 1\\cctv-weapon-detection-system\\research\\model_improvement\\evaluations\\new_videos_outputs\\Screen_Recording_2026_09_10_215511_KNIFE_annotated.mp4"
+  },
+  {
+    "video_name": "Screen Recording 2026-09-10 215822-KNIFE.mp4",
+    "category": "KNIFE",
+    "total_frames": 1039,
+    "elapsed_seconds": 158.3,
+    "model9": {
+      "total_detections": 38,
+      "by_class": {
+        "Handgun": 30,
+        "Knife": 8
+      }
+    },
+    "candidate_v6": {
+      "total_detections": 31,
+      "by_class": {
+        "Handgun": 20,
+        "Knife": 11
+      }
+    },
+    "diff_count": 6,
+    "diff_records": [
+      {
+        "frame": 23,
+        "image": "Screen_Recording_2026_09_10_215822_KNIFE_frame_0023_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.625,
+            [
+              1327,
+              353,
+              1392,
+              446
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 24,
+        "image": "Screen_Recording_2026_09_10_215822_KNIFE_frame_0024_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.621999979019165,
+            [
+              1327,
+              353,
+              1392,
+              446
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 31,
+        "image": "Screen_Recording_2026_09_10_215822_KNIFE_frame_0031_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.5730000138282776,
+            [
+              1283,
+              456,
+              1347,
+              532
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 32,
+        "image": "Screen_Recording_2026_09_10_215822_KNIFE_frame_0032_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.6050000190734863,
+            [
+              1283,
+              456,
+              1346,
+              532
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 99,
+        "image": "Screen_Recording_2026_09_10_215822_KNIFE_frame_0099_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.6930000185966492,
+            [
+              1253,
+              448,
+              1318,
+              520
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 100,
+        "image": "Screen_Recording_2026_09_10_215822_KNIFE_frame_0100_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.7860000133514404,
+            [
+              1254,
+              449,
+              1318,
+              520
+            ]
+          ]
+        ],
+        "v6": []
+      }
+    ],
+    "annotated_video": "C:\\Users\\pc\\Documents\\THESIS 1\\cctv-weapon-detection-system\\research\\model_improvement\\evaluations\\new_videos_outputs\\Screen_Recording_2026_09_10_215822_KNIFE_annotated.mp4"
+  },
+  {
+    "video_name": "Screen Recording 2026-09-10 220101-KNIFE.mp4",
+    "category": "KNIFE",
+    "total_frames": 927,
+    "elapsed_seconds": 143.4,
+    "model9": {
+      "total_detections": 344,
+      "by_class": {
+        "Handgun": 9,
+        "Knife": 335
+      }
+    },
+    "candidate_v6": {
+      "total_detections": 160,
+      "by_class": {
+        "Handgun": 4,
+        "Knife": 156
+      }
+    },
+    "diff_count": 6,
+    "diff_records": [
+      {
+        "frame": 0,
+        "image": "Screen_Recording_2026_09_10_220101_KNIFE_frame_0000_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.652999997138977,
+            [
+              1792,
+              639,
+              1918,
+              786
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 1,
+        "image": "Screen_Recording_2026_09_10_220101_KNIFE_frame_0001_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.652999997138977,
+            [
+              1792,
+              639,
+              1918,
+              786
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 2,
+        "image": "Screen_Recording_2026_09_10_220101_KNIFE_frame_0002_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.652999997138977,
+            [
+              1792,
+              639,
+              1918,
+              786
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 3,
+        "image": "Screen_Recording_2026_09_10_220101_KNIFE_frame_0003_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.652999997138977,
+            [
+              1792,
+              639,
+              1918,
+              786
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 4,
+        "image": "Screen_Recording_2026_09_10_220101_KNIFE_frame_0004_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.6489999890327454,
+            [
+              1792,
+              639,
+              1918,
+              786
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 5,
+        "image": "Screen_Recording_2026_09_10_220101_KNIFE_frame_0005_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.6480000019073486,
+            [
+              1792,
+              639,
+              1918,
+              786
+            ]
+          ]
+        ],
+        "v6": []
+      }
+    ],
+    "annotated_video": "C:\\Users\\pc\\Documents\\THESIS 1\\cctv-weapon-detection-system\\research\\model_improvement\\evaluations\\new_videos_outputs\\Screen_Recording_2026_09_10_220101_KNIFE_annotated.mp4"
+  },
+  {
+    "video_name": "Screen Recording 2026-09-10 220510-KNIFE.mp4",
+    "category": "KNIFE",
+    "total_frames": 429,
+    "elapsed_seconds": 67.2,
+    "model9": {
+      "total_detections": 448,
+      "by_class": {
+        "Handgun": 370,
+        "Knife": 78
+      }
+    },
+    "candidate_v6": {
+      "total_detections": 344,
+      "by_class": {
+        "Handgun": 251,
+        "Knife": 93
+      }
+    },
+    "diff_count": 6,
+    "diff_records": [
+      {
+        "frame": 11,
+        "image": "Screen_Recording_2026_09_10_220510_KNIFE_frame_0011_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.746999979019165,
+            [
+              6,
+              420,
+              64,
+              491
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.5950000286102295,
+            [
+              8,
+              420,
+              64,
+              492
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 35,
+        "image": "Screen_Recording_2026_09_10_220510_KNIFE_frame_0035_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.6679999828338623,
+            [
+              6,
+              420,
+              62,
+              489
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.515999972820282,
+            [
+              9,
+              420,
+              63,
+              491
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 36,
+        "image": "Screen_Recording_2026_09_10_220510_KNIFE_frame_0036_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.6690000295639038,
+            [
+              6,
+              420,
+              62,
+              489
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.515999972820282,
+            [
+              9,
+              420,
+              63,
+              491
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 37,
+        "image": "Screen_Recording_2026_09_10_220510_KNIFE_frame_0037_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.671999990940094,
+            [
+              6,
+              420,
+              62,
+              489
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.5130000114440918,
+            [
+              9,
+              420,
+              63,
+              491
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 38,
+        "image": "Screen_Recording_2026_09_10_220510_KNIFE_frame_0038_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.671999990940094,
+            [
+              6,
+              420,
+              62,
+              489
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.5130000114440918,
+            [
+              9,
+              420,
+              63,
+              491
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 39,
+        "image": "Screen_Recording_2026_09_10_220510_KNIFE_frame_0039_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.671999990940094,
+            [
+              6,
+              420,
+              62,
+              489
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.5130000114440918,
+            [
+              9,
+              420,
+              63,
+              491
+            ]
+          ]
+        ]
+      }
+    ],
+    "annotated_video": "C:\\Users\\pc\\Documents\\THESIS 1\\cctv-weapon-detection-system\\research\\model_improvement\\evaluations\\new_videos_outputs\\Screen_Recording_2026_09_10_220510_KNIFE_annotated.mp4"
+  },
+  {
+    "video_name": "Screen Recording 2026-09-10 221137-KNIFE.mp4",
+    "category": "KNIFE",
+    "total_frames": 293,
+    "elapsed_seconds": 47.0,
+    "model9": {
+      "total_detections": 258,
+      "by_class": {
+        "Handgun": 228,
+        "Knife": 30
+      }
+    },
+    "candidate_v6": {
+      "total_detections": 189,
+      "by_class": {
+        "Handgun": 158,
+        "Knife": 31
+      }
+    },
+    "diff_count": 6,
+    "diff_records": [
+      {
+        "frame": 4,
+        "image": "Screen_Recording_2026_09_10_221137_KNIFE_frame_0004_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.9679999947547913,
+            [
+              747,
+              269,
+              843,
+              382
+            ]
+          ],
+          [
+            "Knife",
+            0.6549999713897705,
+            [
+              203,
+              263,
+              824,
+              1019
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.9480000138282776,
+            [
+              746,
+              268,
+              845,
+              380
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 5,
+        "image": "Screen_Recording_2026_09_10_221137_KNIFE_frame_0005_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.9700000286102295,
+            [
+              747,
+              268,
+              843,
+              382
+            ]
+          ],
+          [
+            "Knife",
+            0.6520000100135803,
+            [
+              205,
+              261,
+              824,
+              1018
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.9490000009536743,
+            [
+              746,
+              267,
+              845,
+              380
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 6,
+        "image": "Screen_Recording_2026_09_10_221137_KNIFE_frame_0006_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.9710000157356262,
+            [
+              746,
+              268,
+              843,
+              382
+            ]
+          ],
+          [
+            "Knife",
+            0.5619999766349792,
+            [
+              205,
+              269,
+              820,
+              1022
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.949999988079071,
+            [
+              746,
+              267,
+              844,
+              380
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 8,
+        "image": "Screen_Recording_2026_09_10_221137_KNIFE_frame_0008_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.9739999771118164,
+            [
+              746,
+              268,
+              843,
+              382
+            ]
+          ],
+          [
+            "Knife",
+            0.6899999976158142,
+            [
+              209,
+              260,
+              814,
+              1033
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.9520000219345093,
+            [
+              746,
+              267,
+              844,
+              380
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 26,
+        "image": "Screen_Recording_2026_09_10_221137_KNIFE_frame_0026_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.9700000286102295,
+            [
+              746,
+              268,
+              843,
+              381
+            ]
+          ],
+          [
+            "Knife",
+            0.6650000214576721,
+            [
+              287,
+              304,
+              777,
+              936
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.9369999766349792,
+            [
+              745,
+              268,
+              845,
+              380
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 32,
+        "image": "Screen_Recording_2026_09_10_221137_KNIFE_frame_0032_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.9760000109672546,
+            [
+              748,
+              270,
+              845,
+              380
+            ]
+          ],
+          [
+            "Knife",
+            0.9509999752044678,
+            [
+              113,
+              798,
+              1187,
+              1005
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.9380000233650208,
+            [
+              746,
+              269,
+              846,
+              380
+            ]
+          ]
+        ]
+      }
+    ],
+    "annotated_video": "C:\\Users\\pc\\Documents\\THESIS 1\\cctv-weapon-detection-system\\research\\model_improvement\\evaluations\\new_videos_outputs\\Screen_Recording_2026_09_10_221137_KNIFE_annotated.mp4"
+  },
+  {
+    "video_name": "Screen Recording 2026-09-10 213340 -HANDGUN.mp4",
+    "category": "NEW HANDGUNS VIDEO CLIPS",
+    "total_frames": 605,
+    "elapsed_seconds": 95.0,
+    "model9": {
+      "total_detections": 47,
+      "by_class": {
+        "Handgun": 21,
+        "Knife": 26
+      }
+    },
+    "candidate_v6": {
+      "total_detections": 23,
+      "by_class": {
+        "Handgun": 8,
+        "Knife": 15
+      }
+    },
+    "diff_count": 6,
+    "diff_records": [
+      {
+        "frame": 40,
+        "image": "Screen_Recording_2026_09_10_213340__HANDGUN_frame_0040_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.9340000152587891,
+            [
+              808,
+              182,
+              864,
+              252
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.800000011920929,
+            [
+              806,
+              181,
+              864,
+              249
+            ]
+          ],
+          [
+            "Knife",
+            0.5040000081062317,
+            [
+              717,
+              427,
+              903,
+              577
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 76,
+        "image": "Screen_Recording_2026_09_10_213340__HANDGUN_frame_0076_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.7080000042915344,
+            [
+              58,
+              640,
+              1656,
+              967
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 77,
+        "image": "Screen_Recording_2026_09_10_213340__HANDGUN_frame_0077_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.6869999766349792,
+            [
+              62,
+              639,
+              1647,
+              966
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 78,
+        "image": "Screen_Recording_2026_09_10_213340__HANDGUN_frame_0078_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.703000009059906,
+            [
+              78,
+              634,
+              1804,
+              1000
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 80,
+        "image": "Screen_Recording_2026_09_10_213340__HANDGUN_frame_0080_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.6510000228881836,
+            [
+              168,
+              766,
+              1920,
+              1059
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 81,
+        "image": "Screen_Recording_2026_09_10_213340__HANDGUN_frame_0081_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.6399999856948853,
+            [
+              170,
+              766,
+              1920,
+              1059
+            ]
+          ]
+        ],
+        "v6": []
+      }
+    ],
+    "annotated_video": "C:\\Users\\pc\\Documents\\THESIS 1\\cctv-weapon-detection-system\\research\\model_improvement\\evaluations\\new_videos_outputs\\Screen_Recording_2026_09_10_213340__HANDGUN_annotated.mp4"
+  },
+  {
+    "video_name": "Screen Recording 2026-09-10 213622-HANDGUN.mp4",
+    "category": "NEW HANDGUNS VIDEO CLIPS",
+    "total_frames": 268,
+    "elapsed_seconds": 42.0,
+    "model9": {
+      "total_detections": 14,
+      "by_class": {
+        "Handgun": 11,
+        "Knife": 3
+      }
+    },
+    "candidate_v6": {
+      "total_detections": 2,
+      "by_class": {
+        "Handgun": 2,
+        "Knife": 0
+      }
+    },
+    "diff_count": 6,
+    "diff_records": [
+      {
+        "frame": 22,
+        "image": "Screen_Recording_2026_09_10_213622_HANDGUN_frame_0022_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.5180000066757202,
+            [
+              355,
+              737,
+              1733,
+              1012
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 23,
+        "image": "Screen_Recording_2026_09_10_213622_HANDGUN_frame_0023_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.5189999938011169,
+            [
+              358,
+              738,
+              1732,
+              1012
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 24,
+        "image": "Screen_Recording_2026_09_10_213622_HANDGUN_frame_0024_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.5080000162124634,
+            [
+              340,
+              737,
+              1735,
+              1011
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 29,
+        "image": "Screen_Recording_2026_09_10_213622_HANDGUN_frame_0029_diff.jpg",
+        "m9": [],
+        "v6": [
+          [
+            "Handgun",
+            0.8289999961853027,
+            [
+              1869,
+              236,
+              1915,
+              313
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 30,
+        "image": "Screen_Recording_2026_09_10_213622_HANDGUN_frame_0030_diff.jpg",
+        "m9": [],
+        "v6": [
+          [
+            "Handgun",
+            0.8479999899864197,
+            [
+              1869,
+              236,
+              1915,
+              312
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 122,
+        "image": "Screen_Recording_2026_09_10_213622_HANDGUN_frame_0122_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.5799999833106995,
+            [
+              1051,
+              369,
+              1110,
+              446
+            ]
+          ]
+        ],
+        "v6": []
+      }
+    ],
+    "annotated_video": "C:\\Users\\pc\\Documents\\THESIS 1\\cctv-weapon-detection-system\\research\\model_improvement\\evaluations\\new_videos_outputs\\Screen_Recording_2026_09_10_213622_HANDGUN_annotated.mp4"
+  },
+  {
+    "video_name": "Screen Recording 2026-09-10 213824-HANDGUN.mp4",
+    "category": "NEW HANDGUNS VIDEO CLIPS",
+    "total_frames": 741,
+    "elapsed_seconds": 115.3,
+    "model9": {
+      "total_detections": 193,
+      "by_class": {
+        "Handgun": 192,
+        "Knife": 1
+      }
+    },
+    "candidate_v6": {
+      "total_detections": 226,
+      "by_class": {
+        "Handgun": 124,
+        "Knife": 102
+      }
+    },
+    "diff_count": 6,
+    "diff_records": [
+      {
+        "frame": 0,
+        "image": "Screen_Recording_2026_09_10_213824_HANDGUN_frame_0000_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.9739999771118164,
+            [
+              1477,
+              339,
+              1519,
+              398
+            ]
+          ],
+          [
+            "Handgun",
+            0.9620000123977661,
+            [
+              1625,
+              294,
+              1687,
+              354
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.9449999928474426,
+            [
+              1629,
+              293,
+              1687,
+              353
+            ]
+          ],
+          [
+            "Handgun",
+            0.9210000038146973,
+            [
+              1479,
+              339,
+              1518,
+              397
+            ]
+          ],
+          [
+            "Knife",
+            0.6690000295639038,
+            [
+              1460,
+              818,
+              1673,
+              1073
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 1,
+        "image": "Screen_Recording_2026_09_10_213824_HANDGUN_frame_0001_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.9750000238418579,
+            [
+              1478,
+              339,
+              1519,
+              398
+            ]
+          ],
+          [
+            "Handgun",
+            0.9620000123977661,
+            [
+              1625,
+              294,
+              1687,
+              354
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.9449999928474426,
+            [
+              1629,
+              293,
+              1687,
+              353
+            ]
+          ],
+          [
+            "Handgun",
+            0.921999990940094,
+            [
+              1479,
+              339,
+              1518,
+              397
+            ]
+          ],
+          [
+            "Knife",
+            0.6439999938011169,
+            [
+              1460,
+              818,
+              1673,
+              1073
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 2,
+        "image": "Screen_Recording_2026_09_10_213824_HANDGUN_frame_0002_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.9750000238418579,
+            [
+              1478,
+              339,
+              1519,
+              398
+            ]
+          ],
+          [
+            "Handgun",
+            0.9620000123977661,
+            [
+              1625,
+              294,
+              1687,
+              354
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.9449999928474426,
+            [
+              1629,
+              293,
+              1687,
+              353
+            ]
+          ],
+          [
+            "Handgun",
+            0.921999990940094,
+            [
+              1479,
+              339,
+              1518,
+              397
+            ]
+          ],
+          [
+            "Knife",
+            0.6650000214576721,
+            [
+              1460,
+              818,
+              1673,
+              1073
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 3,
+        "image": "Screen_Recording_2026_09_10_213824_HANDGUN_frame_0003_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.9750000238418579,
+            [
+              1478,
+              339,
+              1519,
+              398
+            ]
+          ],
+          [
+            "Handgun",
+            0.9620000123977661,
+            [
+              1625,
+              294,
+              1687,
+              354
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.9449999928474426,
+            [
+              1629,
+              293,
+              1687,
+              353
+            ]
+          ],
+          [
+            "Handgun",
+            0.921999990940094,
+            [
+              1479,
+              339,
+              1518,
+              397
+            ]
+          ],
+          [
+            "Knife",
+            0.6639999747276306,
+            [
+              1460,
+              818,
+              1673,
+              1073
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 4,
+        "image": "Screen_Recording_2026_09_10_213824_HANDGUN_frame_0004_diff.jpg",
+        "m9": [],
+        "v6": [
+          [
+            "Knife",
+            0.6539999842643738,
+            [
+              1458,
+              818,
+              1673,
+              1074
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 5,
+        "image": "Screen_Recording_2026_09_10_213824_HANDGUN_frame_0005_diff.jpg",
+        "m9": [],
+        "v6": [
+          [
+            "Knife",
+            0.6949999928474426,
+            [
+              1457,
+              818,
+              1674,
+              1075
+            ]
+          ]
+        ]
+      }
+    ],
+    "annotated_video": "C:\\Users\\pc\\Documents\\THESIS 1\\cctv-weapon-detection-system\\research\\model_improvement\\evaluations\\new_videos_outputs\\Screen_Recording_2026_09_10_213824_HANDGUN_annotated.mp4"
+  },
+  {
+    "video_name": "Screen Recording 2026-09-10 214325-HANDGUN.mp4",
+    "category": "NEW HANDGUNS VIDEO CLIPS",
+    "total_frames": 171,
+    "elapsed_seconds": 27.1,
+    "model9": {
+      "total_detections": 19,
+      "by_class": {
+        "Handgun": 14,
+        "Knife": 5
+      }
+    },
+    "candidate_v6": {
+      "total_detections": 37,
+      "by_class": {
+        "Handgun": 27,
+        "Knife": 10
+      }
+    },
+    "diff_count": 6,
+    "diff_records": [
+      {
+        "frame": 106,
+        "image": "Screen_Recording_2026_09_10_214325_HANDGUN_frame_0106_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.8920000195503235,
+            [
+              676,
+              627,
+              876,
+              871
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Knife",
+            0.5109999775886536,
+            [
+              1430,
+              739,
+              1586,
+              1073
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 107,
+        "image": "Screen_Recording_2026_09_10_214325_HANDGUN_frame_0107_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.9160000085830688,
+            [
+              676,
+              628,
+              876,
+              871
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Knife",
+            0.5429999828338623,
+            [
+              674,
+              629,
+              876,
+              874
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 108,
+        "image": "Screen_Recording_2026_09_10_214325_HANDGUN_frame_0108_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.9150000214576721,
+            [
+              676,
+              628,
+              876,
+              871
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Knife",
+            0.5370000004768372,
+            [
+              674,
+              629,
+              876,
+              875
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 110,
+        "image": "Screen_Recording_2026_09_10_214325_HANDGUN_frame_0110_diff.jpg",
+        "m9": [],
+        "v6": [
+          [
+            "Knife",
+            0.6980000138282776,
+            [
+              1429,
+              745,
+              1587,
+              1069
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 111,
+        "image": "Screen_Recording_2026_09_10_214325_HANDGUN_frame_0111_diff.jpg",
+        "m9": [],
+        "v6": [
+          [
+            "Knife",
+            0.5640000104904175,
+            [
+              1430,
+              745,
+              1588,
+              1068
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 122,
+        "image": "Screen_Recording_2026_09_10_214325_HANDGUN_frame_0122_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.6840000152587891,
+            [
+              1324,
+              637,
+              1441,
+              732
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.8870000243186951,
+            [
+              1323,
+              637,
+              1448,
+              727
+            ]
+          ]
+        ]
+      }
+    ],
+    "annotated_video": "C:\\Users\\pc\\Documents\\THESIS 1\\cctv-weapon-detection-system\\research\\model_improvement\\evaluations\\new_videos_outputs\\Screen_Recording_2026_09_10_214325_HANDGUN_annotated.mp4"
+  },
+  {
+    "video_name": "Screen Recording 2026-09-10 214643-HANDGUN.mp4",
+    "category": "NEW HANDGUNS VIDEO CLIPS",
+    "total_frames": 433,
+    "elapsed_seconds": 68.9,
+    "model9": {
+      "total_detections": 184,
+      "by_class": {
+        "Handgun": 147,
+        "Knife": 37
+      }
+    },
+    "candidate_v6": {
+      "total_detections": 107,
+      "by_class": {
+        "Handgun": 93,
+        "Knife": 14
+      }
+    },
+    "diff_count": 6,
+    "diff_records": [
+      {
+        "frame": 0,
+        "image": "Screen_Recording_2026_09_10_214643_HANDGUN_frame_0000_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.9160000085830688,
+            [
+              1695,
+              275,
+              1748,
+              345
+            ]
+          ],
+          [
+            "Handgun",
+            0.5350000262260437,
+            [
+              1673,
+              272,
+              1745,
+              376
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.5669999718666077,
+            [
+              1670,
+              272,
+              1744,
+              374
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 1,
+        "image": "Screen_Recording_2026_09_10_214643_HANDGUN_frame_0001_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.9150000214576721,
+            [
+              1695,
+              275,
+              1748,
+              345
+            ]
+          ],
+          [
+            "Handgun",
+            0.5339999794960022,
+            [
+              1673,
+              272,
+              1745,
+              376
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.5669999718666077,
+            [
+              1670,
+              272,
+              1744,
+              374
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 2,
+        "image": "Screen_Recording_2026_09_10_214643_HANDGUN_frame_0002_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.9150000214576721,
+            [
+              1695,
+              275,
+              1748,
+              345
+            ]
+          ],
+          [
+            "Handgun",
+            0.5339999794960022,
+            [
+              1673,
+              272,
+              1745,
+              376
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Handgun",
+            0.5669999718666077,
+            [
+              1670,
+              272,
+              1744,
+              374
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 4,
+        "image": "Screen_Recording_2026_09_10_214643_HANDGUN_frame_0004_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.6930000185966492,
+            [
+              1673,
+              274,
+              1745,
+              362
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 5,
+        "image": "Screen_Recording_2026_09_10_214643_HANDGUN_frame_0005_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.652999997138977,
+            [
+              1678,
+              274,
+              1746,
+              355
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 6,
+        "image": "Screen_Recording_2026_09_10_214643_HANDGUN_frame_0006_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.5059999823570251,
+            [
+              1678,
+              274,
+              1746,
+              356
+            ]
+          ]
+        ],
+        "v6": []
+      }
+    ],
+    "annotated_video": "C:\\Users\\pc\\Documents\\THESIS 1\\cctv-weapon-detection-system\\research\\model_improvement\\evaluations\\new_videos_outputs\\Screen_Recording_2026_09_10_214643_HANDGUN_annotated.mp4"
+  },
+  {
+    "video_name": "Screen Recording 2026-09-10 214732-HANDGUN.mp4",
+    "category": "NEW HANDGUNS VIDEO CLIPS",
+    "total_frames": 550,
+    "elapsed_seconds": 94.9,
+    "model9": {
+      "total_detections": 347,
+      "by_class": {
+        "Handgun": 11,
+        "Knife": 336
+      }
+    },
+    "candidate_v6": {
+      "total_detections": 276,
+      "by_class": {
+        "Handgun": 17,
+        "Knife": 259
+      }
+    },
+    "diff_count": 6,
+    "diff_records": [
+      {
+        "frame": 66,
+        "image": "Screen_Recording_2026_09_10_214732_HANDGUN_frame_0066_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.6029999852180481,
+            [
+              184,
+              682,
+              528,
+              805
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 67,
+        "image": "Screen_Recording_2026_09_10_214732_HANDGUN_frame_0067_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.5960000157356262,
+            [
+              184,
+              683,
+              528,
+              805
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 68,
+        "image": "Screen_Recording_2026_09_10_214732_HANDGUN_frame_0068_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.640999972820282,
+            [
+              182,
+              682,
+              530,
+              808
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 78,
+        "image": "Screen_Recording_2026_09_10_214732_HANDGUN_frame_0078_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.7039999961853027,
+            [
+              191,
+              684,
+              550,
+              812
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Knife",
+            0.5059999823570251,
+            [
+              186,
+              687,
+              559,
+              811
+            ]
+          ]
+        ]
+      },
+      {
+        "frame": 86,
+        "image": "Screen_Recording_2026_09_10_214732_HANDGUN_frame_0086_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.7300000190734863,
+            [
+              0,
+              131,
+              48,
+              188
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 87,
+        "image": "Screen_Recording_2026_09_10_214732_HANDGUN_frame_0087_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.7360000014305115,
+            [
+              0,
+              131,
+              48,
+              188
+            ]
+          ]
+        ],
+        "v6": []
+      }
+    ],
+    "annotated_video": "C:\\Users\\pc\\Documents\\THESIS 1\\cctv-weapon-detection-system\\research\\model_improvement\\evaluations\\new_videos_outputs\\Screen_Recording_2026_09_10_214732_HANDGUN_annotated.mp4"
+  },
+  {
+    "video_name": "Screen Recording 2026-09-10 220723- HANDGUN.mp4",
+    "category": "NEW HANDGUNS VIDEO CLIPS",
+    "total_frames": 662,
+    "elapsed_seconds": 120.3,
+    "model9": {
+      "total_detections": 34,
+      "by_class": {
+        "Handgun": 8,
+        "Knife": 26
+      }
+    },
+    "candidate_v6": {
+      "total_detections": 22,
+      "by_class": {
+        "Handgun": 2,
+        "Knife": 20
+      }
+    },
+    "diff_count": 6,
+    "diff_records": [
+      {
+        "frame": 156,
+        "image": "Screen_Recording_2026_09_10_220723__HANDGUN_frame_0156_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.5529999732971191,
+            [
+              1066,
+              395,
+              1123,
+              458
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 157,
+        "image": "Screen_Recording_2026_09_10_220723__HANDGUN_frame_0157_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.546999990940094,
+            [
+              1066,
+              395,
+              1123,
+              458
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 200,
+        "image": "Screen_Recording_2026_09_10_220723__HANDGUN_frame_0200_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.652999997138977,
+            [
+              62,
+              553,
+              118,
+              603
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 245,
+        "image": "Screen_Recording_2026_09_10_220723__HANDGUN_frame_0245_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.8759999871253967,
+            [
+              1863,
+              674,
+              1917,
+              759
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 246,
+        "image": "Screen_Recording_2026_09_10_220723__HANDGUN_frame_0246_diff.jpg",
+        "m9": [
+          [
+            "Handgun",
+            0.8740000128746033,
+            [
+              1863,
+              674,
+              1917,
+              759
+            ]
+          ]
+        ],
+        "v6": []
+      },
+      {
+        "frame": 255,
+        "image": "Screen_Recording_2026_09_10_220723__HANDGUN_frame_0255_diff.jpg",
+        "m9": [
+          [
+            "Knife",
+            0.5450000166893005,
+            [
+              1576,
+              588,
+              1875,
+              708
+            ]
+          ]
+        ],
+        "v6": [
+          [
+            "Knife",
+            0.7110000252723694,
+            [
+              1573,
+              592,
+              1882,
+              710
+            ]
+          ]
+        ]
+      }
+    ],
+    "annotated_video": "C:\\Users\\pc\\Documents\\THESIS 1\\cctv-weapon-detection-system\\research\\model_improvement\\evaluations\\new_videos_outputs\\Screen_Recording_2026_09_10_220723__HANDGUN_annotated.mp4"
+  }
+]

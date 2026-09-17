@@ -1,0 +1,351 @@
+[
+  {
+    "clip_name": "Screen Recording 2026-09-07 224743.mp4",
+    "total_frames": 776,
+    "model9_total_detections": 483,
+    "candidate_total_detections": 257,
+    "diff_frames": [
+      {
+        "frame": 10,
+        "image_file": "Screen Recording 2026-09-07 224743_frame_0010.jpg",
+        "m9_detections": 1,
+        "cand_detections": 0
+      },
+      {
+        "frame": 12,
+        "image_file": "Screen Recording 2026-09-07 224743_frame_0012.jpg",
+        "m9_detections": 1,
+        "cand_detections": 0
+      },
+      {
+        "frame": 13,
+        "image_file": "Screen Recording 2026-09-07 224743_frame_0013.jpg",
+        "m9_detections": 1,
+        "cand_detections": 0
+      },
+      {
+        "frame": 20,
+        "image_file": "Screen Recording 2026-09-07 224743_frame_0020.jpg",
+        "m9_detections": 1,
+        "cand_detections": 0
+      },
+      {
+        "frame": 21,
+        "image_file": "Screen Recording 2026-09-07 224743_frame_0021.jpg",
+        "m9_detections": 1,
+        "cand_detections": 1
+      }
+    ]
+  },
+  {
+    "clip_name": "Screen Recording 2026-09-07 225138.mp4",
+    "total_frames": 724,
+    "model9_total_detections": 85,
+    "candidate_total_detections": 80,
+    "diff_frames": [
+      {
+        "frame": 6,
+        "image_file": "Screen Recording 2026-09-07 225138_frame_0006.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      },
+      {
+        "frame": 36,
+        "image_file": "Screen Recording 2026-09-07 225138_frame_0036.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      },
+      {
+        "frame": 37,
+        "image_file": "Screen Recording 2026-09-07 225138_frame_0037.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      },
+      {
+        "frame": 38,
+        "image_file": "Screen Recording 2026-09-07 225138_frame_0038.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      },
+      {
+        "frame": 39,
+        "image_file": "Screen Recording 2026-09-07 225138_frame_0039.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      }
+    ]
+  },
+  {
+    "clip_name": "Screen Recording 2026-09-07 225703.mp4",
+    "total_frames": 594,
+    "model9_total_detections": 220,
+    "candidate_total_detections": 289,
+    "diff_frames": [
+      {
+        "frame": 7,
+        "image_file": "Screen Recording 2026-09-07 225703_frame_0007.jpg",
+        "m9_detections": 1,
+        "cand_detections": 0
+      },
+      {
+        "frame": 8,
+        "image_file": "Screen Recording 2026-09-07 225703_frame_0008.jpg",
+        "m9_detections": 1,
+        "cand_detections": 0
+      },
+      {
+        "frame": 9,
+        "image_file": "Screen Recording 2026-09-07 225703_frame_0009.jpg",
+        "m9_detections": 1,
+        "cand_detections": 0
+      },
+      {
+        "frame": 15,
+        "image_file": "Screen Recording 2026-09-07 225703_frame_0015.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      },
+      {
+        "frame": 16,
+        "image_file": "Screen Recording 2026-09-07 225703_frame_0016.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      }
+    ]
+  },
+  {
+    "clip_name": "Screen Recording 2026-09-07 230047.mp4",
+    "total_frames": 258,
+    "model9_total_detections": 21,
+    "candidate_total_detections": 196,
+    "diff_frames": [
+      {
+        "frame": 0,
+        "image_file": "Screen Recording 2026-09-07 230047_frame_0000.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      },
+      {
+        "frame": 1,
+        "image_file": "Screen Recording 2026-09-07 230047_frame_0001.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      },
+      {
+        "frame": 2,
+        "image_file": "Screen Recording 2026-09-07 230047_frame_0002.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      },
+      {
+        "frame": 3,
+        "image_file": "Screen Recording 2026-09-07 230047_frame_0003.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      },
+      {
+        "frame": 4,
+        "image_file": "Screen Recording 2026-09-07 230047_frame_0004.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      }
+    ]
+  },
+  {
+    "clip_name": "Screen Recording 2026-09-07 230249.mp4",
+    "total_frames": 848,
+    "model9_total_detections": 287,
+    "candidate_total_detections": 258,
+    "diff_frames": [
+      {
+        "frame": 12,
+        "image_file": "Screen Recording 2026-09-07 230249_frame_0012.jpg",
+        "m9_detections": 1,
+        "cand_detections": 0
+      },
+      {
+        "frame": 15,
+        "image_file": "Screen Recording 2026-09-07 230249_frame_0015.jpg",
+        "m9_detections": 1,
+        "cand_detections": 0
+      },
+      {
+        "frame": 38,
+        "image_file": "Screen Recording 2026-09-07 230249_frame_0038.jpg",
+        "m9_detections": 1,
+        "cand_detections": 0
+      },
+      {
+        "frame": 60,
+        "image_file": "Screen Recording 2026-09-07 230249_frame_0060.jpg",
+        "m9_detections": 1,
+        "cand_detections": 0
+      },
+      {
+        "frame": 63,
+        "image_file": "Screen Recording 2026-09-07 230249_frame_0063.jpg",
+        "m9_detections": 1,
+        "cand_detections": 0
+      }
+    ]
+  },
+  {
+    "clip_name": "Screen Recording 2026-09-07 230541.mp4",
+    "total_frames": 258,
+    "model9_total_detections": 103,
+    "candidate_total_detections": 131,
+    "diff_frames": [
+      {
+        "frame": 0,
+        "image_file": "Screen Recording 2026-09-07 230541_frame_0000.jpg",
+        "m9_detections": 1,
+        "cand_detections": 2
+      },
+      {
+        "frame": 1,
+        "image_file": "Screen Recording 2026-09-07 230541_frame_0001.jpg",
+        "m9_detections": 1,
+        "cand_detections": 2
+      },
+      {
+        "frame": 2,
+        "image_file": "Screen Recording 2026-09-07 230541_frame_0002.jpg",
+        "m9_detections": 1,
+        "cand_detections": 1
+      },
+      {
+        "frame": 3,
+        "image_file": "Screen Recording 2026-09-07 230541_frame_0003.jpg",
+        "m9_detections": 1,
+        "cand_detections": 1
+      },
+      {
+        "frame": 4,
+        "image_file": "Screen Recording 2026-09-07 230541_frame_0004.jpg",
+        "m9_detections": 1,
+        "cand_detections": 1
+      }
+    ]
+  },
+  {
+    "clip_name": "Screen Recording 2026-09-07 230842.mp4",
+    "total_frames": 745,
+    "model9_total_detections": 77,
+    "candidate_total_detections": 76,
+    "diff_frames": [
+      {
+        "frame": 17,
+        "image_file": "Screen Recording 2026-09-07 230842_frame_0017.jpg",
+        "m9_detections": 1,
+        "cand_detections": 1
+      },
+      {
+        "frame": 20,
+        "image_file": "Screen Recording 2026-09-07 230842_frame_0020.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      },
+      {
+        "frame": 297,
+        "image_file": "Screen Recording 2026-09-07 230842_frame_0297.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      },
+      {
+        "frame": 298,
+        "image_file": "Screen Recording 2026-09-07 230842_frame_0298.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      },
+      {
+        "frame": 299,
+        "image_file": "Screen Recording 2026-09-07 230842_frame_0299.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      }
+    ]
+  },
+  {
+    "clip_name": "Screen Recording 2026-09-07 230942.mp4",
+    "total_frames": 731,
+    "model9_total_detections": 8,
+    "candidate_total_detections": 8,
+    "diff_frames": []
+  },
+  {
+    "clip_name": "Screen Recording 2026-09-07 231101.mp4",
+    "total_frames": 1800,
+    "model9_total_detections": 130,
+    "candidate_total_detections": 135,
+    "diff_frames": [
+      {
+        "frame": 89,
+        "image_file": "Screen Recording 2026-09-07 231101_frame_0089.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      },
+      {
+        "frame": 90,
+        "image_file": "Screen Recording 2026-09-07 231101_frame_0090.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      },
+      {
+        "frame": 91,
+        "image_file": "Screen Recording 2026-09-07 231101_frame_0091.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      },
+      {
+        "frame": 92,
+        "image_file": "Screen Recording 2026-09-07 231101_frame_0092.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      },
+      {
+        "frame": 93,
+        "image_file": "Screen Recording 2026-09-07 231101_frame_0093.jpg",
+        "m9_detections": 0,
+        "cand_detections": 1
+      }
+    ]
+  },
+  {
+    "clip_name": "Screen Recording 2026-09-07 231205.mp4",
+    "total_frames": 488,
+    "model9_total_detections": 106,
+    "candidate_total_detections": 66,
+    "diff_frames": [
+      {
+        "frame": 6,
+        "image_file": "Screen Recording 2026-09-07 231205_frame_0006.jpg",
+        "m9_detections": 1,
+        "cand_detections": 0
+      },
+      {
+        "frame": 7,
+        "image_file": "Screen Recording 2026-09-07 231205_frame_0007.jpg",
+        "m9_detections": 1,
+        "cand_detections": 0
+      },
+      {
+        "frame": 8,
+        "image_file": "Screen Recording 2026-09-07 231205_frame_0008.jpg",
+        "m9_detections": 1,
+        "cand_detections": 0
+      },
+      {
+        "frame": 9,
+        "image_file": "Screen Recording 2026-09-07 231205_frame_0009.jpg",
+        "m9_detections": 1,
+        "cand_detections": 0
+      },
+      {
+        "frame": 10,
+        "image_file": "Screen Recording 2026-09-07 231205_frame_0010.jpg",
+        "m9_detections": 2,
+        "cand_detections": 1
+      }
+    ]
+  }
+]

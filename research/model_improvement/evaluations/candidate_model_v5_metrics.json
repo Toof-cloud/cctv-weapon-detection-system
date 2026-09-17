@@ -1,0 +1,23 @@
+{
+  "checkpoint": "research\\model_improvement\\checkpoints\\best_candidate_model_v5.pth",
+  "mAP_50": 81.36,
+  "handgun": {
+    "ap_50": 96.43,
+    "precision": 94.74,
+    "recall": 96.43,
+    "f1": 95.58,
+    "tp": 108,
+    "fp": 6,
+    "fn": 4
+  },
+  "knife": {
+    "ap_50": 66.3,
+    "precision": 87.1,
+    "recall": 67.5,
+    "f1": 76.06,
+    "tp": 81,
+    "fp": 12,
+    "fn": 39
+  },
+  "hard_negative_rejection_rate": 94.0
+}

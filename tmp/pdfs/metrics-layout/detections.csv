@@ -1,0 +1,5 @@
+frame_number,timestamp_seconds,class_name,confidence,x1,y1,x2,y2
+0,0.0,handgun,0.8,20,30,80,100
+1,0.2,handgun,0.8,20,30,80,100
+20,4.0,handgun,0.8,20,30,80,100
+21,4.2,handgun,0.8,20,30,80,100

@@ -1,0 +1,43 @@
+{
+  "model_name": "Model 9 SOTA (Baseline)",
+  "checkpoint_path": "best_weapon_detector_ninth_model.pth",
+  "evaluated_at": "2026-09-10",
+  "test_split": {
+    "total_images": 279,
+    "mAP_50": 92.75,
+    "handgun": {
+      "ap_50": 93.59,
+      "precision": 91.45,
+      "recall": 93.86,
+      "f1": 92.64,
+      "tp": 107,
+      "fp": 10,
+      "fn": 7,
+      "gt": 114
+    },
+    "knife": {
+      "ap_50": 91.91,
+      "precision": 85.82,
+      "recall": 92.74,
+      "f1": 89.15,
+      "tp": 115,
+      "fp": 19,
+      "fn": 9,
+      "gt": 124
+    },
+    "hard_negative_rejection_rate": 92.16
+  },
+  "unseen_cctv_clips_tcr": {
+    "clip_01": {"scenario": "Gas station robbery", "threat": "handgun", "n_ts": 51, "n_iso": 9, "n_int": 11, "n_te": 71, "tcr": 71.83},
+    "clip_02": {"scenario": "Night street mugging", "threat": "handgun", "n_ts": 18, "n_iso": 1, "n_int": 5, "n_te": 24, "tcr": 75.00},
+    "clip_03": {"scenario": "Smoke shop armed holdup", "threat": "handgun", "n_ts": 29, "n_iso": 3, "n_int": 2, "n_te": 34, "tcr": 85.29},
+    "clip_04": {"scenario": "Outdoor knife altercation", "threat": "knife", "n_ts": 2, "n_iso": 3, "n_int": 0, "n_te": 5, "tcr": 40.00},
+    "clip_05": {"scenario": "Restaurant armed holdup", "threat": "handgun", "n_ts": 72, "n_iso": 10, "n_int": 16, "n_te": 98, "tcr": 73.47},
+    "clip_06": {"scenario": "Store robbery through glass", "threat": "none", "n_ts": 0, "n_iso": 0, "n_int": 0, "n_te": 0, "tcr": 100.0},
+    "clip_07": {"scenario": "Alley machete assault", "threat": "knife", "n_ts": 4, "n_iso": 3, "n_int": 2, "n_te": 9, "tcr": 44.44},
+    "clip_08": {"scenario": "Convenience store robbery", "threat": "knife", "n_ts": 1, "n_iso": 0, "n_int": 0, "n_te": 1, "tcr": 100.0},
+    "clip_09": {"scenario": "Pharmacy armed robbery", "threat": "handgun", "n_ts": 30, "n_iso": 3, "n_int": 5, "n_te": 38, "tcr": 78.95},
+    "clip_10": {"scenario": "Supermarket robbery defense", "threat": "handgun", "n_ts": 26, "n_iso": 2, "n_int": 6, "n_te": 34, "tcr": 76.47},
+    "overall_tcr": 74.20
+  }
+}
