@@ -6,6 +6,10 @@ QWidget {
 }
 QMainWindow, QWidget#shell { background: #ffffff; }
 QFrame#header { background: #303841; border: none; min-height: 56px; }
+QTabBar#modeTabs { background: #f5f6fa; border-bottom: 1px solid #dce1eb; padding-left: 20px; }
+QTabBar#modeTabs::tab { background: transparent; color: #626d7b; padding: 11px 19px 9px; border-bottom: 3px solid transparent; font-weight: 600; }
+QTabBar#modeTabs::tab:selected { color: #2f318e; border-bottom-color: #2f318e; }
+QTabBar#modeTabs::tab:disabled { color: #aab1bc; }
 QLabel { background: transparent; border: none; }
 QLabel#brandTitle { color: white; font-size: 19px; font-weight: 650; letter-spacing: 1px; }
 QLabel#brandSub { color: #c7cdd5; font-size: 9px; letter-spacing: 0.3px; }
@@ -94,6 +98,20 @@ QScrollBar::handle:vertical { background: #ccd1d9; min-height: 30px; border-radi
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
 QToolTip { background: #303841; color: white; border: none; padding: 6px; }
 QDialog#configurationDialog, QDialog#processingDialog, QDialog#forensicReportDialog { background: #ffffff; }
+QDialog#processingDialog { border: 1px solid #dce1eb; }
+QFrame#processingHero { background: #303273; border: none; }
+QLabel#processingActivity { color: #c9d1ff; font-size: 10px; font-weight: 700; letter-spacing: 1px; }
+QLabel#processingHeading { color: white; font-size: 22px; font-weight: 700; }
+QLabel#processingContext { color: #e3e5ff; font-size: 12px; }
+QFrame#processingBody { background: white; border: none; }
+QLabel#processingPhase { color: #2f318e; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
+QLabel#processingPercent { color: #2f318e; font-size: 20px; font-weight: 700; }
+QLabel#processingMessage { color: #303841; font-size: 13px; }
+QLabel#processingFrames { color: #5a6575; font-size: 12px; }
+QLabel#processingNote { color: #586478; background: #f5f6fb; border: 1px solid #e2e5f0; border-radius: 6px; padding: 9px 11px; font-size: 11px; }
+QLabel#processingElapsed { color: #747e8d; font-size: 11px; }
+QDialog#processingDialog QProgressBar { border: none; border-radius: 6px; background: #e8e9f4; }
+QDialog#processingDialog QProgressBar::chunk { background: #5f63d0; border-radius: 6px; }
 QDialog#videoEnhancementDialog { background: #f7f8fb; }
 QFrame#basicVsrProfile { background: #f0f1fb; border: 1px solid #cfd1ea; border-radius: 6px; }
 QLabel#enhancementModel { color: #2f318e; font-size: 13px; font-weight: 700; }
@@ -139,13 +157,18 @@ QFrame#playerControls QSlider::handle:horizontal { background: white; border-col
 QFrame#observationsPanel { background: white; border: 1px solid #dfe2e7; }
 QTableView { background: white; alternate-background-color: #f6f7fa; gridline-color: #e1e4e9; border: 1px solid #dfe2e7; selection-background-color: #eeeeff; selection-color: #2f318e; font-size: 12px; }
 QHeaderView::section { background: #f5f6f8; color: #303841; border: none; border-bottom: 1px solid #dfe2e7; padding: 7px; font-weight: 600; font-size: 11px; }
-QDialog#multiCameraDialog, QDialog#cameraSetupDialog { background: #f6f7fb; }
+QWidget#multiCameraWorkspace, QDialog#cameraSetupDialog { background: #ffffff; }
 QDialog#cameraPreviewDialog { background: #20262d; }
 QDialog#cameraPreviewDialog QLabel#dialogHeading, QDialog#cameraPreviewDialog QLabel#dialogDetail { color: #f2f4f7; }
 QDialog#cameraPreviewDialog QPushButton { min-width: 34px; }
-QFrame#configCard, QFrame#cameraCard, QFrame#cameraEditor { background: white; border: 1px solid #dce1eb; border-radius: 9px; }
+QFrame#configCard, QFrame#cameraCard { background: white; border: 1px solid #dce1eb; border-radius: 8px; }
+QFrame#cameraEditor { background: #f8f8ff; border: 1px solid #cfd1ea; border-radius: 7px; }
+QPushButton#cameraRemoveButton { color: #6b7482; padding: 3px 7px; font-size: 10px; }
+QLabel#multiCameraIntro { color: #515a77; background: #f5f5fc; border: 1px solid #cfd1ea; border-left: 4px solid #6568bd; border-radius: 7px; padding: 10px 12px; font-size: 11px; }
+QFrame#multiMccrCard { background: #f5f5fc; border: 1px solid #d9dbef; border-radius: 7px; }
+QLabel#multiMccrValue { color: #2f318e; font-size: 27px; font-weight: 700; }
 QDialog#configurationDialog QScrollArea, QDialog#configurationDialog QScrollArea QWidget { background: white; }
-QDialog#multiCameraDialog QScrollArea { background: transparent; border: none; }
+QWidget#multiCameraWorkspace QScrollArea { background: transparent; border: none; }
 QLineEdit, QDoubleSpinBox, QComboBox { background: #ffffff; color: #263142; border: 1px solid #cbd2df; border-radius: 6px; padding: 8px; min-height: 18px; selection-background-color: #e5e7fa; selection-color: #272a78; }
 QLineEdit:focus, QDoubleSpinBox:focus, QComboBox:focus { border-color: #676bd0; }
 QComboBox::drop-down { border: none; width: 25px; }

@@ -1,9 +1,10 @@
 """Multi-recording workspace built on the same full-video detector as the single view."""
+from hashlib import sha256
 from pathlib import Path
 from time import monotonic
 import traceback
 
-from PySide6.QtCore import QThread, QTimer, Qt, Signal, Slot
+from PySide6.QtCore import QEvent, QThread, QTimer, Qt, Signal, Slot
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (QAbstractItemView, QAbstractSpinBox, QCheckBox, QComboBox, QDialog, QDoubleSpinBox,
     QDialogButtonBox, QFileDialog, QFrame, QGridLayout, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QMessageBox,
@@ -13,6 +14,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QAbstractSpinBox, QCheckBox, Q
 from mockup_ui.model_bridge import ModelBridge, read_video, timecode
 from mockup_ui.multi_camera import Alignment, CameraSource, build_timeline, export_session, validate_session
 from mockup_ui.observation_review import ReviewStore
+from mockup_ui.report_metrics import calculate_report_metrics
 from mockup_ui.review_panel import ObservationReviewDialog
 from mockup_ui.video_player import VideoPlayer
 
@@ -43,13 +45,17 @@ class CameraBatchWorker(QThread):
     def run(self):
         try:
             results = []
+            total_frames = max(1, sum(source.video.frame_count for source in self.sources))
+            completed_frames = 0
             for index, source in enumerate(self.sources):
                 def progress(message, percent):
                     self.progress.emit(f"{source.camera_id} · {index + 1}/{len(self.sources)} cameras · {message}",
-                                       round((index + max(0, percent) / 100) * 100 / len(self.sources)))
+                                       round((completed_frames + source.video.frame_count *
+                                              min(100, max(0, percent)) / 100) * 100 / total_frames))
                 result = self.bridge.analyze_video(source.video, self.threshold, progress, camera_id=source.camera_id)
                 ReviewStore.for_result(result)
                 results.append(result)
+                completed_frames += source.video.frame_count
             self.succeeded.emit(results)
         except Exception:
             self.failed.emit(traceback.format_exc())
@@ -162,15 +168,83 @@ class CameraPreviewDialog(QDialog):
         event.accept()
 
 
-class MultiCameraDialog(QDialog):
+class MultiCameraReportDialog(QDialog):
+    """One report covering every camera and the combined observation timeline."""
+    def __init__(self, sources, results, alignment, rows, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Multi-camera forensic report")
+        self.setObjectName("forensicReportDialog")
+        self.resize(1100, 760)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(24, 20, 24, 18)
+        layout.setSpacing(11)
+        layout.addWidget(label("Multi-camera forensic report", "dialogHeading"))
+        layout.addWidget(label(
+            "This is a system-generated report. All detections and validation results are subject to human analyst review and should be treated as reviewable observations, not conclusive findings.",
+            "reportObservation"))
+        _, metrics = build_timeline(sources, results, alignment)
+        counts = metrics["counts"]
+        score = f"{metrics['mccr_percent']:.2f}%" if metrics["mccr_percent"] is not None else "N/A"
+        layout.addWidget(label(
+            f"Incident: {alignment.scene_id or 'Not specified'} · {len(sources)} cameras · "
+            f"{len(rows)} observations · MCCR {score}", "sectionTitle"))
+        layout.addWidget(label(
+            f"Corroborated {counts.get('Corroborated', 0)} · Not corroborated {counts.get('Not Corroborated', 0)} · "
+            f"Uncertain {counts.get('Uncertain', 0)} · Not applicable {counts.get('Not Applicable', 0)}. "
+            f"Alignment: {alignment.method or 'Not confirmed'}; matching window ±{alignment.window_seconds:.2f} s."))
+        camera_table = QTableWidget(len(sources), 6)
+        camera_table.setHorizontalHeaderLabels(["Camera", "Source video", "Resolution / FPS", "Frames", "Observations", "TCR"])
+        camera_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        camera_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        camera_table.verticalHeader().hide()
+        camera_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        camera_table.setMaximumHeight(130)
+        for index, (source, result) in enumerate(zip(sources, results, strict=True)):
+            tcr = calculate_report_metrics(result.metric_input_path)["tcr"] if result.metric_input_path else {}
+            tcr_value = tcr.get("value_percent")
+            values = [source.camera_id, source.video.path.name,
+                      f"{source.video.width} × {source.video.height} · {source.video.fps:.2f} FPS",
+                      str(source.video.frame_count), str(len(result.detections)),
+                      f"{tcr_value:.2f}%" if tcr_value is not None else "N/A"]
+            for column, value in enumerate(values):
+                item = QTableWidgetItem(value)
+                item.setToolTip(str(source.video.path))
+                camera_table.setItem(index, column, item)
+        layout.addWidget(camera_table)
+        layout.addWidget(label("COMBINED OBSERVATION TIMELINE", "sectionTitle"))
+        decisions = {}
+        for result in results:
+            decisions.update({item["observationId"]: (item["analystReview"] or {}).get("decision", "Not reviewed")
+                              for item in ReviewStore.for_result(result).observations})
+        table = QTableWidget(len(rows), 9)
+        table.setHorizontalHeaderLabels(["Session time", "Camera", "Video time", "Frame", "Object", "Confidence", "Box", "Cross-view", "Analyst"])
+        table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        table.setAlternatingRowColors(True)
+        table.verticalHeader().hide()
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        table.horizontalHeader().setStretchLastSection(True)
+        for index, row in enumerate(rows):
+            values = [session_time(row["session_seconds"]), row["camera_id"], timecode(row["video_seconds"]),
+                      str(row["frame_number"]), row["object_label"].title(), f"{row['confidence']:.1%}",
+                      str(row["box"]), row["corroboration_status"], decisions.get(row["observation_id"], "Not reviewed")]
+            for column, value in enumerate(values):
+                item = QTableWidgetItem(value)
+                item.setToolTip(f"{row['source_video']}\n{row['reason']}\nObservation: {row['observation_id']}")
+                table.setItem(index, column, item)
+        layout.addWidget(table, 1)
+        layout.addWidget(label("Times are video-relative; source recording timestamps are unavailable. Saving produces one PDF for the whole session, plus an annotated video and structured records for each camera."))
+        close = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
+        close.rejected.connect(self.reject)
+        layout.addWidget(close)
+
+class MultiCameraDialog(QWidget):
+    """Multi-camera analysis page embedded in the main application window."""
+    state_changed = Signal()
+
     def __init__(self, videos, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Forensikada · Multi-camera workspace")
-        self.setObjectName("multiCameraDialog")
-        self.setWindowModality(Qt.WindowModality.WindowModal)
-        self.setWindowFlag(Qt.WindowType.WindowMaximizeButtonHint, True)
-        self.setMinimumSize(1060, 720)
-        self.resize(1380, 900)
+        self.setObjectName("multiCameraWorkspace")
         self.setStyleSheet((Path(__file__).parent / "styles.qss").read_text(encoding="utf-8"))
         self.sources = [CameraSource(video, f"CAM-{index + 1:02d}") for index, video in enumerate(videos)]
         self.results, self.rows, self.cards, self.editors = [], [], [], []
@@ -180,64 +254,101 @@ class MultiCameraDialog(QDialog):
             self.bridge.set_model_path(parent.bridge.model_path)
         self.threshold = 50
         self.worker = None
+        self._processing_dialog = None
         self.play_timer = QTimer(self)
         self.play_timer.setInterval(40)
         self.play_timer.timeout.connect(self._tick)
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(22, 20, 22, 18)
-        layout.setSpacing(12)
-        header = QHBoxLayout()
-        titles = QVBoxLayout()
-        titles.addWidget(label("MULTI-CAMERA / POST-INCIDENT REVIEW", "sectionTitle"))
-        titles.addWidget(label("One incident. Multiple viewpoints.", "dialogHeading"))
-        header.addLayout(titles, 1)
-        self.configure_button = QPushButton("Analyze cameras")
-        self.configure_button.setObjectName("primaryButton")
-        self.configure_button.clicked.connect(self.configure)
-        self.export_button = QPushButton("Save session")
-        self.export_button.setEnabled(False)
-        self.export_button.clicked.connect(self.export)
-        header.addWidget(self.configure_button)
-        header.addWidget(self.export_button)
-        layout.addLayout(header)
-        self.status = label("Name the incident, confirm whether the recordings match, then analyze. Original files are preserved.")
-        layout.addWidget(self.status)
-        self.progress_bar = QProgressBar()
-        self.progress_bar.hide()
-        layout.addWidget(self.progress_bar)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
         splitter = QSplitter(Qt.Orientation.Horizontal)
+        splitter.setObjectName("multiCameraSplitter")
         splitter.setChildrenCollapsible(False)
         layout.addWidget(splitter, 1)
 
+        sidebar = QFrame()
+        sidebar.setObjectName("sidePanel")
+        sidebar.setMinimumWidth(215)
+        sidebar.setMaximumWidth(290)
+        side = QVBoxLayout(sidebar)
+        side.setContentsMargins(18, 19, 18, 20)
+        side.setSpacing(11)
+        side.addWidget(label("EVIDENCE SOURCES", "sectionTitle"))
         self.setup = QWidget()
-        self.setup.setMinimumWidth(250)
-        self.setup.setMaximumWidth(300)
-        side = QVBoxLayout(self.setup)
-        side.setContentsMargins(0, 0, 10, 0)
-        side.addWidget(label("SESSION SETUP", "sectionTitle"))
-        side.addWidget(label("Incident name or ID"))
+        setup = QVBoxLayout(self.setup)
+        setup.setContentsMargins(0, 0, 0, 0)
+        setup.setSpacing(8)
+        setup.addWidget(label("Incident name or ID"))
         self.scene = QLineEdit()
         self.scene.setPlaceholderText("e.g. Scene 004")
-        side.addWidget(self.scene)
-        self.confirmed = QCheckBox("Same incident and timing aligned")
-        self.confirmed.setToolTip("Confirm after checking that the recordings correspond and their timing is aligned.")
-        side.addWidget(self.confirmed)
-        side.addWidget(label("If the videos did not start together, adjust their timing before analysis."))
-        self.details_button = QPushButton("Camera and timing details")
-        self.details_button.clicked.connect(self.open_details)
-        side.addWidget(self.details_button)
+        setup.addWidget(self.scene)
         add = QPushButton("+ Add camera recordings")
         add.clicked.connect(self.add_recordings)
-        side.addWidget(add)
+        setup.addWidget(add)
+        setup.addWidget(label("ENHANCE EACH CAMERA · BASICVSR++", "enhancementTitle"))
         self.source_scroll = QScrollArea()
+        self.source_scroll.setObjectName("cameraSourcesScroll")
         self.source_scroll.setWidgetResizable(True)
-        side.addWidget(self.source_scroll, 1)
-        side.addWidget(label("Cross-camera matches support review; they do not prove that two views show the same physical object.", "enhancementNotice"))
-        splitter.addWidget(self.setup)
+        self.source_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.source_scroll.setMaximumHeight(180)
+        setup.addWidget(self.source_scroll)
+        setup.addSpacing(12)
+        setup.addWidget(label("RECORDING ALIGNMENT", "sectionTitle"))
+        self.confirmed = QCheckBox("Same incident, aligned")
+        self.confirmed.setToolTip("Confirm after checking that the recordings correspond and their timing is aligned.")
+        setup.addWidget(self.confirmed)
+        self.details_button = QPushButton("Camera and timing details")
+        self.details_button.clicked.connect(self.open_details)
+        setup.addWidget(self.details_button)
+        side.addWidget(self.setup)
 
-        content = QWidget()
-        right = QVBoxLayout(content)
-        right.setContentsMargins(8, 0, 0, 0)
+        side.addWidget(label("ANALYSIS", "sectionTitle"))
+        self.configure_button = QPushButton("Analyze cameras")
+        self.configure_button.setObjectName("primaryButton")
+        self.configure_button.clicked.connect(self.configure)
+        side.addWidget(self.configure_button)
+        status_card = QFrame()
+        status_card.setObjectName("statusCard")
+        status_box = QVBoxLayout(status_card)
+        status_box.setContentsMargins(12, 12, 12, 12)
+        status_box.setSpacing(5)
+        self.status_title = label("Ready to analyze", "statusTitle")
+        self.status = label("Confirm the incident and analyze all cameras.", "mutedText")
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setTextVisible(False)
+        self.progress_bar.setMaximumHeight(5)
+        self.progress_bar.hide()
+        status_box.addWidget(self.status_title)
+        status_box.addWidget(self.status)
+        status_box.addWidget(self.progress_bar)
+        side.addWidget(status_card)
+        side.addStretch()
+        side.addWidget(label("TRAINED MODEL", "sectionTitle"))
+        model_path = self.bridge.model_path
+        model_text = (f"Faster R-CNN · Handgun / Knife\n{Path(model_path).name}" if model_path and Path(model_path).is_file()
+                      else f"Selected checkpoint unavailable\n{Path(model_path).name}" if model_path
+                      else "No checkpoint selected")
+        self.model_label = label(
+            model_text, "mutedText")
+        self.model_label.setToolTip(str(model_path) if model_path else "Select a model in detection configuration.")
+        side.addWidget(self.model_label)
+        splitter.addWidget(sidebar)
+
+        content = QFrame()
+        content.setObjectName("workspace")
+        center = QVBoxLayout(content)
+        center.setContentsMargins(14, 16, 14, 15)
+        center.setSpacing(10)
+        heading = QHBoxLayout()
+        workspace_title = label("MULTI-CAMERA WEAPON DETECTION", "workspaceTitle")
+        workspace_title.setWordWrap(False)
+        heading.addWidget(workspace_title)
+        heading.addStretch()
+        self.workspace_meta = label("Imported recordings", "mutedText")
+        heading.addWidget(self.workspace_meta)
+        center.addLayout(heading)
+        notice = label("One incident · Multiple viewpoints · Shared playback", "multiCameraIntro")
+        center.addWidget(notice)
         tools = QHBoxLayout()
         self.camera_count = label("CAMERA VIEWS", "sectionTitle")
         tools.addWidget(self.camera_count, 1)
@@ -246,10 +357,13 @@ class MultiCameraDialog(QDialog):
         self.view.setEnabled(False)
         self.view.currentIndexChanged.connect(self.change_view)
         tools.addWidget(self.view)
-        right.addLayout(tools)
+        center.addLayout(tools)
         self.grid_scroll = QScrollArea()
+        self.grid_scroll.setObjectName("cameraGridScroll")
         self.grid_scroll.setWidgetResizable(True)
-        right.addWidget(self.grid_scroll, 3)
+        self.grid_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.grid_scroll.viewport().installEventFilter(self)
+        center.addWidget(self.grid_scroll, 4)
         playback = QHBoxLayout()
         self.play_button = QPushButton("Play all")
         self.play_button.clicked.connect(self.toggle_playback)
@@ -260,13 +374,12 @@ class MultiCameraDialog(QDialog):
         playback.addWidget(self.seek, 1)
         self.time_label = label("Session 00:00.000")
         playback.addWidget(self.time_label)
-        right.addLayout(playback)
-        self.metrics_label = label("COMBINED OBSERVATIONS · Awaiting analysis", "sectionTitle")
-        right.addWidget(self.metrics_label)
-        self.metric_note = label("Uncertain and Not Applicable are reported separately and excluded from MCCR.")
-        right.addWidget(self.metric_note)
-        self.timeline = QTableWidget(0, 8)
-        self.timeline.setHorizontalHeaderLabels(["Session time", "Camera", "Video time", "Frame", "Object", "Confidence", "Cross-view status", "Analyst"])
+        center.addLayout(playback)
+        self.metrics_label = label("DETECTED OBJECTS · TIMELINE", "sectionTitle")
+        self.metrics_label.setToolTip("Select an observation to inspect that time across camera views.")
+        center.addWidget(self.metrics_label)
+        self.timeline = QTableWidget(0, 7)
+        self.timeline.setHorizontalHeaderLabels(["Session time", "Camera", "Frame", "Object", "Confidence", "Cross-view", "Analyst"])
         self.timeline.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.timeline.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.timeline.setAlternatingRowColors(True)
@@ -275,11 +388,89 @@ class MultiCameraDialog(QDialog):
         self.timeline.horizontalHeader().setStretchLastSection(True)
         self.timeline.cellClicked.connect(self.jump_to_observation)
         self.timeline.setMinimumHeight(160)
-        right.addWidget(self.timeline, 2)
+        center.addWidget(self.timeline, 2)
+        center.addWidget(label("Automated detections require human review.", "safetyNote"))
         splitter.addWidget(content)
-        splitter.setSizes([275, 1100])
+
+        summary = QFrame()
+        summary.setObjectName("summaryPanel")
+        summary.setMinimumWidth(270)
+        summary.setMaximumWidth(360)
+        summary_box = QVBoxLayout(summary)
+        summary_box.setContentsMargins(17, 19, 17, 16)
+        summary_box.setSpacing(10)
+        summary_box.addWidget(label("DETECTION SUMMARY", "sectionTitle"))
+        summary_metrics = QHBoxLayout()
+        def metric(caption):
+            card = QFrame()
+            card.setObjectName("metricCard")
+            box = QVBoxLayout(card)
+            box.setContentsMargins(5, 8, 5, 8)
+            box.setSpacing(1)
+            value = label("—", "metricNumber")
+            value.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            title = label(caption, "metricLabel")
+            title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            box.addWidget(value)
+            box.addWidget(title)
+            summary_metrics.addWidget(card)
+            return value
+        self.total_metric = metric("DETECTIONS")
+        self.handgun_metric = metric("HANDGUNS")
+        self.knife_metric = metric("KNIVES")
+        summary_box.addLayout(summary_metrics)
+        self.summary_message = label("Analyze the imported cameras to see weapon observations.", "summaryMessage")
+        summary_box.addWidget(self.summary_message)
+        summary_box.addWidget(label("CROSS-CAMERA REVIEW", "sectionTitle"))
+        mccr_card = QFrame()
+        mccr_card.setObjectName("multiMccrCard")
+        mccr_box = QVBoxLayout(mccr_card)
+        mccr_box.setContentsMargins(12, 12, 12, 12)
+        self.mccr_value = label("—", "multiMccrValue")
+        mccr_box.addWidget(self.mccr_value)
+        mccr_box.addWidget(label("Multi-camera corroboration rate", "mutedText"))
+        summary_box.addWidget(mccr_card)
+        self.cross_view_counts = label("Awaiting analysis.", "mutedText")
+        summary_box.addWidget(self.cross_view_counts)
+        self.metric_note = label("Uncertain and Not Applicable observations are excluded from MCCR.", "mutedText")
+        summary_box.addWidget(self.metric_note)
+        summary_box.addSpacing(8)
+        summary_box.addWidget(label("CURRENT SESSION TIME", "sectionTitle"))
+        self.current_time_detail = label("00:00.000 · 0 cameras in view", "mutedText")
+        summary_box.addWidget(self.current_time_detail)
+        summary_box.addWidget(label("ANALYST REVIEW", "sectionTitle"))
+        self.reviewed_metric = label("0 observations reviewed", "mutedText")
+        summary_box.addWidget(self.reviewed_metric)
+        summary_box.addStretch()
+        summary_box.addWidget(label(
+            "Cross-camera matches are reviewable observations, not proof of the same physical object.",
+            "enhancementNotice"))
+        splitter.addWidget(summary)
+        splitter.setSizes([250, 860, 320])
         splitter.setStretchFactor(1, 1)
         self.rebuild_sources()
+
+    def eventFilter(self, watched, event):
+        if watched is self.grid_scroll.viewport() and event.type() == QEvent.Type.Resize:
+            QTimer.singleShot(0, self._layout_camera_cards)
+        return super().eventFilter(watched, event)
+
+    def _layout_camera_cards(self):
+        if not hasattr(self, "camera_grid"):
+            return
+        compact = self.grid_scroll.viewport().width() < 620
+        for column in (2, 4, 6):
+            self.timeline.setColumnHidden(column, compact)
+        columns = 1 if compact else 2
+        if columns == self._grid_columns:
+            return
+        self._grid_columns = columns
+        while self.camera_grid.count():
+            self.camera_grid.takeAt(0)
+        for index, card in enumerate(self.camera_frames):
+            self.camera_grid.addWidget(card, index // columns, index % columns)
+        self.camera_grid.setColumnStretch(0, 1)
+        self.camera_grid.setColumnStretch(1, 1 if columns == 2 else 0)
 
     def capture_settings(self):
         self.alignment.scene_id = self.scene.text().strip()
@@ -302,23 +493,42 @@ class MultiCameraDialog(QDialog):
         self.cards, self.editors = [], []
         source_widget, grid_widget = QWidget(), QWidget()
         source_layout, grid = QVBoxLayout(source_widget), QGridLayout(grid_widget)
-        source_layout.setContentsMargins(0, 0, 5, 0)
+        self.camera_grid, self.camera_frames, self._grid_columns = grid, [], 0
+        source_layout.setContentsMargins(0, 0, 4, 0)
+        source_layout.setSpacing(7)
         grid.setContentsMargins(0, 0, 0, 0)
+        grid.setHorizontalSpacing(10)
+        grid.setVerticalSpacing(10)
         for index, source in enumerate(self.sources):
             editor = QFrame()
             editor.setObjectName("cameraEditor")
             box = QVBoxLayout(editor)
-            box.addWidget(label(source.camera_id, "detectionName"))
-            filename = label(source.video.path.name)
-            filename.setToolTip(str(source.video.path))
+            box.setContentsMargins(10, 8, 10, 8)
+            box.setSpacing(4)
+            source_heading = QHBoxLayout()
+            source_heading.addWidget(label(source.camera_id, "detectionName"), 1)
+            remove = QPushButton("Remove")
+            remove.setObjectName("cameraRemoveButton")
+            remove.clicked.connect(lambda checked=False, i=index: self.remove_recording(i))
+            enhance = QPushButton("Enhance")
+            enhance.setObjectName("enhancementButton")
+            enhance.setToolTip(f"Run BasicVSR++ enhancement on {source.camera_id} before detection.")
+            enhance.clicked.connect(lambda checked=False, i=index: self.enhance_camera(i))
+            source_heading.addWidget(enhance)
+            source_heading.addWidget(remove)
+            box.addLayout(source_heading)
+            filename = label(source.video.path.name, "evidenceTitle")
+            filename.setToolTip(f"Detection input: {source.video.path}" +
+                                (f"\nOriginal recording: {source.original_video_path}" if source.original_video_path else ""))
             box.addWidget(filename)
-            detail = source.location or "Location not specified"
+            detail = f"{source.video.width} × {source.video.height} · {source.video.fps:.2f} FPS"
+            if source.location:
+                detail += f" · {source.location}"
             if source.offset_seconds:
                 detail += f" · offset {source.offset_seconds:+.3f} s"
-            box.addWidget(label(detail))
-            remove = QPushButton("Remove")
-            remove.clicked.connect(lambda checked=False, i=index: self.remove_recording(i))
-            box.addWidget(remove)
+            box.addWidget(label(detail, "mutedText"))
+            box.addWidget(label(f"BasicVSR++ enhanced · Original: {source.original_video_path.name}" if source.original_video_path else
+                                "Optional: Enhance before detection", "enhancementStatus"))
             source_layout.addWidget(editor)
             card = QFrame()
             card.setObjectName("cameraCard")
@@ -349,9 +559,10 @@ class MultiCameraDialog(QDialog):
             body.addWidget(player, 1)
             info = label(f"{source.video.width} × {source.video.height} · {source.video.fps:.2f} FPS · {timecode(source.video.duration)}")
             body.addWidget(info)
-            state = label("Imported · Ready for analysis", "cameraStatus")
+            state = label("Enhanced · Ready for analysis" if source.original_video_path else
+                          "Imported · Ready for analysis", "cameraStatus")
             body.addWidget(state)
-            grid.addWidget(card, index // 2, index % 2)
+            self.camera_frames.append(card)
             self.cards.append((player, title, state, review))
         source_layout.addStretch()
         for scroll, widget in ((self.source_scroll, source_widget), (self.grid_scroll, grid_widget)):
@@ -359,7 +570,9 @@ class MultiCameraDialog(QDialog):
             if old:
                 old.deleteLater()
             scroll.setWidget(widget)
+        self._layout_camera_cards()
         self.camera_count.setText(f"CAMERA VIEWS / {len(self.sources):02d}")
+        self.workspace_meta.setText(f"{len(self.sources)} imported recordings")
         self.configure_button.setEnabled(len(self.sources) >= 2)
         self.update_range()
 
@@ -373,10 +586,15 @@ class MultiCameraDialog(QDialog):
     def clear_results(self):
         self.results, self.rows = [], []
         self.timeline.setRowCount(0)
-        self.export_button.setEnabled(False)
         self.view.setEnabled(False)
         self.view.setCurrentIndex(0)
-        self.metrics_label.setText("COMBINED OBSERVATIONS · Awaiting analysis")
+        self.metrics_label.setText("DETECTED OBJECTS · TIMELINE")
+        for value in (self.total_metric, self.handgun_metric, self.knife_metric, self.mccr_value):
+            value.setText("—")
+        self.summary_message.setText("Analyze the imported cameras to see weapon observations.")
+        self.cross_view_counts.setText("Awaiting analysis.")
+        self.reviewed_metric.setText("0 observations reviewed")
+        self.state_changed.emit()
 
     def add_recordings(self):
         filenames, _ = QFileDialog.getOpenFileNames(self, "Add camera recordings", "", VIDEO_FILTER)
@@ -403,6 +621,30 @@ class MultiCameraDialog(QDialog):
         self.clear_results()
         self.rebuild_sources()
 
+    def enhance_camera(self, index):
+        if self.worker or self.results or not 0 <= index < len(self.sources):
+            return
+        self.pause()
+        source = self.sources[index]
+        source_key = f"{source.video.path.resolve()}:{source.video.size_bytes}:{source.video.modified_ns}"
+        digest = sha256(source_key.encode("utf-8")).hexdigest()[:12]
+        output = Path(__file__).parent / "outputs" / "enhanced_videos" / f"camera_{index + 1:02d}_{digest}_enhanced.mp4"
+        from mockup_ui.app import VideoEnhancementDialog
+        dialog = VideoEnhancementDialog(source.video, self, output_path=output)
+        if dialog.exec() != QDialog.DialogCode.Accepted or not dialog.enhanced_video_path:
+            return
+        try:
+            enhanced = read_video(dialog.enhanced_video_path)
+        except Exception as exc:
+            QMessageBox.warning(self, "Enhanced video unavailable", str(exc))
+            return
+        if source.original_video_path is None:
+            source.original_video_path = source.video.path
+        source.video = enhanced
+        self.clear_results()
+        self.rebuild_sources()
+        self.status.setText(f"{source.camera_id} enhanced with BasicVSR++. Ready to analyze all cameras.")
+
     def configure(self):
         if self.worker:
             return
@@ -411,6 +653,7 @@ class MultiCameraDialog(QDialog):
             self.rebuild_sources()
             self.setup.setEnabled(True)
             self.configure_button.setText("Analyze cameras")
+            self.status_title.setText("Ready to analyze")
             self.status.setText("Edit camera setup, then configure the next analysis. Previous exports remain unchanged.")
             return
         self.pause()
@@ -423,10 +666,18 @@ class MultiCameraDialog(QDialog):
         from mockup_ui.app import DetectionConfigDialog
         dialog = DetectionConfigDialog(self.sources[0].video, self.threshold, self, self.bridge.model_path,
                                        videos=[s.video for s in self.sources])
+        enhanced_count = sum(source.original_video_path is not None for source in self.sources)
+        if enhanced_count:
+            dialog.enhancement_notice.setText(
+                f"INPUT FOOTAGE\n{enhanced_count} of {len(self.sources)} camera recordings were enhanced with BasicVSR++. "
+                "Detection will analyze the current recording for each camera."
+            )
         if dialog.exec() != QDialog.DialogCode.Accepted:
             return
         self.threshold = dialog.slider.value()
         self.bridge.set_model_path(dialog.selected_model)
+        self.model_label.setText(f"Faster R-CNN · Handgun / Knife\n{Path(dialog.selected_model).name}")
+        self.model_label.setToolTip(str(dialog.selected_model))
         self.bridge.enable_cctv_intelligence = dialog.cctv_intel_checkbox.isChecked()
         self.bridge.enable_temporal_consistency = dialog.temporal_checkbox.isChecked()
         self.start_analysis()
@@ -440,45 +691,74 @@ class MultiCameraDialog(QDialog):
         self.seek.setEnabled(False)
         self.progress_bar.setValue(0)
         self.progress_bar.show()
+        self.status_title.setText("Scanning cameras")
+        self.status.setText("The detector is processing each recording in sequence.")
+        self.workspace_meta.setText("Analyzing · please wait")
+        self.summary_message.setText("Detection totals will appear when every camera finishes.")
+        from mockup_ui.app import ProcessingDialog
+        self._processing_dialog = ProcessingDialog(
+            sum(source.video.frame_count for source in self.sources), self.window(), camera_count=len(self.sources))
+        self._processing_dialog.show()
         self.worker = CameraBatchWorker(list(self.sources), self.bridge, self.threshold / 100, self)
         self.worker.progress.connect(self.on_progress, Qt.ConnectionType.QueuedConnection)
         self.worker.succeeded.connect(self.completed, Qt.ConnectionType.QueuedConnection)
         self.worker.failed.connect(self.failed, Qt.ConnectionType.QueuedConnection)
         self.worker.finished.connect(self.worker_finished, Qt.ConnectionType.QueuedConnection)
         self.worker.start()
+        self.state_changed.emit()
 
     @Slot(str, int)
     def on_progress(self, message, percent):
         self.status.setText(message)
         self.progress_bar.setValue(percent)
+        if self._processing_dialog:
+            self._processing_dialog.update_progress(message, percent)
 
     @Slot(object)
     def completed(self, results):
+        self._close_processing_dialog()
         self.results = results
         self.rows, metrics = build_timeline(self.sources, results, self.alignment)
         counts = metrics["counts"]
         score = f"{metrics['mccr_percent']:.2f}%" if metrics["mccr_percent"] is not None else "N/A"
-        self.metrics_label.setText(f"{len(self.rows)} observations  ·  {counts.get('Corroborated', 0)} corroborated  ·  MCCR {score}")
-        self.metric_note.setText(f"{counts.get('Not Corroborated', 0)} not corroborated · {counts.get('Uncertain', 0)} uncertain · {counts.get('Not Applicable', 0)} not applicable. Uncertain and Not Applicable are excluded from MCCR.")
+        self.metrics_label.setText(f"DETECTED OBJECTS · {len(self.rows)} OBSERVATIONS")
+        self.total_metric.setText(f"{len(self.rows):,}")
+        self.handgun_metric.setText(f"{sum(result.counts.get('handgun', 0) for result in results):,}")
+        self.knife_metric.setText(f"{sum(result.counts.get('knife', 0) for result in results):,}")
+        self.mccr_value.setText(score)
+        self.summary_message.setText(
+            f"{len(self.rows):,} frame observations across {len(results)} cameras. "
+            "Open Review on a camera to record analyst decisions." if self.rows else
+            "No handgun or knife met the configured threshold in these recordings.")
+        self.cross_view_counts.setText(
+            f"{counts.get('Corroborated', 0)} corroborated · {counts.get('Not Corroborated', 0)} not corroborated\n"
+            f"{counts.get('Uncertain', 0)} uncertain · {counts.get('Not Applicable', 0)} not applicable")
         self.refresh_timeline()
         for result, card in zip(results, self.cards, strict=True):
             card[2].setText(f"Analyzed · {len(result.detections)} observations · {result.analyzed_frames} frames")
             card[3].setEnabled(bool(result.detections))
-        self.export_button.setEnabled(True)
         self.view.setEnabled(True)
         self.view.setCurrentIndex(1)
-        self.status.setText("Analysis complete. Preview a camera, review detections, or select a row to inspect the matching time.")
+        self.status_title.setText("Analysis complete")
+        self.status.setText("Preview a camera or select an observation to inspect all views.")
+        self.workspace_meta.setText("Annotated results")
         self.configure_button.setText("New analysis")
+        self.state_changed.emit()
 
     @Slot(str)
     def failed(self, details):
+        self._close_processing_dialog()
         import logging
         logging.error("Multi-camera analysis failed\n%s", details)
+        self.status_title.setText("Analysis unavailable")
         self.status.setText("Session analysis did not complete. Correct the input or model issue and retry.")
+        self.summary_message.setText("No completed multi-camera result was produced.")
+        self.workspace_meta.setText("Analysis incomplete")
         QMessageBox.warning(self, "Camera analysis failed", details.splitlines()[-1])
 
     @Slot()
     def worker_finished(self):
+        self._close_processing_dialog()
         self.worker.wait()
         self.worker.deleteLater()
         self.worker = None
@@ -487,8 +767,15 @@ class MultiCameraDialog(QDialog):
         self.play_button.setEnabled(True)
         self.seek.setEnabled(True)
         self.progress_bar.hide()
+        self.state_changed.emit()
         if self.results:
             self.toggle_playback()
+
+    def _close_processing_dialog(self):
+        if self._processing_dialog:
+            self._processing_dialog.accept()
+            self._processing_dialog.deleteLater()
+            self._processing_dialog = None
 
     def refresh_timeline(self):
         decisions = {}
@@ -497,13 +784,18 @@ class MultiCameraDialog(QDialog):
                               for row in ReviewStore.for_result(result).observations})
         self.timeline.setRowCount(len(self.rows))
         for index, row in enumerate(self.rows):
-            values = [session_time(row["session_seconds"]), row["camera_id"], timecode(row["video_seconds"]),
+            values = [session_time(row["session_seconds"]), row["camera_id"],
                       str(row["frame_number"]), row["object_label"].title(), f"{row['confidence']:.1%}",
                       row["corroboration_status"], decisions.get(row["observation_id"], "Not reviewed")]
             for column, value in enumerate(values):
                 item = QTableWidgetItem(value)
-                item.setToolTip(f"{row['source_video']}\n{row['reason']}\nTemporal status: {row['temporal_status']}\nBox: {row['box']}")
+                item.setToolTip(f"{row['source_video']}\nVideo time: {timecode(row['video_seconds'])}\n"
+                                f"Frame: {row['frame_number']} · Confidence: {row['confidence']:.1%}\n"
+                                f"Analyst: {decisions.get(row['observation_id'], 'Not reviewed')}\n"
+                                f"{row['reason']}\nTemporal status: {row['temporal_status']}\nBox: {row['box']}")
                 self.timeline.setItem(index, column, item)
+        reviewed = sum(decision != "Not reviewed" for decision in decisions.values())
+        self.reviewed_metric.setText(f"{reviewed} / {len(self.rows)} observations reviewed")
 
     def review_camera(self, index):
         self.pause()
@@ -537,6 +829,9 @@ class MultiCameraDialog(QDialog):
     def seek_all(self, milliseconds):
         seconds = milliseconds / 1000
         self.time_label.setText(f"Session {session_time(seconds)}")
+        coverage = sum(source.offset_seconds <= seconds < source.offset_seconds + source.video.duration
+                       for source in self.sources)
+        self.current_time_detail.setText(f"{session_time(seconds)} · {coverage} of {len(self.sources)} cameras in view")
         for source, card in zip(self.sources, self.cards):
             local = seconds - source.offset_seconds
             if 0 <= local < source.video.duration:
@@ -574,7 +869,9 @@ class MultiCameraDialog(QDialog):
 
     def export(self):
         self.pause()
-        destination = QFileDialog.getExistingDirectory(self, "Save camera session")
+        if not self.results or self.worker:
+            return
+        destination = QFileDialog.getExistingDirectory(self, "Save videos and forensic reports")
         if not destination:
             return
         try:
@@ -582,7 +879,12 @@ class MultiCameraDialog(QDialog):
         except Exception as exc:
             QMessageBox.warning(self, "Export incomplete", f"The session could not be fully saved: {exc}")
             return
-        QMessageBox.information(self, "Session saved", f"Saved combined observations, alignment metadata, and a video/report/review package for each camera.\n\n{folder}")
+        QMessageBox.information(self, "Session saved", f"Saved one forensic PDF for all cameras, plus combined observations and an annotated video with structured records for each camera.\n\n{folder}")
+
+    def show_report(self):
+        if self.results and not self.worker:
+            self.pause()
+            MultiCameraReportDialog(self.sources, self.results, self.alignment, self.rows, self).exec()
 
     def reject(self):
         self.close()

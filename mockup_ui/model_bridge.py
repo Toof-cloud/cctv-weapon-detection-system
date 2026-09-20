@@ -345,7 +345,7 @@ def result_summary(result: VideoAnalysisResult) -> dict:
     }
 
 
-def save_result(result: VideoAnalysisResult, output_dir: Path = OUTPUT_DIR) -> Path:
+def save_result(result: VideoAnalysisResult, output_dir: Path = OUTPUT_DIR, *, include_pdf: bool = True) -> Path:
     """Export the completed analysis and a snapshot of saved analyst reviews."""
     from mockup_ui.observation_review import ReviewStore, atomic_json
     store = ReviewStore.for_result(result)
@@ -366,5 +366,5 @@ def save_result(result: VideoAnalysisResult, output_dir: Path = OUTPUT_DIR) -> P
     snapshot["artifacts"] = {"annotatedVideo": str(destination / "annotated.mp4"), "detectionsCsv": str(destination / "detections.csv")}
     atomic_json(destination / "observation_reviews.json", snapshot)
     from mockup_ui.forensic_report import write_forensic_report
-    write_forensic_report(destination / "summary.json", destination)
+    write_forensic_report(destination / "summary.json", destination, include_pdf=include_pdf)
     return destination
