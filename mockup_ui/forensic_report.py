@@ -233,8 +233,8 @@ Companion files: forensic_report.json and forensic_records.csv. Use your browser
 </main></body></html>'''
 
 
-def write_forensic_report(summary_path: Path, destination: Path | None = None) -> Path:
-    """Write once per destination; original video, CSV and summary stay untouched."""
+def write_forensic_report(summary_path: Path, destination: Path | None = None, *, include_pdf: bool = True) -> Path:
+    """Write once per destination; optionally leave PDF generation to a session report."""
     summary_path = Path(summary_path).resolve()
     report = build_report(summary_path)
     destination = Path(destination).resolve() if destination else summary_path.parent / report["report_id"]
@@ -248,8 +248,9 @@ def write_forensic_report(summary_path: Path, destination: Path | None = None) -
         writer = csv.DictWriter(stream, fieldnames=CSV_FIELDS)
         writer.writeheader()
         writer.writerows(report["detections"])
-    from mockup_ui.pdf_report import write_pdf
-    write_pdf(report, paths[3])
+    if include_pdf:
+        from mockup_ui.pdf_report import write_pdf
+        write_pdf(report, paths[3])
     return paths[0]
 
 

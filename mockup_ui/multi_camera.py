@@ -11,6 +11,7 @@ from uuid import uuid4
 
 from mockup_ui.model_bridge import VideoInfo, save_result
 from mockup_ui.observation_review import ReviewStore
+from mockup_ui.report_metrics import calculate_report_metrics
 
 
 @dataclass
@@ -19,6 +20,7 @@ class CameraSource:
     camera_id: str
     location: str = ""
     offset_seconds: float = 0.0
+    original_video_path: Path | None = None
 
 
 @dataclass
@@ -100,9 +102,9 @@ def build_timeline(sources, results, alignment):
 
 
 def export_session(sources, results, alignment, destination):
-    """Write a fresh session manifest, timeline, and the existing per-camera reports."""
+    """Write one session PDF plus annotated video and structured records per camera."""
     rows, metrics = build_timeline(sources, results, alignment)
-    folder = Path(destination) / f"camera-session-{datetime.now():%Y%m%d-%H%M%S}-{uuid4().hex[:8]}"
+    folder = Path(destination).resolve() / f"camera-session-{datetime.now():%Y%m%d-%H%M%S}-{uuid4().hex[:8]}"
     folder.mkdir(parents=True, exist_ok=False)
     manifest = {"schema_version": 1, "status": "exporting", "generated_at_utc": datetime.now(timezone.utc).isoformat(),
                 "scene_id": alignment.scene_id, "alignment_confirmed_by_analyst": alignment.confirmed,
@@ -112,7 +114,14 @@ def export_session(sources, results, alignment, destination):
     manifest_path = folder / "session.json"
     manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     for source, result in zip(sources, results, strict=True):
-        exported = save_result(result, folder)
+        exported = save_result(result, folder, include_pdf=False)
+        tcr = calculate_report_metrics(exported / "metric_input.csv")["tcr"]
+        camera_report = json.loads((exported / "forensic_report.json").read_text(encoding="utf-8"))
+        fingerprints = {
+            "source_video": camera_report["source"]["file_at_report_generation"]["sha256"],
+            "detections_csv": camera_report["artifacts"]["pipeline_detections"]["sha256"],
+            "summary_json": camera_report["artifacts"]["saved_summary"]["sha256"],
+        }
         reviews = {r["observationId"]: r["analystReview"] for r in ReviewStore.for_result(result).observations}
         for row in rows:
             if row["camera_id"] == source.camera_id:
@@ -121,6 +130,17 @@ def export_session(sources, results, alignment, destination):
                            reviewed_at=review.get("reviewedAt"))
         manifest["cameras"].append({"camera_id": source.camera_id, "location": source.location,
                                     "source_video": str(source.video.path), "offset_seconds": source.offset_seconds,
+                                    "original_source_video": str(source.original_video_path) if source.original_video_path else None,
+                                    "width": source.video.width, "height": source.video.height,
+                                    "fps": source.video.fps, "frame_count": source.video.frame_count,
+                                    "duration_seconds": source.video.duration,
+                                    "observation_count": len(result.detections),
+                                    "analyzed_frames": result.analyzed_frames,
+                                    "frames_with_detections": result.positive_frames,
+                                    "confidence_threshold": result.threshold,
+                                    "device": result.device,
+                                    "tcr": tcr,
+                                    "fingerprints": fingerprints,
                                     "model_path": result.model_path, "run_id": result.run_id,
                                     "export_folder": str(exported.relative_to(folder))})
     with (folder / "combined_observations.csv").open("w", encoding="utf-8-sig", newline="") as stream:
@@ -128,6 +148,9 @@ def export_session(sources, results, alignment, destination):
         writer = csv.DictWriter(stream, fieldnames=keys)
         writer.writeheader()
         writer.writerows({**row, "box": json.dumps(row["box"]), "supporting_observations": json.dumps(row["supporting_observations"])} for row in rows)
-    manifest.update(status="completed", observations=rows)
+    manifest["observations"] = rows
+    from mockup_ui.multi_camera_pdf import write_session_pdf
+    write_session_pdf(folder / "forensic_report.pdf", manifest)
+    manifest["status"] = "completed"
     manifest_path.write_text(json.dumps(manifest, indent=2, allow_nan=False), encoding="utf-8")
     return folder

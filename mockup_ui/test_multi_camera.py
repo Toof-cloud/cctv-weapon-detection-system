@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import tempfile
+import threading
 import time
 from types import SimpleNamespace
 import unittest
@@ -14,12 +15,12 @@ import cv2
 import numpy as np
 from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
-from PySide6.QtWidgets import QApplication, QFileDialog, QPushButton
+from PySide6.QtWidgets import QApplication, QFileDialog, QPushButton, QTableWidget
 
 from mockup_ui.app import DetectionConfigDialog, MainWindow
 from mockup_ui.model_bridge import VideoAnalysisResult, VideoInfo, read_video
 from mockup_ui.multi_camera import Alignment, CameraSource, build_timeline, export_session, validate_session
-from mockup_ui.multi_camera_panel import CameraPreviewDialog, CameraSetupDialog, MultiCameraDialog
+from mockup_ui.multi_camera_panel import CameraPreviewDialog, CameraSetupDialog, MultiCameraDialog, MultiCameraReportDialog
 from mockup_ui.observation_review import ReviewStore
 
 
@@ -121,7 +122,7 @@ class MultiCameraUiTests(unittest.TestCase):
             return fake_result(video, camera_id)
         self.window.bridge.analyze_video = analyze
         self.window.start_analysis()
-        self.assertFalse(self.window.export_button.isEnabled())
+        self.assertFalse(self.window.results)
         self.assertFalse(self.window.setup.isEnabled())
         deadline = time.monotonic() + 5
         while self.window.worker and time.monotonic() < deadline:
@@ -130,7 +131,9 @@ class MultiCameraUiTests(unittest.TestCase):
         self.window.pause()
         self.assertEqual(calls, ["CAM-01", "CAM-02"])
         self.assertEqual(self.window.timeline.rowCount(), 2)
-        self.assertIn("100.00%", self.window.metrics_label.text())
+        self.assertEqual(self.window.mccr_value.text(), "100.00%")
+        self.assertEqual(self.window.total_metric.text(), "2")
+        self.assertEqual(self.window.knife_metric.text(), "2")
         self.assertEqual(self.window.cards[0][0].path, self.window.results[0].output_path)
         self.window.seek.setValue(200)
         self.assertEqual([card[0].frame_number for card in self.window.cards], [2, 2])
@@ -142,10 +145,144 @@ class MultiCameraUiTests(unittest.TestCase):
         self.assertEqual(manifest["metrics"]["mccr_percent"], 100)
         self.assertEqual(manifest["observations"][0]["analyst_decision"], "Reject")
         self.assertEqual(len(manifest["cameras"]), 2)
+        self.assertTrue((exported / "forensic_report.pdf").is_file())
+        self.assertEqual(set(exported.rglob("*.pdf")), {exported / "forensic_report.pdf"})
+        for camera in manifest["cameras"]:
+            camera_folder = exported / camera["export_folder"]
+            self.assertTrue((camera_folder / "annotated.mp4").is_file())
+            self.assertTrue((camera_folder / "forensic_report.json").is_file())
+            self.assertTrue((camera_folder / "forensic_records.csv").is_file())
         self.window.configure()
         self.assertEqual(self.window.results, [])
         self.assertTrue(self.window.setup.isEnabled())
-        self.assertFalse(self.window.export_button.isEnabled())
+
+    def test_detection_progress_popup_is_centered_and_tracks_all_cameras(self):
+        gate = threading.Event()
+        self.addCleanup(gate.set)
+        self.window.show()
+        def analyze(video, threshold, progress, camera_id):
+            progress(f"{camera_id} scanning", 40)
+            gate.wait(3)
+            return fake_result(video, camera_id)
+        self.window.bridge.analyze_video = analyze
+        self.window.start_analysis()
+        try:
+            deadline = time.monotonic() + 3
+            while self.window.progress_bar.value() != 20 and time.monotonic() < deadline:
+                QTest.qWait(10)
+            popup = self.window._processing_dialog
+            self.assertIsNotNone(popup)
+            self.assertTrue(popup.isVisible())
+            self.assertEqual(popup.camera_count, 2)
+            self.assertEqual(popup.progress.value(), 20)
+            self.assertIn("CAM-01", popup.message.text())
+            self.assertLessEqual((popup.frameGeometry().center() - self.window.frameGeometry().center()).manhattanLength(), 12)
+        finally:
+            gate.set()
+            deadline = time.monotonic() + 5
+            while self.window.worker and time.monotonic() < deadline:
+                QTest.qWait(10)
+        self.assertIsNone(self.window.worker)
+        self.assertIsNone(self.window._processing_dialog)
+
+    def test_enhanced_camera_is_the_input_to_detection(self):
+        original = self.window.sources[0].video.path
+        enhanced = make_video(self.folder / "enhanced_cam_1.mp4", "ENHANCED CAMERA 1")
+        with patch("mockup_ui.app.VideoEnhancementDialog") as dialog_type:
+            dialog = dialog_type.return_value
+            dialog.exec.return_value = 1
+            dialog.enhanced_video_path = enhanced.path
+            self.window.enhance_camera(0)
+            self.assertIn("output_path", dialog_type.call_args.kwargs)
+        self.assertEqual(self.window.sources[0].video.path, enhanced.path)
+        self.assertEqual(self.window.sources[0].original_video_path, original)
+        self.assertEqual(self.window.sources[1].video.path, self.videos[1].path)
+        self.assertIn("Enhanced", self.window.cards[0][2].text())
+        inputs = []
+        def analyze(video, threshold, progress, camera_id):
+            inputs.append(video.path)
+            return fake_result(video, camera_id)
+        self.window.bridge.analyze_video = analyze
+        self.window.start_analysis()
+        deadline = time.monotonic() + 5
+        while self.window.worker and time.monotonic() < deadline:
+            QTest.qWait(10)
+        self.assertEqual(inputs, [enhanced.path, self.videos[1].path])
+        exported = export_session(self.window.sources, self.window.results, self.window.alignment, self.folder)
+        cameras = json.loads((exported / "session.json").read_text())["cameras"]
+        self.assertEqual(cameras[0]["source_video"], str(enhanced.path))
+        self.assertEqual(cameras[0]["original_source_video"], str(original))
+        self.assertIsNone(cameras[1]["original_source_video"])
+
+    def test_multi_camera_is_embedded_and_uses_shared_toolbar(self):
+        main = MainWindow()
+        self.addCleanup(main.close)
+        main.open_multi_camera([str(video.path) for video in self.videos])
+        self.assertIs(main.pages.currentWidget(), main._multi_camera_window)
+        self.assertEqual(main.mode_tabs.currentIndex(), 1)
+        self.assertEqual(len([button for button in main.findChildren(QPushButton) if button.text() == "Import videos"]), 1)
+        self.assertFalse(main.report_button.isEnabled())
+        self.assertFalse(main.save_button.isEnabled())
+        multi = main._multi_camera_window
+        multi.scene.setText("TEST-SCENE")
+        multi.confirmed.setChecked(True)
+        multi.capture_settings()
+        multi.bridge.analyze_video = lambda video, threshold, progress, camera_id: fake_result(video, camera_id)
+        multi.start_analysis()
+        deadline = time.monotonic() + 5
+        while multi.worker and time.monotonic() < deadline:
+            QTest.qWait(20)
+        multi.pause()
+        self.assertTrue(main.report_button.isEnabled())
+        self.assertTrue(main.save_button.isEnabled())
+        with patch.object(multi, "show_report") as report:
+            main.show_forensic_report()
+            report.assert_called_once()
+        with patch.object(multi, "export") as export:
+            main.save_current_result()
+            export.assert_called_once()
+        main.mode_tabs.setCurrentIndex(0)
+        self.assertFalse(main.report_button.isEnabled())
+        self.assertFalse(main.save_button.isEnabled())
+        previous = main._multi_camera_window
+        main.open_multi_camera([str(video.path) for video in self.videos])
+        self.assertIsNot(main._multi_camera_window, previous)
+        self.assertEqual(main.pages.count(), 2)
+        self.assertFalse(main.report_button.isEnabled())
+        self.assertFalse(main.save_button.isEnabled())
+
+    def test_combined_report_includes_each_camera_and_timeline(self):
+        results = [fake_result(video, f"CAM-{index:02d}") for index, video in enumerate(self.videos, 1)]
+        self.window.scene.setText("TEST-SCENE")
+        self.window.confirmed.setChecked(True)
+        self.window.capture_settings()
+        self.window.completed(results)
+        self.window.pause()
+        report = MultiCameraReportDialog(self.window.sources, results, self.window.alignment,
+                                         self.window.rows, self.window)
+        tables = report.findChildren(QTableWidget)
+        self.assertEqual([table.rowCount() for table in tables], [2, 2])
+        self.assertEqual(tables[0].columnCount(), 6)
+        self.assertEqual(tables[0].item(0, 0).text(), "CAM-01")
+        self.assertEqual(tables[1].item(0, 1).text(), "CAM-01")
+        self.assertFalse(any(button.text() == "Open camera report" for button in report.findChildren(QPushButton)))
+        report.close()
+
+    def test_camera_views_and_timeline_adapt_to_window_width(self):
+        main = MainWindow()
+        self.addCleanup(main.close)
+        main.resize(1450, 880)
+        main.open_multi_camera([str(video.path) for video in self.videos])
+        main.show()
+        QTest.qWait(50)
+        multi = main._multi_camera_window
+        self.assertEqual(multi._grid_columns, 2)
+        self.assertFalse(multi.timeline.isColumnHidden(2))
+        main.resize(1060, 720)
+        QTest.qWait(50)
+        self.assertEqual(multi._grid_columns, 1)
+        self.assertTrue(multi.timeline.isColumnHidden(2))
+        self.assertTrue(multi.timeline.isColumnHidden(4))
 
     def test_multi_file_picker_routes_to_workspace(self):
         main = MainWindow()

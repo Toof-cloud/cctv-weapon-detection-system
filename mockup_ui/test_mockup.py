@@ -245,6 +245,8 @@ class VideoUiTests(unittest.TestCase):
         self.window.close()
 
     def confirm_detection(self, threshold=None):
+        if self.window._config_dialog is None:
+            self.window.analyze_button.click()
         dialog = self.window._config_dialog
         self.assertIsNotNone(dialog)
         self.assertTrue(dialog.isVisible())
@@ -266,6 +268,8 @@ class VideoUiTests(unittest.TestCase):
         self.assertFalse(self.window._model_retry.isActive())
         self.assertEqual(self.window.status_title.text(), "Ready to analyze")
         self.assertTrue(self.window.analyze_button.isEnabled())
+        self.assertIsNone(self.window._config_dialog)
+        self.window.analyze_button.click()
         self.assertEqual(self.window._config_dialog.slider.value(), 50)
         self.assertIn("No enhanced video has been created", self.window._config_dialog.enhancement_notice.text())
         self.assertIn("BasicVSR++ enhancement", self.window.enhancement_status.text())
@@ -369,6 +373,10 @@ class VideoUiTests(unittest.TestCase):
         self.assertFalse(self.window.report_button.isEnabled())
         self.assertIsNotNone(self.window._processing_dialog)
         self.assertTrue(self.window._processing_dialog.isVisible())
+        self.assertEqual(self.window._processing_dialog.camera_count, 1)
+        self.assertEqual(self.window._processing_dialog.progress.value(), 25)
+        self.assertLessEqual((self.window._processing_dialog.frameGeometry().center() -
+                              self.window.frameGeometry().center()).manhattanLength(), 3)
         self.assertIn("frame 2 of 8", self.window._processing_dialog.frames.text().lower())
         self.assertEqual(self.window.total_metric.text(), "—")
         self.assertEqual(self.window.observation_model.rowCount(), 0)
@@ -388,6 +396,28 @@ class VideoUiTests(unittest.TestCase):
         self.assertTrue(self.window.report_button.isEnabled())
         self.assertIsNone(self.window._processing_dialog)
         self.assertEqual(self.window.player.path, self.window.result.output_path)
+
+    def test_applied_enhancement_is_reported_as_detection_input(self):
+        enhanced = make_clip(self.folder / "ENHANCED_CLIP.mp4")
+        self.window.load_video(str(self.video.path))
+        self.assertIsNone(self.window._config_dialog)
+        with patch("mockup_ui.app.VideoEnhancementDialog") as dialog_type, \
+             patch.object(QMessageBox, "information"):
+            dialog_type.return_value.exec.return_value = 1
+            dialog_type.return_value.enhanced_video_path = enhanced.path
+            self.window.show_video_enhancement()
+        self.assertEqual(self.window.video_info.path, enhanced.path)
+        self.assertTrue(self.window._enhanced_video_active)
+        self.window.show_detection_configuration()
+        self.assertIn("enhanced video is active", self.window._config_dialog.enhancement_notice.text())
+        self.window._config_dialog.reject()
+        QTest.qWait(10)
+        self.window.bridge.analyze_video = lambda video, threshold, progress: fixture_result(video)
+        self.window._analysis_requested = True
+        self.window.analyze()
+        self.wait_finished()
+        self.assertEqual(self.window.result.video.path, enhanced.path)
+        self.assertIn("enhanced video was analyzed", self.window.enhancement_status.text())
 
     def test_completed_summary_stays_constant_while_reviewing_boxed_frames(self):
         records = [

@@ -2,8 +2,8 @@
 
 The interface visualizes the existing weapon-detection system:
 **Import videos → configure detection → scan with the selected trained model → review annotated
-videos and detection summaries.** Select one recording for the existing single-camera workflow,
-or multiple recordings for the multi-camera workspace. The service loads the trained model,
+videos and detection summaries.** Select one recording for the single-video view,
+or multiple recordings for the multi-camera view in the same application window. The service loads the trained model,
 detects its **handgun** and **knife** classes, and produces the boxes and report.
 
 **Original project files modified: NONE.** Changes are confined to `mockup_ui/`.
@@ -20,20 +20,28 @@ From the repository root:
 
 ## Multi-camera workspace
 
-Choose **Import videos**, then Ctrl-select two or more recordings. The workspace
-shows camera views together and offers a shared playback/seek control. Processing
+Choose **Import videos**, then Ctrl-select two or more recordings. The main window
+switches to the Multi-camera tab. It shows camera views together and offers a shared playback/seek control. Processing
 uses the existing full-video `ModelBridge` separately for each camera, in sequence;
 playback switches to the annotated recordings when all cameras finish.
+The view follows the Single video screen: evidence and analysis controls on the
+left, camera views and the observation timeline in the center, and detection and
+cross-camera summaries on the right. At narrower window sizes, camera views stack
+and the timeline shows its essential columns; full details remain in row tooltips
+and the forensic report.
 
 1. Enter an incident name or ID. The workspace assigns unique camera IDs for you.
    Use **Camera and timing details** only if you need to rename cameras, record their
    locations, document the alignment method, or adjust a recording's start offset.
+   Use **Enhance** on an individual camera to preview and apply BasicVSR++ before
+   detection. The enhanced recording becomes that camera's detection input, while
+   the original source path remains in the session report.
 2. Confirm correspondence only after verifying the same incident and alignment.
    Without this confirmation, cross-view observations are **Not Applicable**.
 3. Choose **Analyze cameras**. Model, confidence, CCTV intelligence and temporal
    consistency settings apply to all cameras. Temporal validation remains separate
-   within each recording. Inputs are processed as imported; use enhanced recordings
-   as inputs if you have already prepared them with BasicVSR++.
+   within each recording. A centered progress dialog shows the active camera and
+   overall scan progress; the same dialog is used for Single video analysis.
 4. Use **Preview** on any camera to open a large player with a single Play/Pause
    control and timeline. Scroll over the video to zoom, drag to pan, and
    double-click to fit it again. The standard Windows title-bar controls remain
@@ -41,11 +49,12 @@ playback switches to the annotated recordings when all cameras finish.
 5. Review the combined timeline and each camera's **Review** panel. Selecting a
    timeline row seeks all views to that session time. A view outside its recording
    interval displays a placeholder rather than a stale frame.
-6. **Save session** writes `session.json`, `combined_observations.csv`, and the
-   existing video/PDF/HTML/JSON/review export package for each camera. The combined
+6. The shared **Forensic report** button opens one report with every camera's
+   details and the combined session timeline. **Save video + report** writes exactly
+   one multi-camera PDF, `session.json`, `combined_observations.csv`, and
+   an annotated video with HTML/JSON/CSV/review records for each camera. The combined
    session's MCCR, alignment information, matching observation IDs and analyst
-   decisions are in its JSON/CSV. Per-camera PDFs retain their single-camera scope;
-   this update does not add a consolidated multi-camera PDF.
+   decisions are preserved in its PDF and structured records.
 
 The manuscript's printed pages 70-72 (PDF pages 75-77) require same-incident
 correspondence, different camera IDs, class agreement and a predefined alignment
@@ -58,9 +67,9 @@ reporting rule. This differs from the older two-camera benchmark's inclusion of
 Uncertain in its denominator. Analyst decisions never alter automatic matches.
 
 Camera setup is locked after completion so it cannot silently relabel existing
-results. **Edit setup / new analysis** clears the displayed results before editing;
+results. **New analysis** clears the displayed results before editing;
 previous saved exports and review records remain intact. Session exports preserve
-the source paths and offset settings, but reopening a whole multi-camera workspace
+the source paths and offset settings, but reopening a whole multi-camera session
 from a manifest is not implemented. Individual reviews can still be reopened.
 
 Focused verification:
@@ -89,11 +98,11 @@ an existing working CUDA environment for GPU inference if available.
 
 1. **Import video** or drop a local video onto the viewer. The video loads without starting detection.
 2. Select **Enhance video** to open the BasicVSR++ enhancement UI. It shows the
-   source frame beside the reserved enhanced-output preview. Enhancement is
-   automatic, so there are no presets or manual adjustment controls. The run
-   action remains disabled and the imported video remains unchanged.
-3. Review the video details and confidence threshold in the configuration dialog.
-   Select **Start detection** to continue, or cancel and use **Analyze video** later.
+   source frame beside the enhanced-output preview. Enhancement is automatic,
+   with no presets or manual adjustments. Select **Run BasicVSR++ enhancement**,
+   then **Apply Enhanced Video** to use that recording as detection input.
+3. When ready, choose **Analyze video** to open detection configuration. Review
+   the video details and confidence threshold, then select **Start detection**.
 4. The detection service loads the trained model and
    scans every video frame. The UI shows loading/scanning progress. Playback and
    result controls remain disabled; summary values stay pending while scanning.
@@ -111,7 +120,7 @@ After analysis, **Observation review** opens the analyst decision panel. Saved
 reviews can be resumed with **Open saved review…**, including after restarting
 the application. Opening a review never reruns detection.
 
-Importing never starts analysis. The toolbar contains **Import video**,
+Importing never starts analysis. The shared toolbar contains **Import videos**,
 **Forensic report**, and **Save video + report**. An **Analyze video** control opens
 the threshold confirmation whenever an imported video remains unprocessed.
 The app does not open a model picker. If the required model is missing after the
@@ -127,10 +136,10 @@ summary. Importing another video clears the previous result. Reimport a video
 to scan it again with a changed threshold or retry after a processing error.
 
 The **Enhance video** button becomes available after import and opens the automatic
-BasicVSR++ workflow mockup. No enhancement service is called. The disabled
-**Run BasicVSR++ enhancement** action and the detection configuration both state
-that detection receives the original video. BasicVSR++ processing can be connected
-to this stage before the existing detection call when its implementation is added.
+BasicVSR++ workflow. It calls the project's existing WSL-based enhancement service;
+that WSL environment and its configured BasicVSR++ script must be available for a
+run to complete. Applying the output replaces the detection input for that video.
+Multi-camera sources offer the same action separately for each recording.
 
 Short clips are best for the defense, especially on CPU. Processing every frame
 can take several minutes. The UI remains responsive, but only one analysis runs
@@ -309,9 +318,9 @@ cannot be mistaken for the current run. Failed/incomplete processing is not
 presented as a completed result. Failed runs keep totals pending and disable
 playback/export; any partial files remain isolated under `temp/`.
 
-The application does not yet run video enhancement, training, multi-camera comparison,
-object tracking, or case management. The visible enhancement controls are a UI
-preview for BasicVSR++ integration. Analyst decisions are entered manually.
+The application offers BasicVSR++ enhancement and multi-camera comparison, but it
+does not train models, track physical objects across cameras, or manage cases.
+Analyst decisions are entered manually.
 
 ## What the results mean
 
