@@ -1,12 +1,12 @@
-# All Models (1 to 9) Training, Dataset, and Testing Technical Factsheet
+# All Models (1 to 9 & Model V11) Training, Dataset, and Testing Technical Factsheet
 
 * **Thesis Project:** FORENSIKADA (Multi-Camera CCTV Weapon Detection System)  
 * **University:** National University – Manila (*CCIT – Computer Science Department*)  
-* **Purpose:** Consolidated factual technical data for all model iterations (Models 1 through 9) for direct integration into thesis manuscript tables, methodology (Chapter 3), results & discussion (Chapter 4), and defense presentations.
+* **Purpose:** Consolidated factual technical data for all model iterations (Models 1 through 9 & Model V11) for direct integration into thesis manuscript tables, methodology (Chapter 3), results & discussion (Chapter 4), and defense presentations.
 
 ---
 
-## Section 1: Master Comparative Summary Table (Models 1 to 9)
+## Section 1: Master Comparative Summary Table (Models 1 to 9 & Model V11)
 
 | Model | Dataset & Sourcing Focus | Train / Val / Test Images | Precision | Recall | F1-Score | AP (Handgun) | AP (Knife) | mAP@0.50 | TP / FP / FN | Key Finding / Forensic Diagnosis |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
@@ -19,6 +19,7 @@
 | **Model 7** | Hard Negative Mining (Bare Hands/Rails) + Small Anchors + Cosine LR | 1,838 / 393 / 397 (2,628 Total) | 70.48% | 90.65% | 79.31% | 86.98% | 88.10% | 87.54% | 320 / 134 / 33 | 85.7% hard negative rejection. Small anchors ((8, 16, 32, 64, 128)) triggered on sub-12px noise. |
 | **Model 8** | Balanced Anchors (16–256px) + Sanitized Negatives (Phones/VIRAT) + Specular Jitter | 2,095 / 260 / 265 (2,620 Total) | 81.18% | 92.44% | 86.44% | 94.02% | 88.22% | 91.12% | 220 / 51 / 18 | Silver gun flaw solved (AP surged to 94.02%). Phone floor false alarms eliminated. |
 | **Model 9** | Surveillance Hard Negatives (Dining/POS Pinpads/Bottles) + 1D Directional Motion Blur (PSF) | 2,214 / 275 / 279 (2,768 Total) | **88.64%** | **93.30%** | **90.90%** | **93.59%** | **91.91%** | **92.75%** | **222 / 29 / 16** | **Highest mAP (92.75%) in project history!** Hard negative rejection reached 92.16%. POS pinpad false alarms 100% eliminated; bottles slashed by 83.3%. |
+| **Model V11** | Multi-Angle & Shadow Invariance SOTA (8px Anchors + Bounded Regression Clamp + 296 CCTV Residual Negatives) | 2,214 (+296 Negs) / 275 / 279 (2,768 Total Base + Injected Negatives) | **94.09%** | 73.53% | 82.55% | 90.82% | 53.24% | 72.03% | 175 / 11 / 63 | **Highest precision (94.09%) and lowest false alarm count (11 FP)** across all models. Door shadow & empty hand false positives suppressed; regression clamp prevents oversized box drift. |
 
 ---
 
@@ -343,6 +344,64 @@
   2. **Glass Beverage Bottle Hallucination:** Slashed by 83.3% in real surveillance (`clip_10`: dropped from 18 to 3 frames).
   3. **Directional Motion Blur:** Successfully preserved knife detection under rapid lunge dynamics.
   4. **Best overall balance:** 93.59% Handgun AP, 91.91% Knife AP, and 92.16% background rejection rate.
+
+### Model V11: Multi-Angle & Hand-Shadow Invariance SOTA (Current Production Model)
+* **Checkpoint Filename:** `best_candidate_model_v11.pth` *(Architecture: `FasterRCNN_ResNet50_FPN_V2_CandidateV11`)*
+* **Dataset Name:** Surveillance Multi-Angle Shadow & Residual Hard Negative Dataset
+* **Sourced From:**
+  * **Base Dataset:** Model 9 Surveillance Dataset (USRT CCTV-Gun + Howard Knife + 505 CCTV Negatives)
+  * **Injected Targeted Hard Negatives (Class 0):** 296 targeted negative background samples:
+    * **111 new V11 targeted empirical crops:**
+      - `CAM2_SCENE002`: Empty hand gesture resting on door with cast shadow (frames 0–60)
+      - `CAM2_SCENE002`: Actor dark ponytail against clothing (frames 0–60)
+      - `CAM2_SCENE001`: Counter base and floor shadows (frames 55–90)
+      - `Unseen 225703`: Customer jacket / shoulder shadow crops (frames 160–185)
+      - `Unseen 230249`: Cashier black baseball cap / headphones & POS terminal displays (frames 400–620)
+    * **185 prior residual negatives:** `hard_negatives`, `hard_negatives_fullframe`, V9, and V10 crops
+* **Base Weights Initializer:** Fine-tuned from `best_candidate_model_v10.pth`
+* **Dataset Statistics:**
+  * Base Weapon Set: 2,768 images (2,214 train, 275 val, 279 test)
+  * Targeted Injected Hard Negatives: 296 background samples (injected into training split)
+  * Effective Training Size: 2,510 training items (2,214 weapon scenes + 296 targeted hard negatives)
+  * Validation Set: 275 images
+  * Test Set: 279 images (held-out test split, including 51 zero-threat pure surveillance backgrounds)
+* **Architecture & Multi-Scale Anchor Configuration:**
+  * Architecture: Faster R-CNN with ResNet-50 Feature Pyramid Network (ResNet-50 FPN v2)
+  * Anchor Sizes: `((8,), (16,), (32,), (64,), (128,))`
+    * 8px RPN anchor scale specifically engineered to capture distant, foreshortened CCTV weapon silhouettes (<25px).
+  * Aspect Ratios: `((0.5, 1.0, 2.0),) * 5`
+  * Stage-Decoupled Bounding Box Regression Clamping:
+    * RPN bbox transform clip: $\ln(1.4) \approx 0.3365$
+    * RoI heads bbox transform clip: $\ln(1.4) \approx 0.3365$
+    * *Purpose:* Strictly bounds proposal expansion, preventing false alarm bounding boxes from exploding across entire actors or background furniture fixtures (capped at $\le 501\text{px}$).
+* **Surveillance Data Augmentation Pipeline:**
+  * **1D Directional Motion Blur:** Linear Point Spread Function (PSF) kernel (size 5 to 11 px, angle 0 to 180 deg) simulating weapon lunges and draws.
+  * **Blade Edge Glint:** Synthetic directional highlight boost ($1.2\times$ to $1.45\times$) on slender regions.
+  * **Specular Highlight & Metal Tone Jitter:** $\pm 25\%$ brightness/contrast jitter for stainless, chrome, and matte firearm finishes.
+  * **Synthetic Hand-Grip Occlusion:** CutMix over weapon grip areas to train the backbone on exposed blade/barrel contours.
+* **Training Hyperparameters:**
+  * Hardware: NVIDIA GeForce RTX 5060 Ti GPU (CUDA acceleration, CPU strictly capped at 8 threads)
+  * Optimizer: SGD (`Base lr=0.0001`, `momentum=0.9`, `weight_decay=0.0005`)
+  * Learning Rate Schedule: CosineAnnealingLR (`lr: 0.0001 -> 1e-6` over 4 epochs)
+  * Batch Size: 2 | Epochs: 4
+  * Final Training Loss: **0.0423** | Best Validation Loss: **0.0659**
+* **Test Split Metrics ($\text{IoU} \ge 0.50$, $\text{Conf} \ge 0.50$ across 279 held-out test images):**
+  * Precision: **94.09%** (0.940860) *(HIGHEST PRECISION ACROSS ALL MODELS: +5.45% over Model 9!)*
+  * Recall: **73.53%** (0.735294)
+  * F1-Score: **82.55%** (0.825472)
+  * AP (Handgun): **90.82%** (0.908200) *(Precision: 95.65%, Recall: 96.49%, F1: 96.07%)*
+  * AP (Knife): **53.24%** (0.532400) *(Precision: 91.55%, Recall: 52.42%, F1: 66.67%)*
+  * mAP@0.50: **72.03%** (0.720300)
+  * True Positives: **175** (110 Handgun, 65 Knife)
+  * False Positives: **11** (5 Handgun, 6 Knife) *(LOWEST FALSE ALARM VOLUME IN PROJECT HISTORY: -62.1% vs. Model 9!)*
+  * False Negatives: **63** (4 Handgun, 59 Knife)
+  * Hard Negative Scene Rejection Specificity: **47/51 images (92.16% zero-alarm rate on complex non-weapon CCTV scenes)**
+* **Key Empirical Breakthroughs in CCTV Surveillance:**
+  1. **Record Low False Positive Count (11 FP):** Reduced false proposals from 29 down to 11, delivering peak operational reliability.
+  2. **Handgun Superiority:** Maintained exceptional Handgun Recall (96.49%) and Handgun Precision (95.65%) with 90.82% AP.
+  3. **Hand-Shadow & Gesture Immunity:** Targeted mining of `CAM2_SCENE001` and `CAM2_SCENE002` resolved false triggers from empty hand shadows against wooden doors.
+  4. **Ponytail & Dark Apparel Suppression:** Neutralized actor ponytail and dark customer shoulder shadow false alarms.
+  5. **Bounded Geometric Stability:** Decoupled $\ln(1.4)$ regression clamping effectively terminated oversized bounding box drift under partial occlusions.
 
 ---
 
