@@ -154,3 +154,4 @@ def export_session(sources, results, alignment, destination):
     manifest["status"] = "completed"
     manifest_path.write_text(json.dumps(manifest, indent=2, allow_nan=False), encoding="utf-8")
     return folder
+

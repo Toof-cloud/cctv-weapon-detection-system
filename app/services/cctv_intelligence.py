@@ -88,7 +88,7 @@ class PersonDetector:
     extraction in blurry and degraded surveillance CCTV scenes compared to SSD.
     """
 
-    def __init__(self, device: Optional[torch.device] = None, score_threshold: float = 0.30):
+    def __init__(self, device: Optional[torch.device] = None, score_threshold: float = 0.40):
         self.device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.score_threshold = score_threshold
 
@@ -559,11 +559,12 @@ class CCTVIntelligenceFilter:
                     elif cname == "handgun" and aspect_ratio < 0.50:
                         rejection_reason = f"UNPHYSICAL_HANDGUN_ASPECT_RATIO (AR={aspect_ratio:.2f} < 0.50 vertical distractor)"
 
-            # Check 2b: Photometric Material & Cast Shadow Feasibility
+            # Check 2b: Photometric Material, Bare Hand, & Cast Shadow Feasibility
             # Real firearms exhibit dark blued steel/polymer features (trigger guard, ejection port, muzzle).
             # Empty hand gestures casting faint translucent shadows on bright doors/walls have virtually zero
             # deep-black pixels (deep_dark < 1.2%) despite high background brightness (mean_V > 115).
-            # Smooth dark fabric folds/creases have low Laplacian variance (< 10.0) without metallic weapon edges.
+            # Empty swinging bare hands/wrists against dark clothing are dominated by bare skin (skin_ratio >= 55%).
+            # Smooth dark shadow gaps / fabric folds have low Laplacian variance (< 18.0) without metallic weapon edges.
             if rejection_reason is None and self.enable_geometric_filtering:
                 crop = frame_bgr[max(0, y1):min(h, y2), max(0, x1):min(w, x2)]
                 if crop.size > 0:
@@ -571,17 +572,27 @@ class CCTVIntelligenceFilter:
                     v_channel = crop_hsv[:, :, 2]
                     deep_dark_ratio = float(np.mean(v_channel < 50))
                     mean_v = float(np.mean(v_channel))
+                    gray_crop = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+                    lap_var = float(cv2.Laplacian(gray_crop, cv2.CV_64F).var())
+
+                    # Skin tone mask in HSV
+                    lower_skin1 = np.array([0, 30, 60], dtype=np.uint8)
+                    upper_skin1 = np.array([25, 200, 255], dtype=np.uint8)
+                    lower_skin2 = np.array([170, 30, 60], dtype=np.uint8)
+                    upper_skin2 = np.array([180, 200, 255], dtype=np.uint8)
+                    mask_skin = cv2.inRange(crop_hsv, lower_skin1, upper_skin1) | cv2.inRange(crop_hsv, lower_skin2, upper_skin2)
+                    skin_ratio = float(np.mean(mask_skin > 0))
+
                     if cname == "handgun" and deep_dark_ratio < 0.012 and mean_v > 115.0:
                         rejection_reason = f"TRANSLUCENT_WALL_SHADOW (deep_dark={deep_dark_ratio:.1%} < 1.2% on bright surface)"
+                    elif cname == "handgun" and skin_ratio >= 0.55:
+                        rejection_reason = f"BARE_HUMAN_LIMB (skin={skin_ratio:.1%} >= 55% empty hand/arm)"
+                    elif lap_var < 18.0 and mean_v < 85.0:
+                        rejection_reason = f"SMOOTH_SHADOW_OR_FABRIC_TRAP (laplacian={lap_var:.1f} < 18.0 on dark gradient)"
                     elif cname == "handgun":
-                        gray_crop = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
-                        lap_var = float(cv2.Laplacian(gray_crop, cv2.CV_64F).var())
-                        if lap_var < 10.0 and mean_v < 80.0:
-                            rejection_reason = f"SMOOTH_FABRIC_CREASE_TRAP (laplacian={lap_var:.1f} < 10.0 on dark fabric)"
-                        else:
-                            bright_bg_ratio = float(np.mean((v_channel > 130) & (crop_hsv[:, :, 1] < 40)))
-                            if bright_bg_ratio > 0.48 and deep_dark_ratio < 0.25:
-                                rejection_reason = f"EMPTY_SILHOUETTE_BACKGROUND_TRAP (bright_bg={bright_bg_ratio:.1%} > 48% on dangling limb)"
+                        bright_bg_ratio = float(np.mean((v_channel > 130) & (crop_hsv[:, :, 1] < 40)))
+                        if bright_bg_ratio > 0.48 and deep_dark_ratio < 0.25 and lap_var < 150.0:
+                            rejection_reason = f"EMPTY_SILHOUETTE_BACKGROUND_TRAP (bright_bg={bright_bg_ratio:.1%} > 48% on dangling limb)"
 
             # Human proximity assessment & closest person association
             is_adjacent_to_person = False
@@ -718,11 +729,11 @@ class CCTVIntelligenceFilter:
                     rejection_reason = f"UNPHYSICAL_PERSON_LOCATION (rel_y={rel_y:.2f} below feet)"
 
                 # Architectural vertical post/column suppression (e.g. stair support poles, door frames):
-                # An object cannot be a tall vertical column (height > 140px, aspect_ratio < 0.38) reaching near the floor
-                # (wbox[3] >= pbox[3] - 0.20 * p_h) while the person is upright.
+                # An object cannot be a tall vertical column (height > 130px, aspect_ratio < 0.52) reaching near the floor
+                # (wbox[3] >= pbox[3] - 0.25 * p_h) while the person is upright.
                 if rejection_reason is None and cname in ["knife", "handgun"]:
                     aspect_ratio = box_w / max(1, box_h)
-                    if box_h > 140 and aspect_ratio < 0.38 and wbox[3] >= pbox[3] - 0.20 * p_h:
+                    if box_h > 130 and aspect_ratio < 0.52 and wbox[3] >= pbox[3] - 0.25 * p_h:
                         rejection_reason = f"UNPHYSICAL_ARCHITECTURAL_COLUMN (vertical post h={box_h}px, AR={aspect_ratio:.2f})"
 
                 # Far-away torso accessory / cross-body sling-bag discrimination:

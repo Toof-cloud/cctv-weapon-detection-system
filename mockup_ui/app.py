@@ -429,8 +429,9 @@ class DetectionConfigDialog(QDialog):
         self.model_combo.setObjectName("dialogModelCombo")
         self.model_combo.setMinimumHeight(38)
         self.model_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        for _, path in discover_available_models():
-            self.model_combo.addItem(path.name, str(path))
+        for label_text, path in discover_available_models():
+            display_text = f"{label_text} | {path.name}" if label_text and path.name not in label_text else (label_text or path.name)
+            self.model_combo.addItem(display_text, str(path))
             self.model_combo.setItemData(self.model_combo.count() - 1, str(path), Qt.ItemDataRole.ToolTipRole)
             if current_model and path.resolve() == Path(current_model).resolve():
                 self.model_combo.setCurrentIndex(self.model_combo.count() - 1)

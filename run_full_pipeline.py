@@ -21,14 +21,36 @@ from app.services.video_enhancement_service import VideoEnhancementService
 from app.services.video_service import VideoService
 from app.utils.timestamps import format_timestamp
 
+# ==============================================================================
+# PIPELINE ARCHITECTURE OVERVIEW:
+# 
+# [1] Video Upload             --> Resolve and verify input video path
+# [2] Video Validation         --> Verify codec, frame integrity, and open status
+# [3] Metadata Extraction      --> Extract FPS, dimensions, frame count, duration
+# [4] Frame Extraction         --> Sample frames at target analysis rate
+# [5] BasicVSR++ Enhancement   --> Reconstruct high-frequency textures (Optional)
+# [6] Enhanced Frames          --> Pass high-fidelity frames to detector
+# [7] Faster R-CNN Detection   --> Fine-tuned deep detector + CCTV Intelligence
+# [8] Detection Results        --> Multi-level validation (Person, Motion, Temporal)
+# [9] CSV Report Export        --> Traceable, immutable audit logs
+# [10] Annotated Frames        --> Save bounding-box evidence snapshots (PNG)
+# [11] Annotated Video         --> Re-encode surveillance video with visual overlays
+# [12] Forensic Report         --> Generate comprehensive summary, HTML, and PDF
+# ==============================================================================
 
+
+# ==============================================================================
+# SECTION 1: HELPER UTILITIES & DIRECTORY MANAGEMENT
+# ==============================================================================
 
 def ensure_directory(path: Path) -> Path:
+    """Ensure that the target directory exists on disk."""
     path.mkdir(parents=True, exist_ok=True)
     return path
 
 
 def copy_report_csv(source_csv: Path, destination_csv: Path) -> Path:
+    """Duplicate forensic CSV records to specified destination."""
     if not source_csv.exists():
         raise FileNotFoundError(f"Detection report not found: {source_csv}")
 
@@ -37,7 +59,17 @@ def copy_report_csv(source_csv: Path, destination_csv: Path) -> Path:
     return destination_csv
 
 
+# ==============================================================================
+# SECTION 2: FORENSIC SUMMARY & REPORT GENERATION
+# Pipeline Stage: [12] Forensic Report
+# ==============================================================================
+
 def generate_forensic_summary(csv_path: Path, summary_path: Path) -> dict:
+    """Generate a forensic summary text file from the detection CSV.
+    
+    Reads all evaluated proposals, segregates confirmed security alerts from
+    suppressed background traps, and outputs a formatted audit report.
+    """
     if not csv_path.exists():
         raise FileNotFoundError(f"CSV report not found: {csv_path}")
 
@@ -116,13 +148,22 @@ def generate_forensic_summary(csv_path: Path, summary_path: Path) -> dict:
     return summary
 
 
+# ==============================================================================
+# SECTION 3: MODEL SELECTION & WEIGHTS RESOLUTION
+# ==============================================================================
+
 def resolve_model_path(model_arg: str | None) -> str | Path | None:
+    """Resolve shorthand model aliases to exact weights on disk."""
     if model_arg is None or str(model_arg).strip() == "":
         return None
 
     value = str(model_arg).strip().lower()
     if value in {"auto", "default"}:
         return None
+    if value in {"v11", "candidate11", "model11"}:
+        v11_cand = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v11.pth"
+        if v11_cand.exists():
+            return v11_cand
     if value in {"ninth", "model9", "nine"}:
         return ROOT_DIR / "mockup_ui" / "models" / "best_weapon_detector_ninth_model.pth"
     if value in {"eighth", "model8", "eight"}:
@@ -144,6 +185,13 @@ def resolve_model_path(model_arg: str | None) -> str | Path | None:
     return path
 
 
+# ==============================================================================
+# SECTION 4: CORE DETECTION & ANNOTATION ENGINE
+# Pipeline Stages:
+# [4] Frame Extraction -> [7] Faster R-CNN -> [8] CCTV Intelligence
+# [9] CSV Export -> [10] Annotated Frames -> [11] Annotated Video
+# ==============================================================================
+
 def detect_video_with_model(
     input_path: str | Path,
     output_path: str | Path,
@@ -157,9 +205,14 @@ def detect_video_with_model(
     camera_id: str = "CAM-01",
     min_temporal_hits: int = 3,
 ):
+    """Run frame-by-frame Faster R-CNN detection, apply CCTV intelligence,
+    draw visual overlays, and export forensic records.
+    """
     input_file = Path(input_path)
     output_file = Path(output_path)
     detected_frames_dir = output_file.parent / f"{output_file.stem}_detected_frames"
+    
+    # [10] Annotated Frames Directory Setup
     if save_detected_frames:
         detected_frames_dir.mkdir(parents=True, exist_ok=True)
         for existing in detected_frames_dir.glob("*.png"):
@@ -170,6 +223,9 @@ def detect_video_with_model(
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
+    # --------------------------------------------------------------------------
+    # [2] Video Validation & [3] Metadata Extraction
+    # --------------------------------------------------------------------------
     capture = cv2.VideoCapture(str(input_file))
     if not capture.isOpened():
         raise RuntimeError(f"OpenCV could not open: {input_file}")
@@ -189,17 +245,24 @@ def detect_video_with_model(
 
     duration = total_frames / fps
 
+    # [11] Annotated Video Writer Initialization
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     writer = cv2.VideoWriter(str(output_file), fourcc, fps, (width, height))
     if not writer.isOpened():
         capture.release()
         raise RuntimeError(f"Could not create output video: {output_file}")
 
+    # --------------------------------------------------------------------------
+    # [7] Faster R-CNN Model Initialization
+    # --------------------------------------------------------------------------
     detector = DetectionService(
         confidence_threshold=confidence_threshold,
         model_path=model_path,
     )
 
+    # --------------------------------------------------------------------------
+    # [8] CCTV Intelligence Filter Setup (Person Gating, Motion, Temporal)
+    # --------------------------------------------------------------------------
     cctv_filter = None
     if enable_cctv_intelligence:
         print(f"[CCTV Intelligence] Activated: Centroid Motion Tracker + MobileNetV3 Person Proximity Gate + Geometric Area Filter + Temporal Consistency (min_hits={min_temporal_hits})")
@@ -219,10 +282,12 @@ def detect_video_with_model(
     frame_interval = max(1, round(fps / analysis_fps))
     frame_number = 0
     analyzed_frames = 0
-
     total_detections = 0
     detection_records = []
 
+    # --------------------------------------------------------------------------
+    # [4] Frame Extraction Loop & [7] Real-Time Inference
+    # --------------------------------------------------------------------------
     while True:
         success, frame = capture.read()
         if not success:
@@ -230,8 +295,10 @@ def detect_video_with_model(
 
         timestamp = frame_number / fps
 
+        # Sample at target analysis fps
         if frame_number % frame_interval == 0:
             if cctv_filter is not None:
+                # Two-pass intelligence filtering: Raw detection -> Surveillance validation
                 raw_detections = detector.detect_frame(frame, min_threshold=min(0.35, float(confidence_threshold)))
                 confirmed_detections, audit_records = cctv_filter.process_frame(
                     frame, raw_detections, frame_idx=analyzed_frames
@@ -242,6 +309,7 @@ def detect_video_with_model(
                 ]
                 evaluated_to_log = audit_records
             else:
+                # Raw detector mode without intelligence rules
                 raw_detections = detector.detect_frame(frame)
                 active_detections = raw_detections
                 evaluated_to_log = [
@@ -251,9 +319,12 @@ def detect_video_with_model(
 
             analyzed_frames += 1
             total_detections += len(active_detections)
+            
+            # [10] Draw Bounding Boxes on Active Frames
             frame = draw_detections(frame, active_detections)
 
             if active_detections:
+                # Save confirmed detection snapshot (PNG)
                 if save_detected_frames:
                     saved_frame_path = detected_frames_dir / f"frame_{frame_number:06d}_detected.png"
                     if not cv2.imwrite(str(saved_frame_path), frame):
@@ -265,6 +336,7 @@ def detect_video_with_model(
                         f"  {detection['class_name']}: {detection['confidence']:.2%} | Box: {detection['box']}"
                     )
 
+            # [8] Build Structured Detection Records
             for rec in evaluated_to_log:
                 x1, y1, x2, y2 = rec["box"]
                 detection_records.append(
@@ -293,6 +365,7 @@ def detect_video_with_model(
                     }
                 )
 
+        # [11] Burn On-Screen Display (OSD) Timestamp & Camera ID
         timestamp_label = f"{camera_id} | Frame {frame_number} | Time {timestamp:.2f}s"
         cv2.putText(
             frame,
@@ -324,7 +397,10 @@ def detect_video_with_model(
     )
     csv_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Reconcile temporal consistency across whole video
+    # --------------------------------------------------------------------------
+    # ✨ TEMPORAL CONSISTENCY RECONCILIATION
+    # Second-pass tracklet merging: suppresses single-frame optical flickers
+    # --------------------------------------------------------------------------
     if cctv_filter and enable_temporal_consistency:
         detection_records = cctv_filter.reconcile_video_records(detection_records, min_hits=min_temporal_hits)
 
@@ -375,13 +451,15 @@ def detect_video_with_model(
                     output_file.unlink()
                 temp_output.rename(output_file)
         else:
-            # If all detections were reconciled as transient flickers/distractors (0 confirmed alerts),
-            # remove any lingering PNG frames that were saved during online pass
+            # If all detections were reconciled as transient flickers (0 confirmed alerts),
+            # remove lingering unconfirmed PNG frames saved during the online pass
             if save_detected_frames and detected_frames_dir.exists():
                 for p in detected_frames_dir.glob("*.png"):
                     p.unlink()
 
-    # Export via ReportService (CSV, JSON, HTML, PDF)
+    # --------------------------------------------------------------------------
+    # [9] CSV Report Export & [12] Forensic Reporting (HTML, PDF, JSON)
+    # --------------------------------------------------------------------------
     report_service = ReportService(output_dir=csv_path.parent)
     report_service.export_csv(
         records=detection_records,
@@ -460,6 +538,12 @@ def detect_video_with_model(
     }
 
 
+# ==============================================================================
+# SECTION 5: FULL END-TO-END PIPELINE ORCHESTRATOR
+# Ties together the complete workflow:
+# Upload -> Validation -> Metadata -> Enhancement -> Detection -> Reports
+# ==============================================================================
+
 def run_full_pipeline(
     video_path: str | Path,
     output_dir: str | Path,
@@ -469,7 +553,24 @@ def run_full_pipeline(
     enable_enhancement: bool = True,
     enable_cctv_intelligence: bool = True,
 ) -> dict:
-    # *Video Upload
+    """Execute the full CCTV weapon detection pipeline sequentially:
+    
+    1. Video Upload
+    2. Video Validation
+    3. Metadata Extraction
+    4. BasicVSR++ Enhancement (Optional)
+    5. Enhanced Frames
+    6. Faster R-CNN Detection
+    7. Detection Results & Intelligence Filtering
+    8. CSV Report Generation
+    9. Annotated Frames (PNG)
+    10. Annotated Video (MP4)
+    11. Forensic Summary & PDF Reports
+    """
+
+    # --------------------------------------------------------------------------
+    # [1] Video Upload: Resolve source path
+    # --------------------------------------------------------------------------
     input_video = Path(video_path).expanduser().resolve()
     if not input_video.exists():
         raise FileNotFoundError(f"Input video not found: {input_video}")
@@ -477,21 +578,26 @@ def run_full_pipeline(
     output_root = Path(output_dir).expanduser().resolve()
     ensure_directory(output_root)
 
-    # *Video Validation
+    # --------------------------------------------------------------------------
+    # [2] Video Validation: Verify file readability & headers
+    # --------------------------------------------------------------------------
     video_service = VideoService()
     video_service.validate_video(str(input_video))
 
-    # *Metadata Extraction
+    # --------------------------------------------------------------------------
+    # [3] Metadata Extraction: FPS, resolution, frame counts
+    # --------------------------------------------------------------------------
     metadata = video_service.get_metadata(str(input_video))
 
-    # *Frame Extraction
+    # --------------------------------------------------------------------------
+    # [5] BasicVSR++ Enhancement (Optional Super-Resolution Step)
+    # --------------------------------------------------------------------------
     enhanced_video = None
     if enable_enhancement:
         enhancer = VideoEnhancementService()
         candidate_enhanced_video = output_root / "enhanced_video.mp4"
         try:
-            print("\n[1/4] Enhancing video...")
-            # BasicVSR++ enhancement stage
+            print("\n[1/4] Enhancing video with BasicVSR++...")
             enhancer.enhance_video(
                 str(input_video),
                 str(candidate_enhanced_video),
@@ -504,6 +610,7 @@ def run_full_pipeline(
                 candidate_enhanced_video.unlink()
 
     def run_detection(label, source_video):
+        # Executes stages [4], [7], [8], [9], [10], [11], [12]
         detection_result = detect_video_with_model(
             input_path=source_video,
             output_path=output_root / f"annotated_output_{label}.mp4",
@@ -521,13 +628,18 @@ def run_full_pipeline(
         )
         return detection_result, summary_path, summary
 
-    # *Faster R-CNN detection stage
+    # --------------------------------------------------------------------------
+    # [6] & [7] Faster R-CNN Detection: Baseline (Unenhanced) Run
+    # --------------------------------------------------------------------------
     print("\n[2/4] Running detection without enhancement...")
     original_result, original_summary_path, original_summary = run_detection(
         "no_enhancement",
         input_video,
     )
 
+    # --------------------------------------------------------------------------
+    # [6] & [7] Faster R-CNN Detection: Enhanced Video Run (Comparative)
+    # --------------------------------------------------------------------------
     enhanced_result = None
     enhanced_summary_path = None
     enhanced_summary = None
@@ -538,8 +650,11 @@ def run_full_pipeline(
             enhanced_video,
         )
     else:
-        print("\n[3/4] Enhanced detection skipped because enhancement failed.")
+        print("\n[3/4] Enhanced detection skipped (enhancement was disabled or unavailable).")
 
+    # --------------------------------------------------------------------------
+    # [12] Pipeline Completion & Output Summary
+    # --------------------------------------------------------------------------
     print("\n[4/4] Video detection completed.")
     print(f"No-enhancement annotated video: {original_result['output_path']}")
     print(f"No-enhancement CSV: {original_result['csv_report']}")
@@ -572,7 +687,15 @@ def run_full_pipeline(
     }
 
 
+# ==============================================================================
+# SECTION 6: COMMAND LINE INTERFACE (CLI) & ENTRY POINT
+# ==============================================================================
+
 def parse_args() -> argparse.Namespace:
+    """Parse command‑line arguments for the full pipeline.
+    The CLI mirrors the visual pipeline diagram:
+    *Video Upload → Validation → Enhancement → Detection → Reporting*.
+    """
     parser = argparse.ArgumentParser(
         description="Run the full CCTV weapon detection pipeline: upload -> enhancement -> detection -> forensic report."
     )
@@ -590,7 +713,7 @@ def parse_args() -> argparse.Namespace:
         "--model",
         type=str,
         default="auto",
-        help="Detection checkpoint to use: auto, seventh, sixth, fifth, or path to .pth.",
+        help="Detection checkpoint to use: auto, v11, ninth, eighth, seventh, sixth, fifth, or path to .pth.",
     )
     parser.add_argument(
         "--confidence",
@@ -630,6 +753,7 @@ if __name__ == "__main__":
         raise ValueError("Please provide at least one input video via --video or --camera1.")
 
     if args.camera2:
+        # Multi-camera surveillance pipeline with cross-view corroboration
         print("\n" + "=" * 76)
         print("          MULTI-CAMERA SURVEILLANCE PIPELINE ACTIVATED (2 CAMERAS)          ")
         print("=" * 76)
@@ -650,6 +774,7 @@ if __name__ == "__main__":
         print(f"Unified Forensic CSV: {result['unified_csv']}")
         print(f"Unified Forensic PDF: {result['unified_pdf']}")
     else:
+        # Single-camera end-to-end pipeline execution
         result = run_full_pipeline(
             video_path=primary_video,
             output_dir=args.output,
@@ -662,4 +787,3 @@ if __name__ == "__main__":
         print("\n[4/4] Full pipeline finished successfully.")
         print(f"Model used: {result['selected_model']}")
         print(f"Result summary: {result['summary']}")
-

@@ -99,6 +99,90 @@ class ReportService:
             "rejection_reason": rejection_reason,
         }
 
+    def compute_tcr_and_mccr(self, normalized_records: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Computes Temporal Consistency Rate (TCR) and Multi-Camera Corroboration Rate (MCCR)
+        directly from normalized detection records according to the thesis mathematical formulations:
+        - TCR = (N_TS / N_TE) * 100
+        - MCCR = (N_CC / N_MC) * 100
+        """
+        frame_nums = [int(r["frame_number"]) for r in normalized_records if str(r.get("frame_number", "")).isdigit()]
+        min_f = min(frame_nums) if frame_nums else 0
+        max_f = max(frame_nums) if frame_nums else 0
+
+        supported = []
+        isolated = []
+        track_frames: Dict[str, List[int]] = {}
+
+        for r in normalized_records:
+            fn = int(r.get("frame_number", 0))
+            status = r.get("validation_status", "")
+            lbl = r.get("object_label", "")
+
+            # Boundary frame check (not evaluable)
+            if fn == min_f or fn == max_f:
+                continue
+
+            if status in ("VALIDATED_TEMPORAL", "CONFIRMED_ALERT"):
+                supported.append(r)
+                track_frames.setdefault(lbl, []).append(fn)
+            elif status == "SUPPRESSED_TEMPORAL_FLICKER":
+                isolated.append(r)
+
+        # Track interruptions: gaps > 15 frames between supported frames
+        interrupted = 0
+        for lbl, f_list in track_frames.items():
+            f_sorted = sorted(f_list)
+            for i in range(len(f_sorted) - 1):
+                if f_sorted[i+1] - f_sorted[i] > 15:
+                    interrupted += 1
+
+        n_ts = len(supported)
+        n_iso = len(isolated)
+        n_int = interrupted
+        n_te = n_ts + n_iso + n_int
+        tcr = (n_ts / n_te * 100.0) if n_te > 0 else (100.0 if not normalized_records else 0.0)
+
+        hg_ts = sum(1 for r in supported if r.get("object_label") == "handgun")
+        hg_iso = sum(1 for r in isolated if r.get("object_label") == "handgun")
+        hg_te = hg_ts + hg_iso
+        tcr_hg = (hg_ts / hg_te * 100.0) if hg_te > 0 else None
+
+        knife_ts = sum(1 for r in supported if r.get("object_label") == "knife")
+        knife_iso = sum(1 for r in isolated if r.get("object_label") == "knife")
+        knife_te = knife_ts + knife_iso
+        tcr_knife = (knife_ts / knife_te * 100.0) if knife_te > 0 else None
+
+        # MCCR: evaluate concurrent dual camera feeds
+        cameras = {r.get("camera_id") for r in normalized_records if r.get("camera_id")}
+        if len(cameras) >= 2:
+            confirmed_rows = [r for r in normalized_records if r.get("validation_status") in ("CONFIRMED_ALERT", "VALIDATED_TEMPORAL")]
+            n_cc = 0
+            n_mc = len(confirmed_rows)
+            for r in confirmed_rows:
+                t = float(r.get("timestamp_seconds", 0.0))
+                cid = r.get("camera_id")
+                opposing = [o for o in confirmed_rows if o.get("camera_id") != cid and abs(float(o.get("timestamp_seconds", 0.0)) - t) <= 1.5]
+                if opposing:
+                    n_cc += 1
+            mccr = (n_cc / n_mc * 100.0) if n_mc > 0 else 0.0
+            mccr_status = f"{mccr:.1f}% ({n_cc}/{n_mc} corroborated)"
+        else:
+            mccr = None
+            mccr_status = "N/A (Single Camera Feed)"
+
+        return {
+            "tcr": tcr,
+            "tcr_handgun": tcr_hg,
+            "tcr_knife": tcr_knife,
+            "n_ts": n_ts,
+            "n_iso": n_iso,
+            "n_int": n_int,
+            "n_te": n_te,
+            "mccr": mccr,
+            "mccr_status": mccr_status,
+        }
+
     def export_csv(
         self,
         records: List[Dict[str, Any]],
@@ -159,6 +243,7 @@ class ReportService:
                 "peak_confidence": max([r["confidence_score"] for r in confirmed], default=0.0),
                 "first_threat_timestamp": min([r["timestamp_seconds"] for r in confirmed], default=None),
             },
+            "temporal_metrics": self.compute_tcr_and_mccr(normalized),
             "detection_records": normalized,
         }
 
@@ -203,6 +288,11 @@ class ReportService:
 
         first_ts = min([r["timestamp_formatted"] for r in confirmed], default="N/A")
         peak_conf = max([r["confidence_score"] for r in confirmed], default=0.0)
+
+        # Compute forensic temporal & multi-camera metrics (TCR & MCCR)
+        temporal_metrics = self.compute_tcr_and_mccr(normalized)
+        tcr_card_val = f"{temporal_metrics['tcr']:.1f}%" if temporal_metrics["n_te"] > 0 else "N/A"
+        mccr_card_val = f"{temporal_metrics['mccr']:.1f}%" if temporal_metrics["mccr"] is not None else "N/A"
 
         # Build Table Rows
         table_rows = []
@@ -487,12 +577,39 @@ class ReportService:
             <div class="lbl">Suppressed Traps (Audited)</div>
         </div>
         <div class="card">
+            <div class="val">{tcr_card_val}</div>
+            <div class="lbl">Temporal Consistency (TCR)</div>
+        </div>
+        <div class="card">
+            <div class="val">{mccr_card_val}</div>
+            <div class="lbl">Multi-Camera (MCCR)</div>
+        </div>
+        <div class="card">
             <div class="val">{peak_conf:.1%}</div>
             <div class="lbl">Peak Detection Confidence</div>
         </div>
         <div class="card">
             <div class="val">{first_ts}</div>
             <div class="lbl">First Verified Incident Time</div>
+        </div>
+    </div>
+
+    <div class="section-title">Forensic Reliability & Consensus Metrics (TCR & MCCR)</div>
+    <div class="meta-grid">
+        <div class="meta-box">
+            <div class="meta-label">TEMPORAL CONSISTENCY RATE (TCR)</div>
+            <div><strong>TCR Score:</strong> {tcr_card_val}</div>
+            <div><strong>Supported Observations (N_TS):</strong> {temporal_metrics['n_ts']}</div>
+            <div><strong>Isolated Transient Flicker (N_ISO):</strong> {temporal_metrics['n_iso']}</div>
+            <div><strong>Tracking Interruptions (N_INT):</strong> {temporal_metrics['n_int']}</div>
+            <div><strong>Total Eligible Evaluations (N_TE):</strong> {temporal_metrics['n_te']}</div>
+        </div>
+        <div class="meta-box">
+            <div class="meta-label">MULTI-CAMERA CORROBORATION RATE (MCCR)</div>
+            <div><strong>MCCR Score:</strong> {mccr_card_val}</div>
+            <div><strong>Status / Finding:</strong> {temporal_metrics['mccr_status']}</div>
+            <div><strong>Concurrency Window (&Delta;t):</strong> &le; 1.5 seconds</div>
+            <div><strong>Interpretation:</strong> Evaluates concurrent spatial verification across dual camera perspectives.</div>
         </div>
     </div>
 

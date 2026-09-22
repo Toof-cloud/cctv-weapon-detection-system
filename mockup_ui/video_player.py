@@ -240,7 +240,8 @@ class VideoPlayer(QWidget):
         ok, frame = self.capture.read()
         if not ok:
             self.pause()
-            self.failed.emit("Playback stopped because a video frame could not be decoded.")
+            if self.frame_number < self.frame_count - 2:
+                self.failed.emit("Playback stopped because a video frame could not be decoded.")
             return
         self._present(frame, self.frame_number + 1)
 
