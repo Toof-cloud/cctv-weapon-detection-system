@@ -15,6 +15,13 @@ detection function is imported and called directly.
 From the repository root:
 
 ```powershell
+.\run_mockup_ui.bat
+```
+
+The launcher always uses `mockup_ui\.venv`, where the UI dependencies are
+installed. You can also run the same interpreter directly:
+
+```powershell
 .\mockup_ui\.venv\Scripts\python.exe -B .\mockup_ui\app.py
 ```
 
@@ -77,7 +84,8 @@ Focused verification:
 .\mockup_ui\.venv\Scripts\python.exe -B -m unittest mockup_ui.test_multi_camera mockup_ui.test_observation_review -v
 ```
 
-Or use the existing working detector environment:
+To use another detector environment, first confirm that it includes the packages
+from `mockup_ui\requirements-ui.txt`. Then run:
 
 ```powershell
 python -B mockup_ui/app.py
@@ -86,7 +94,7 @@ python -B mockup_ui/app.py
 Optional video on startup:
 
 ```powershell
-python -B mockup_ui/app.py --video "D:\your-videos\cctv.mp4"
+.\run_mockup_ui.bat --video "D:\your-videos\cctv.mp4"
 ```
 
 Replace the example video path with your real file. The locally created `.venv/`

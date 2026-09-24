@@ -14,6 +14,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 import cv2
 import numpy as np
 from PySide6.QtCore import Qt
+from PySide6.QtPdf import QPdfDocument
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication, QFileDialog, QPushButton, QTableWidget
 
@@ -147,6 +148,19 @@ class MultiCameraUiTests(unittest.TestCase):
         self.assertEqual(len(manifest["cameras"]), 2)
         self.assertTrue((exported / "forensic_report.pdf").is_file())
         self.assertEqual(set(exported.rglob("*.pdf")), {exported / "forensic_report.pdf"})
+        document = QPdfDocument(self.app)
+        self.assertEqual(document.load(str(exported / "forensic_report.pdf")), QPdfDocument.Error.None_)
+        self.assertGreater(document.pagePointSize(0).height(), document.pagePointSize(0).width())
+        report_text = "\n".join(document.getAllText(page).text() for page in range(document.pageCount()))
+        for expected in ("Forensic Detection Report", "Video Metadata", "CAM-01", "CAM-02",
+                         "Object Detection Observations and Reviews", "TCR Information", "MCCR Information",
+                         "Analyst Review Information", "Source References", "Traceability Report"):
+            self.assertIn(expected, report_text)
+        document.close()
+        document.deleteLater()
+        del document
+        self.app.processEvents()
+        QTest.qWait(20)
         for camera in manifest["cameras"]:
             camera_folder = exported / camera["export_folder"]
             self.assertTrue((camera_folder / "annotated.mp4").is_file())

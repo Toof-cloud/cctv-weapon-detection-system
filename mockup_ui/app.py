@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import logging
 from pathlib import Path
+import subprocess
 import sys
 import traceback
 from time import monotonic
@@ -12,6 +14,14 @@ from time import monotonic
 MOCKUP_DIR = Path(__file__).resolve().parent
 ROOT_DIR = MOCKUP_DIR.parent
 TEMP_DIR = MOCKUP_DIR / "temp"
+
+# Make the common `python mockup_ui/app.py` command use the UI environment when
+# the selected system Python does not have PySide6 installed.
+UI_PYTHON = MOCKUP_DIR / ".venv" / "Scripts" / "python.exe"
+if importlib.util.find_spec("PySide6") is None and UI_PYTHON.is_file():
+    if Path(sys.executable).resolve() != UI_PYTHON.resolve():
+        raise SystemExit(subprocess.call([str(UI_PYTHON), "-B", str(Path(__file__).resolve()), *sys.argv[1:]]))
+
 for directory in (TEMP_DIR, MOCKUP_DIR / "outputs", MOCKUP_DIR / "models"):
     directory.mkdir(parents=True, exist_ok=True)
 sys.dont_write_bytecode = True
