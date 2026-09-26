@@ -50,8 +50,8 @@ from PySide6.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
     QLabel,
-    QListView,
     QMainWindow,
+    QMenu,
     QMessageBox,
     QProgressBar,
     QPushButton,
@@ -60,7 +60,6 @@ from PySide6.QtWidgets import (
     QSlider,
     QSplitter,
     QStackedWidget,
-    QStyleFactory,
     QTabBar,
     QVBoxLayout,
     QWidget,
@@ -68,7 +67,6 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QAbstractItemView,
     QCheckBox,
-    QComboBox,
 )
 
 from mockup_ui.model_bridge import (
@@ -76,6 +74,9 @@ from mockup_ui.model_bridge import (
     discover_available_models, read_video, save_result, timecode,
 )
 from mockup_ui.video_player import VideoPlayer
+from mockup_ui.model_selector import ModelSelector
+from mockup_ui.page_shell import DetectionPageShell, page_panel, workspace_heading, summary_metrics, enhancement_heading
+from mockup_ui.ui_theme import apply_theme, current_theme, load_stylesheet, restore_theme
 from mockup_ui.observation_review import REVIEW_DIR, ReviewStore
 from mockup_ui.review_panel import ObservationReviewDialog
 
@@ -676,7 +677,7 @@ class DetectionConfigDialog(QDialog):
         self.setModal(True)
         self.setMinimumWidth(640)
         self.resize(710, 800)
-        self.setStyleSheet((MOCKUP_DIR / "styles.qss").read_text(encoding="utf-8"))
+        self.setStyleSheet(load_stylesheet())
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
@@ -730,7 +731,7 @@ class DetectionConfigDialog(QDialog):
         stack.setContentsMargins(0, 0, 8, 0)
         stack.setSpacing(12)
 
-        def card(number, title, description, status_text):
+        def card(title, description, status_text):
             frame = QFrame()
             frame.setObjectName("configCard")
             box = QVBoxLayout(frame)
@@ -738,9 +739,6 @@ class DetectionConfigDialog(QDialog):
             box.setSpacing(10)
             header = QHBoxLayout()
             header.setSpacing(10)
-            number_label = note(number, "configStepNumber")
-            number_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            header.addWidget(number_label)
             copy = QVBoxLayout()
             copy.setSpacing(2)
             copy.addWidget(note(title, "configCardTitle"))
@@ -755,21 +753,9 @@ class DetectionConfigDialog(QDialog):
             return box, status
 
         model_box, self.model_status = card(
-            "01", "Detection model", "Choose the trained model used to find weapons.", "CHECKING",
+            "Detection model", "Choose the trained model used to find weapons.", "CHECKING",
         )
-        self.model_combo = QComboBox()
-        # Use a regular list popup rather than Windows' native menu popup,
-        # whose scroll gutters can appear as black bars in dark system themes.
-        self._model_combo_style = QStyleFactory.create("Fusion")
-        self._model_combo_style.setParent(self.model_combo)
-        self.model_combo.setStyle(self._model_combo_style)
-        model_view = QListView(self.model_combo)
-        model_view.setFrameShape(QFrame.Shape.NoFrame)
-        model_view.setUniformItemSizes(True)
-        model_view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.model_combo.setView(model_view)
-        self.model_combo.setMaxVisibleItems(7)
-        model_view.window().setStyleSheet("QFrame { background: white; border: 1px solid #cbd2df; }")
+        self.model_combo = ModelSelector()
         self.model_combo.setObjectName("dialogModelCombo")
         self.model_combo.setMinimumHeight(40)
         self.model_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
@@ -778,19 +764,16 @@ class DetectionConfigDialog(QDialog):
             self.model_combo.setItemData(self.model_combo.count() - 1, str(path), Qt.ItemDataRole.ToolTipRole)
             if current_model and path.resolve() == Path(current_model).resolve():
                 self.model_combo.setCurrentIndex(self.model_combo.count() - 1)
+        self.model_combo._update_tooltip(self.model_combo.currentIndex())
         model_box.addWidget(self.model_combo)
-        model_meta = QHBoxLayout()
-        model_meta.addWidget(note("FASTER R-CNN", "configMetaBadge"))
-        model_meta.addWidget(note("HANDGUN + KNIFE", "configMetaBadge"))
-        model_meta.addStretch()
-        model_box.addLayout(model_meta)
+        model_box.addWidget(note("Faster R-CNN · Handgun and knife", "configMetaBadge"))
         model_ready = bool(self.model_combo.count())
         self.model_status.setText("READY" if model_ready else "MISSING")
         self.model_status.setProperty("ready", model_ready)
         self.header_ready.setText("READY" if model_ready else "MODEL REQUIRED")
 
         threshold_box, self.threshold_status = card(
-            "02", "Confidence threshold", "Only show detections at or above this confidence score.", "ADJUSTABLE",
+            "Confidence threshold", "Only show detections at or above this confidence score.", "ADJUSTABLE",
         )
         row = QHBoxLayout()
         row.setContentsMargins(0, 2, 0, 2)
@@ -820,7 +803,7 @@ class DetectionConfigDialog(QDialog):
         update_threshold(threshold)
 
         filters, self.filters_status = card(
-            "03", "Detection checks", "Use additional checks to reduce false detections.", "2 ACTIVE",
+            "Detection checks", "Use additional checks to reduce false detections.", "2 ACTIVE",
         )
 
         def filter_option(title, description):
@@ -1350,6 +1333,7 @@ class DetectionCard(QFrame):
 class MainWindow(QMainWindow):
     def __init__(self, initial_video: str | None = None):
         super().__init__()
+        restore_theme()
         if "Inter Variable" not in QFontDatabase.families():
             QFontDatabase.addApplicationFont(str(MOCKUP_DIR / "assets" / "InterVariable.ttf"))
         self.bridge = ModelBridge()
@@ -1447,34 +1431,43 @@ class MainWindow(QMainWindow):
             button.setIconSize(QSize(18, 18))
             button.setMinimumHeight(42)
             layout.addWidget(button)
+        self.settings_button = QPushButton()
+        self.settings_button.setObjectName("settingsButton")
+        self.settings_button.setIcon(QIcon(str(ASSET_DIR / "settings.svg")))
+        self.settings_button.setIconSize(QSize(20, 20))
+        self.settings_button.setFixedSize(42, 42)
+        self.settings_button.setAccessibleName("System settings")
+        self.settings_button.setToolTip("System settings")
+        self.settings_menu = QMenu(self)
+        self.settings_menu.addSection("Appearance")
+        self.dark_mode_action = self.settings_menu.addAction("Dark mode")
+        self.dark_mode_action.setCheckable(True)
+        self.dark_mode_action.setChecked(current_theme() == "dark")
+        self.dark_mode_action.triggered.connect(lambda enabled: self.set_theme("dark" if enabled else "light"))
+        self.settings_button.clicked.connect(lambda: self.settings_menu.popup(
+            self.settings_button.mapToGlobal(self.settings_button.rect().bottomLeft())))
+        layout.addWidget(self.settings_button)
         return header
 
+    def set_theme(self, theme, *, persist=True):
+        apply_theme(self, theme, persist=persist)
+        self.dark_mode_action.setChecked(current_theme() == "dark")
+
     def _body(self):
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.setObjectName("mainSplitter")
-        splitter.setChildrenCollapsible(False)
+        splitter = DetectionPageShell("mainSplitter")
         splitter.addWidget(self._sidebar())
         splitter.addWidget(self._workspace())
         splitter.addWidget(self._summary_panel())
-        splitter.setStretchFactor(0, 0)
-        splitter.setStretchFactor(1, 1)
-        splitter.setStretchFactor(2, 0)
-        splitter.setSizes([250, 850, 330])
+        splitter.finish()
         return splitter
 
     def _sidebar(self):
-        panel = QFrame()
-        panel.setObjectName("sidePanel")
-        panel.setMinimumWidth(210)
-        panel.setMaximumWidth(290)
-        layout = QVBoxLayout(panel)
-        layout.setContentsMargins(18, 19, 18, 20)
-        layout.setSpacing(11)
+        panel, layout = page_panel("sidePanel")
         layout.addWidget(self._section("EVIDENCE SOURCE"))
         evidence = QFrame()
         evidence.setObjectName("selectedEvidence")
         evidence_layout = QVBoxLayout(evidence)
-        evidence_layout.setContentsMargins(13, 10, 13, 10)
+        evidence_layout.setContentsMargins(13, 8, 13, 8)
         self.source_name = QLabel("No video selected")
         self.source_name.setTextFormat(Qt.TextFormat.PlainText)
         self.source_name.setObjectName("evidenceTitle")
@@ -1486,7 +1479,20 @@ class MainWindow(QMainWindow):
         evidence_layout.addWidget(self.source_meta)
         layout.addWidget(evidence)
 
-        layout.addSpacing(13)
+        enhancement, enhancement_layout = enhancement_heading()
+        self.enhancement_status = QLabel("Import a video to enhance it.")
+        self.enhancement_status.setObjectName("enhancementStatus")
+        self.enhancement_status.setWordWrap(True)
+        enhancement_layout.addWidget(self.enhancement_status)
+        self.enhancement_button = QPushButton("Enhance video")
+        self.enhancement_button.setObjectName("cameraEnhanceButton")
+        self.enhancement_button.setMinimumHeight(30)
+        self.enhancement_button.setToolTip("Open the BasicVSR++ enhancement preview.")
+        self.enhancement_button.setEnabled(False)
+        self.enhancement_button.clicked.connect(self.show_video_enhancement)
+        enhancement_layout.addWidget(self.enhancement_button)
+        layout.addWidget(enhancement)
+
         layout.addWidget(self._section("VIEW MODE"))
         toggle = QFrame()
         toggle.setObjectName("toggleBox")
@@ -1509,7 +1515,6 @@ class MainWindow(QMainWindow):
         toggle_layout.addWidget(self.detected_button)
         layout.addWidget(toggle)
 
-        layout.addSpacing(13)
         layout.addWidget(self._section("CONFIDENCE THRESHOLD"))
         threshold_row = QHBoxLayout()
         self.threshold_slider = QSlider(Qt.Orientation.Horizontal)
@@ -1537,12 +1542,11 @@ class MainWindow(QMainWindow):
         self.open_review_button.clicked.connect(self.open_saved_review)
         layout.addWidget(self.open_review_button)
 
-        layout.addSpacing(13)
         layout.addWidget(self._section("ANALYSIS STATUS"))
         status_card = QFrame()
         status_card.setObjectName("statusCard")
         status_layout = QVBoxLayout(status_card)
-        status_layout.setContentsMargins(12, 12, 12, 12)
+        status_layout.setContentsMargins(12, 8, 12, 8)
         self.status_title = QLabel("Ready")
         self.status_title.setObjectName("statusTitle")
         self.status_detail = QLabel("")
@@ -1568,49 +1572,13 @@ class MainWindow(QMainWindow):
         return panel
 
     def _workspace(self):
-        panel = QFrame()
-        panel.setObjectName("workspace")
-        layout = QVBoxLayout(panel)
-        layout.setContentsMargins(14, 16, 14, 15)
-        layout.setSpacing(10)
-        heading_row = QHBoxLayout()
+        panel, layout = page_panel("workspace")
         self.workspace_title = QLabel("VIDEO WEAPON DETECTION")
         self.workspace_title.setObjectName("workspaceTitle")
         self.workspace_meta = QLabel("Original evidence")
         self.workspace_meta.setObjectName("mutedText")
-        heading_row.addWidget(self.workspace_title)
-        heading_row.addStretch()
-        heading_row.addWidget(self.workspace_meta)
+        heading_row = workspace_heading(self.workspace_title, self.workspace_meta)
         layout.addLayout(heading_row)
-
-        enhancement = QFrame()
-        enhancement.setObjectName("enhancementCard")
-        enhancement.setToolTip("Open the automatic BasicVSR++ enhancement preview.")
-        enhancement_layout = QHBoxLayout(enhancement)
-        enhancement_layout.setContentsMargins(13, 10, 11, 10)
-        enhancement_layout.setSpacing(12)
-        enhancement_copy = QVBoxLayout()
-        enhancement_copy.setSpacing(2)
-        enhancement_heading = QHBoxLayout()
-        enhancement_title = QLabel("VIDEO ENHANCEMENT · BASICVSR++")
-        enhancement_title.setObjectName("enhancementTitle")
-        enhancement_heading.addWidget(enhancement_title)
-        enhancement_heading.addStretch()
-        enhancement_copy.addLayout(enhancement_heading)
-        self.enhancement_status = QLabel(
-            "Import a video to preview automatic enhancement before detection"
-        )
-        self.enhancement_status.setObjectName("enhancementStatus")
-        self.enhancement_status.setWordWrap(True)
-        enhancement_copy.addWidget(self.enhancement_status)
-        enhancement_layout.addLayout(enhancement_copy, 1)
-        self.enhancement_button = QPushButton("Enhance video")
-        self.enhancement_button.setObjectName("enhancementButton")
-        self.enhancement_button.setToolTip("Open the BasicVSR++ enhancement preview.")
-        self.enhancement_button.setEnabled(False)
-        self.enhancement_button.clicked.connect(self.show_video_enhancement)
-        enhancement_layout.addWidget(self.enhancement_button)
-        layout.addWidget(enhancement)
 
         self.player = VideoPlayer()
         self.canvas = self.player.canvas
@@ -1650,20 +1618,9 @@ class MainWindow(QMainWindow):
         return panel
 
     def _summary_panel(self):
-        panel = QFrame()
-        panel.setObjectName("summaryPanel")
-        panel.setMinimumWidth(275)
-        panel.setMaximumWidth(390)
-        layout = QVBoxLayout(panel)
-        layout.setContentsMargins(17, 19, 17, 16)
-        layout.setSpacing(10)
+        panel, layout = page_panel("summaryPanel")
         layout.addWidget(self._section("DETECTION SUMMARY"))
-        metrics = QHBoxLayout()
-        total_card, self.total_metric = self._metric("—", "DETECTIONS")
-        handgun_card, self.handgun_metric = self._metric("—", "HANDGUNS")
-        knife_card, self.knife_metric = self._metric("—", "KNIVES")
-        for card in (total_card, handgun_card, knife_card):
-            metrics.addWidget(card)
+        metrics, (self.total_metric, self.handgun_metric, self.knife_metric) = summary_metrics()
         layout.addLayout(metrics)
 
         self.summary_message = QLabel("Import a video, review the confidence threshold, then start detection.")
@@ -1699,25 +1656,8 @@ class MainWindow(QMainWindow):
         label.setObjectName("sectionTitle")
         return label
 
-    @staticmethod
-    def _metric(value: str, caption: str):
-        card = QFrame()
-        card.setObjectName("metricCard")
-        box = QVBoxLayout(card)
-        box.setContentsMargins(5, 8, 5, 8)
-        box.setSpacing(1)
-        number = QLabel(value)
-        number.setObjectName("metricNumber")
-        number.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        text = QLabel(caption)
-        text.setObjectName("metricLabel")
-        text.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        box.addWidget(number)
-        box.addWidget(text)
-        return card, number
-
     def _apply_style(self):
-        self.setStyleSheet((MOCKUP_DIR / "styles.qss").read_text(encoding="utf-8"))
+        apply_theme(self, current_theme(), persist=False)
 
     def choose_video(self):
         if self._thread or (getattr(self, "_multi_camera_window", None) and self._multi_camera_window.worker):
@@ -1770,7 +1710,7 @@ class MainWindow(QMainWindow):
         self.progress.hide()
         self.progress.setRange(0, 100)
         self.progress.setValue(0)
-        self.enhancement_status.setText("Import a video to preview automatic BasicVSR++ enhancement.")
+        self.enhancement_status.setText("Import a video to enhance it.")
         self._update_model_label()
         self._set_ready("Import a CCTV video to begin a new analysis.")
         self._sync_header_actions()
@@ -1798,6 +1738,13 @@ class MainWindow(QMainWindow):
         self._sync_header_actions()
 
     def _mode_changed(self, index):
+        if hasattr(self, "pages") and index < self.pages.count():
+            previous = self.pages.currentWidget()
+            target = self.pages.widget(index)
+            previous_shell = previous if isinstance(previous, DetectionPageShell) else getattr(previous, "page_shell", None)
+            target_shell = target if isinstance(target, DetectionPageShell) else getattr(target, "page_shell", None)
+            if previous_shell and target_shell and previous_shell is not target_shell:
+                target_shell.setSizes(previous_shell.sizes())
         if index == 0:
             multi_camera = getattr(self, "_multi_camera_window", None)
             if multi_camera:
@@ -1859,7 +1806,7 @@ class MainWindow(QMainWindow):
         self.threshold_slider.setEnabled(True)
         self.workspace_meta.setText("Imported · ready to analyze")
         self.enhancement_status.setText(
-            "Video ready · Preview automatic BasicVSR++ enhancement before detection"
+            "Optional: BasicVSR++ enhancement"
         )
         self._clear_results()
         self._update_model_label()
@@ -1911,7 +1858,7 @@ class MainWindow(QMainWindow):
                 self.source_name.setToolTip(str(new_info.path))
                 self.source_meta.setText(f"{new_info.width} × {new_info.height} pixels\n{new_info.fps:.2f} fps · {timecode(new_info.duration)}")
                 self.dimensions_label.setText(f"{new_info.frame_count:,} frames · Video only")
-                self.enhancement_status.setText("BasicVSR++ Enhanced Video Active · Ready for detection")
+                self.enhancement_status.setText("Enhanced video ready for detection")
                 self.status_detail.setText(f"Enhanced video loaded: {new_info.path.name} · Selected threshold: {self.threshold_slider.value()}%")
                 QMessageBox.information(
                     self,
@@ -1997,7 +1944,7 @@ class MainWindow(QMainWindow):
         self.status_detail.setText("The detection service is loading the trained model to scan the entire video.")
         self.enhancement_status.setText(
             "BasicVSR++ enhanced video is being analyzed" if self._enhanced_video_active else
-            "Enhancement not applied · The detector is analyzing the original imported video"
+            "Analyzing the original video"
         )
         self.workspace_meta.setText("Scanning · please wait")
         self.summary_message.setText("Analyzing the video for weapons. Detection totals will appear after processing completes.")
@@ -2058,7 +2005,7 @@ class MainWindow(QMainWindow):
         )
         self.enhancement_status.setText(
             "BasicVSR++ enhanced video was analyzed" if self._enhanced_video_active else
-            "Enhancement not applied to this run · The original imported video was analyzed"
+            "Enhancement not applied to this run"
         )
 
     @Slot(str, str)
@@ -2248,7 +2195,7 @@ class MainWindow(QMainWindow):
         self.enhancement_button.setEnabled(result.video.path.is_file())
         self._analysis_succeeded(result)
         self.enhancement_status.setText(
-            "Enhancement not applied to this saved run · The original imported video was analyzed"
+            "Saved run used the original video"
         )
         self.player.pause()
         self._sync_header_actions()

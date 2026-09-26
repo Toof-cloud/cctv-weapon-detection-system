@@ -18,6 +18,11 @@ the home screen. BasicVSR++ enhancement has a simplified **Enhance video** actio
 source/result previews, and progress stages. Its processing animation illustrates
 restoration; the actual enhanced frame appears when processing completes.
 
+Both detection tabs share the same three-column layout, heading spacing, and
+summary cards. Single-video enhancement is in the evidence sidebar. Use the
+settings gear beside **Save video + report** to toggle **Dark mode**; the appearance
+choice is remembered on this computer and also applies to analysis/review dialogs.
+
 **Original project files modified: NONE.** Changes are confined to `mockup_ui/`.
 No model was retrained, replaced, copied or modified. The original whole-video
 detection function is imported and called directly.
