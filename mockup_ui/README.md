@@ -266,7 +266,7 @@ time. Older saved results leave unavailable fields blank with explicit statuses.
 
 The report begins with the system-generated/analyst-review disclaimer, followed by
 Video Metadata, Video and Detection Information, Interpretation, Object Detection
-Observations and Reviews, TCR Information, MCCR Information, and Analyst Review Information. Source References and the
+Observations and Reviews, Model Performance Metrics, and Analyst Review Information. Source References and the
 Traceability Report appear at the end. The PDF does not print guide labels such as
 section group numbers.
 
@@ -365,7 +365,8 @@ mockup_ui/
 ├── models/                      Required location of best_weapon_detector_ninth_model.pth
 ├── reviews/                     Persistent completed runs and analyst review records
 ├── assets/
-│   ├── forensikada-logo.png      Original Figma logo
+│   ├── forensikada-logo.png     Camera-frame brand mark used in the application header
+│   ├── forensikada-app-icon.png FK monogram used for the window and taskbar icon
 │   ├── import-image.png         Existing Figma folder icon, reused for video import
 │   ├── run-analysis.svg         Original Figma analysis icon
 │   ├── save-result.svg          Original Figma report icon
@@ -396,8 +397,8 @@ removed when the application is closed. Logs are in `temp/mockup.log`.
 
 The visual reference remains the [Forensikada Figma dashboard](https://www.figma.com/design/woIsbmBEZTJ4RYb5b7tgcd/Forensikada-UI?node-id=2-6):
 charcoal toolbar, white side panels, central video, observation table, Inter font
-and indigo selection accents. Existing exported logo/icons and the Inter license
-are reused locally, with no new visual downloads or dependencies in this update.
+and indigo selection accents. The camera-frame header mark and FK application icon
+come from the same Figma branding and are stored locally with the other UI assets.
 
 ## Verification
 

@@ -153,9 +153,11 @@ class MultiCameraUiTests(unittest.TestCase):
         self.assertGreater(document.pagePointSize(0).height(), document.pagePointSize(0).width())
         report_text = "\n".join(document.getAllText(page).text() for page in range(document.pageCount()))
         for expected in ("Forensic Detection Report", "Video Metadata", "CAM-01", "CAM-02",
-                         "Object Detection Observations and Reviews", "TCR Information", "MCCR Information",
+                         "Object Detection Observations and Reviews", "Model Performance Metrics",
                          "Analyst Review Information", "Source References", "Traceability Report"):
             self.assertIn(expected, report_text)
+        self.assertNotIn("TCR Information", report_text)
+        self.assertNotIn("MCCR Information", report_text)
         document.close()
         document.deleteLater()
         del document
@@ -188,8 +190,18 @@ class MultiCameraUiTests(unittest.TestCase):
             self.assertIsNotNone(popup)
             self.assertTrue(popup.isVisible())
             self.assertEqual(popup.camera_count, 2)
+            deadline = time.monotonic() + 1
+            while popup.progress.value() != 20 and time.monotonic() < deadline:
+                QTest.qWait(10)
             self.assertEqual(popup.progress.value(), 20)
             self.assertIn("CAM-01", popup.message.text())
+            self.assertEqual([step.property("state") for step in popup.stage_labels],
+                             ["done", "active", "pending"])
+            self.assertEqual(popup.engine_badge.text(), "FASTER R-CNN · LIVE")
+            self.assertEqual(popup.scan_wave.bar_count, 9)
+            phase = popup.scan_wave.phase
+            QTest.qWait(40)
+            self.assertNotEqual(popup.scan_wave.phase, phase)
             self.assertLessEqual((popup.frameGeometry().center() - self.window.frameGeometry().center()).manhattanLength(), 12)
         finally:
             gate.set()

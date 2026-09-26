@@ -223,14 +223,13 @@ def write_session_pdf(path: Path, manifest: dict) -> None:
             p("No handgun or knife observations met the configured confidence threshold."),
         ])
 
-    story.append(section("TCR Information"))
+    story.append(section("Model Performance Metrics"))
     for camera, report in camera_reports:
         story.extend([
             camera_heading(camera, report),
             field_table([pair(label, value) for label, value in metric_fields(report.get("metrics", {}), "tcr")]),
         ])
     story.extend([
-        section("MCCR Information"),
         field_table([pair(label, value) for label, value in metric_fields(_session_mccr(manifest), "mccr")]),
         section("Analyst Review Information"),
     ])

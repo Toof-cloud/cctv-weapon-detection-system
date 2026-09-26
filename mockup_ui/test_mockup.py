@@ -22,7 +22,7 @@ from PySide6.QtWidgets import QApplication, QFileDialog, QLabel, QMessageBox, QP
 
 import mockup_ui.model_bridge as bridge_module
 import mockup_ui.observation_review as review_module
-from mockup_ui.app import MainWindow, VideoEnhancementDialog
+from mockup_ui.app import DetectionConfigDialog, MainWindow, VideoEnhancementDialog
 from mockup_ui.model_bridge import (
     MOCKUP_DIR, TEMP_DIR, ModelBridge, ModelSetupError, VideoAnalysisResult,
     VideoInputError, read_video, save_result,
@@ -255,6 +255,33 @@ class VideoUiTests(unittest.TestCase):
         dialog.accept()
         QTest.qWait(20)
 
+    def test_figma_brand_logo_and_application_icon_are_applied(self):
+        logo = self.window.findChild(QLabel, "brandLogo")
+        self.assertIsNotNone(logo)
+        self.assertIsNotNone(logo.pixmap())
+        self.assertFalse(logo.pixmap().isNull())
+        self.assertEqual(logo.size().toTuple(), (92, 44))
+        self.assertGreater(logo.pixmap().width(), logo.pixmap().height())
+        self.assertFalse(self.window.windowIcon().isNull())
+
+    def test_detection_configuration_uses_guided_setup_cards(self):
+        dialog = DetectionConfigDialog(self.video, 50, self.window, current_model=self.checkpoint)
+        self.addCleanup(dialog.close)
+        self.assertEqual(dialog.header_ready.text(), "READY")
+        self.assertEqual(dialog.model_status.text(), "READY")
+        self.assertEqual(dialog.threshold_status.text(), "ADJUSTABLE")
+        self.assertEqual(dialog.filters_status.text(), "2 ACTIVE")
+        self.assertEqual(dialog.start_button.text(), "Start detection")
+        self.assertGreaterEqual(dialog.slider.minimumHeight(), 28)
+        self.assertTrue(dialog.cctv_filter.property("active"))
+        self.assertTrue(dialog.temporal_filter.property("active"))
+        dialog.slider.setValue(80)
+        self.assertEqual(dialog.threshold_hint.text(), "HIGH PRECISION")
+        self.assertEqual(dialog.value_label.text(), "80%")
+        dialog.cctv_intel_checkbox.setChecked(False)
+        self.assertFalse(dialog.temporal_checkbox.isEnabled())
+        self.assertEqual(dialog.filters_status.text(), "OPTIONAL")
+
     def test_import_never_starts_detection_cancel_preserves_video_and_manual_start_waits_for_model(self):
         self.checkpoint.unlink()
         self.window.bridge.analyze_video = lambda v, t, p: fixture_result(v)
@@ -281,6 +308,13 @@ class VideoUiTests(unittest.TestCase):
         self.assertIn("BasicVSR++ output", enhancement.enhanced_preview.text())
         self.assertTrue(enhancement.run_button.isEnabled())
         self.assertEqual(enhancement.findChildren(QSlider), [])
+        self.assertFalse(enhancement.restoration_preview.is_animating)
+        initial_phase = enhancement.restoration_preview.phase
+        enhancement.restoration_preview.start()
+        QTest.qWait(40)
+        self.assertTrue(enhancement.restoration_preview.is_animating)
+        self.assertNotEqual(enhancement.restoration_preview.phase, initial_phase)
+        enhancement.restoration_preview.stop()
         visible_copy = " ".join(label.text() for label in enhancement.findChildren(QLabel))
         self.assertIn("No manual adjustments required", visible_copy)
         self.assertNotIn("ENGINE NOT CONNECTED", visible_copy)
