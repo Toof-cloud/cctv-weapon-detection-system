@@ -26,7 +26,7 @@ class VideoCanvas(QLabel):
         self.setMinimumSize(440, 245)
         self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding)
         self.setAcceptDrops(True)
-        self.setText("DROP A CCTV VIDEO HERE\n\nMP4, AVI, MOV, MKV or WebM\n\nImport to analyze automatically")
+        self.setText("Import a CCTV video to begin\n\nMP4, AVI, MOV, MKV or WebM\n\nEnhance if needed, then analyze")
         self.setProperty("hasImage", False)
 
     def show_frame(self, frame):
@@ -36,6 +36,15 @@ class VideoCanvas(QLabel):
         self.setText("")
         self.setProperty("hasImage", True)
         self._fit()
+
+    def reset(self):
+        self._source_pixmap = QPixmap()
+        self.set_zoom(1.0)
+        self.clear()
+        self.setProperty("hasImage", False)
+        self.setText("Import a CCTV video to begin\n\nMP4, AVI, MOV, MKV or WebM\n\nEnhance if needed, then analyze")
+        self.style().unpolish(self)
+        self.style().polish(self)
 
     def _fit(self):
         if not self._source_pixmap.isNull():
@@ -254,3 +263,17 @@ class VideoPlayer(QWidget):
         if self.capture is not None:
             self.capture.release()
             self.capture = None
+
+    def reset(self):
+        """Release the file and return playback to its empty, disabled state."""
+        self.release()
+        self.path = None
+        self.fps = 0.0
+        self.frame_count = self.frame_number = 0
+        self.seek_slider.blockSignals(True)
+        self.seek_slider.setRange(0, 0)
+        self.seek_slider.setValue(0)
+        self.seek_slider.blockSignals(False)
+        self.time_label.setText("00:00.000 / 00:00.000")
+        self.canvas.reset()
+        self.set_locked(True)

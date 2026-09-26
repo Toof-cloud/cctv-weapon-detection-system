@@ -1,135 +1,322 @@
-"""Consolidated, paginated forensic report for a saved camera session."""
+"""Combined multi-camera PDF using the single-camera forensic report format."""
+from collections import Counter
+from datetime import datetime
+import json
 from pathlib import Path
 from xml.sax.saxutils import escape
 
-from mockup_ui.report_metrics import REPORT_DISCLAIMER
+from mockup_ui.report_metrics import REPORT_DISCLAIMER as DISCLAIMER, metric_fields
+
+
+def _camera_reports(path: Path, manifest: dict) -> list[tuple[dict, dict]]:
+    """Load the already verified report data written for every camera export."""
+    reports = []
+    for camera in manifest["cameras"]:
+        report_path = path.parent / camera["export_folder"] / "forensic_report.json"
+        reports.append((camera, json.loads(report_path.read_text(encoding="utf-8"))))
+    return reports
+
+
+def _session_mccr(manifest: dict) -> dict:
+    metrics = manifest["metrics"]
+    counts = metrics.get("counts", {})
+    eligible = metrics.get("eligible", 0)
+    value = metrics.get("mccr_percent")
+    confirmed = manifest.get("alignment_confirmed_by_analyst", False)
+    if value is not None:
+        reason = "Calculated from aligned observations across the imported camera recordings."
+    elif not confirmed:
+        reason = "Recording correspondence and alignment have not been confirmed."
+    else:
+        reason = "No eligible aligned observations are available for this session."
+    metric = {
+        "status": "computed" if value is not None else "unavailable",
+        "value_percent": value,
+        "reason": reason,
+        "n_cc": counts.get("Corroborated", 0),
+        "not_corroborated": counts.get("Not Corroborated", 0),
+        "uncertain": counts.get("Uncertain", 0),
+        "not_applicable": counts.get("Not Applicable", 0),
+        "n_mc": eligible,
+        "concurrent_interval": f"Matching window +/- {manifest['matching_window_seconds']:.2f} seconds",
+    }
+    cameras = manifest.get("cameras", [])
+    if len(cameras) == 2:
+        metric.update(camera_a=cameras[0]["camera_id"], camera_b=cameras[1]["camera_id"])
+    return {"mccr": metric}
 
 
 def write_session_pdf(path: Path, manifest: dict) -> None:
+    """Write one portrait A4 report containing every camera and observation."""
     from reportlab.lib import colors
-    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib.enums import TA_LEFT
+    from reportlab.lib.pagesizes import A4
     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-    from reportlab.platypus import LongTable, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    from reportlab.platypus import KeepTogether, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
-    page_size = landscape(A4)
-    doc = SimpleDocTemplate(str(path), pagesize=page_size, leftMargin=38, rightMargin=38,
-                            topMargin=28, bottomMargin=30)
-    usable_width = page_size[0] - 76
+    path = Path(path)
+    camera_reports = _camera_reports(path, manifest)
+    observations_by_id = {row["observation_id"]: row for row in manifest.get("observations", [])}
+
+    regular, bold = "Helvetica", "Helvetica-Bold"
+    font_dir = Path("C:/Windows/Fonts")
+    if (font_dir / "arial.ttf").exists() and (font_dir / "arialbd.ttf").exists():
+        if "Forensikada" not in pdfmetrics.getRegisteredFontNames():
+            pdfmetrics.registerFont(TTFont("Forensikada", str(font_dir / "arial.ttf")))
+            pdfmetrics.registerFont(TTFont("ForensikadaBold", str(font_dir / "arialbd.ttf")))
+            pdfmetrics.registerFontFamily("Forensikada", normal="Forensikada", bold="ForensikadaBold")
+        regular, bold = "Forensikada", "ForensikadaBold"
+
     styles = getSampleStyleSheet()
-    styles.add(ParagraphStyle("SessionTitle", parent=styles["Title"], fontName="Helvetica-Bold",
-                              fontSize=19, leading=23, textColor=colors.HexColor("#2f318e"), spaceAfter=6))
-    styles.add(ParagraphStyle("SessionHeading", parent=styles["Heading2"], fontName="Helvetica-Bold",
-                              fontSize=11, leading=15, textColor=colors.HexColor("#303841"),
-                              spaceBefore=5, spaceAfter=3, keepWithNext=True))
-    styles.add(ParagraphStyle("SessionBody", parent=styles["BodyText"], fontName="Helvetica",
-                              fontSize=8, leading=11, spaceAfter=2, wordWrap="CJK"))
-    styles.add(ParagraphStyle("SessionCell", parent=styles["BodyText"], fontName="Helvetica",
-                              fontSize=7, leading=9, wordWrap="CJK"))
-    styles.add(ParagraphStyle("SessionHeader", parent=styles["SessionCell"], fontName="Helvetica-Bold"))
+    for style in styles.byName.values():
+        style.fontName = regular
+    styles.add(ParagraphStyle("ReportBody", fontName=regular, fontSize=9, leading=13, spaceAfter=6,
+                              splitLongWords=True, alignment=TA_LEFT))
+    styles.add(ParagraphStyle("ReportTitle", fontName=bold, fontSize=23, leading=28,
+                              textColor=colors.HexColor("#2f318e"), spaceAfter=12))
+    styles.add(ParagraphStyle("Section", fontName=bold, fontSize=12, leading=17,
+                              spaceBefore=14, spaceAfter=7, keepWithNext=True))
+    styles.add(ParagraphStyle("Observation", fontName=bold, fontSize=10, leading=14,
+                              textColor=colors.HexColor("#2f318e"), spaceBefore=9, spaceAfter=5,
+                              keepWithNext=True))
+    styles.add(ParagraphStyle("Disclaimer", fontName=bold, fontSize=9.5, leading=14,
+                              textColor=colors.HexColor("#493614")))
+    body = styles["ReportBody"]
 
-    def paragraph(value, style="SessionBody"):
+    def p(value, style=body):
         value = "Not recorded" if value is None or value == "" else str(value)
-        return Paragraph(escape(value).replace("\n", "<br/>"), styles[style])
+        return Paragraph(escape(value).replace("\n", "<br/>"), style)
 
-    def heading(value):
-        return paragraph(value, "SessionHeading")
+    def pair(label, value):
+        return [p(label), p(value)]
 
-    story = [paragraph("Multi-camera forensic report", "SessionTitle"),
-             paragraph(REPORT_DISCLAIMER), Spacer(1, 5), heading("Session and detection information")]
-    metrics = manifest["metrics"]
-    counts = metrics["counts"]
-    mccr = f"{metrics['mccr_percent']:.2f}%" if metrics["mccr_percent"] is not None else "N/A"
-    overview = [
-        ("Incident ID", manifest.get("scene_id") or "Not specified"),
-        ("Generated (UTC)", manifest["generated_at_utc"]),
-        ("Camera recordings", len(manifest["cameras"])),
-        ("Total observations", len(manifest["observations"])),
-        ("MCCR", mccr),
-        ("Cross-view statuses", ", ".join(f"{key}: {counts.get(key, 0)}" for key in
-                                      ("Corroborated", "Not Corroborated", "Uncertain", "Not Applicable"))),
-        ("Alignment", f"{'Confirmed by analyst' if manifest['alignment_confirmed_by_analyst'] else 'Not confirmed'}; "
-                       f"{manifest.get('alignment_method') or 'no reference recorded'}; "
-                       f"matching window +/- {manifest['matching_window_seconds']:.2f} s"),
-        ("Time basis", manifest["time_basis"]),
+    width = A4[0] - 84
+
+    def field_table(rows):
+        table = Table(rows, colWidths=[145, width - 145], hAlign="LEFT")
+        table.setStyle(TableStyle([
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#f2f3f8")),
+            ("LINEBELOW", (0, 0), (-1, -1), .4, colors.HexColor("#dce0e8")),
+            ("LEFTPADDING", (0, 0), (-1, -1), 8),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+            ("TOPPADDING", (0, 0), (-1, -1), 7),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ]))
+        return table
+
+    def section(title):
+        return p(title, styles["Section"])
+
+    def camera_heading(camera, report):
+        return p(f"{camera['camera_id']} - {report['source']['name']}", styles["Observation"])
+
+    generated = manifest["generated_at_utc"]
+    timestamp = datetime.fromisoformat(generated.replace("Z", "+00:00")).strftime("%Y%m%dT%H%M%SZ")
+    report_id = f"FR-MULTI-{timestamp}-{path.parent.name[-8:]}"
+    disclaimer = Table([[p(DISCLAIMER, styles["Disclaimer"])]], colWidths=[width], hAlign="LEFT")
+    disclaimer.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#fff4da")),
+        ("BOX", (0, 0), (-1, -1), .8, colors.HexColor("#d8b45c")),
+        ("LEFTPADDING", (0, 0), (-1, -1), 11),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 11),
+        ("TOPPADDING", (0, 0), (-1, -1), 9),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+    ]))
+
+    story = [
+        p("FORENSIKADA / FORENSIC ANALYSIS", styles["Section"]),
+        p("Forensic Detection Report", styles["ReportTitle"]),
+        p(f"Report: {report_id}\nGenerated (UTC): {generated}"),
+        disclaimer,
+        section("Video Metadata"),
     ]
-    pairs = Table([[paragraph(name, "SessionHeader"), paragraph(value)] for name, value in overview],
-                  colWidths=[130, usable_width - 130], hAlign="LEFT")
-    pairs.setStyle(TableStyle([
-        ("VALIGN", (0, 0), (-1, -1), "TOP"), ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#f1f2f8")),
-        ("LINEBELOW", (0, 0), (-1, -1), .35, colors.HexColor("#dce1eb")),
-        ("LEFTPADDING", (0, 0), (-1, -1), 7), ("RIGHTPADDING", (0, 0), (-1, -1), 7),
-        ("TOPPADDING", (0, 0), (-1, -1), 2), ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
-    ]))
-    story.extend([pairs, heading("Camera sources and processing")])
-    for camera in manifest["cameras"]:
-        tcr = camera.get("tcr", {})
-        tcr_value = tcr.get("value_percent")
-        tcr_display = f"{tcr_value:.2f}%" if tcr_value is not None else "N/A"
-        story.append(paragraph(f"{camera['camera_id']} - {Path(camera['source_video']).name}", "SessionHeader"))
-        story.append(paragraph(f"Source: {camera['source_video']} | {camera['width']} x {camera['height']} | "
-                               f"{camera['fps']:.2f} FPS | {camera['frame_count']} frames | "
-                               f"{camera['observation_count']} observations | Location: {camera['location'] or 'Not recorded'} | "
-                               f"Offset: {camera['offset_seconds']:+.3f} s"))
-        if camera.get("original_source_video"):
-            story.append(paragraph(f"Original recording before BasicVSR++ enhancement: {camera['original_source_video']}"))
-        story.append(paragraph(f"Run: {camera['run_id']} | Model: {Path(camera['model_path']).name} | "
-                               f"Confidence threshold: {camera['confidence_threshold']:.0%} | "
-                               f"Device: {camera['device']} | Analyzed frames: {camera['analyzed_frames']} | "
-                               f"Frames with detections: {camera['frames_with_detections']} | "
-                               f"TCR: {tcr_display}"))
-        story.append(paragraph(f"TCR interpretation: {tcr.get('reason') or 'Not available'} | "
-                               f"Annotated video and camera records: {camera['export_folder']}"))
+    for camera, report in camera_reports:
+        source = report["source"]
+        dimensions = (f"{source['width']} x {source['height']} pixels"
+                      if source["width"] and source["height"] else "Not recorded")
+        story.extend([
+            camera_heading(camera, report),
+            field_table([
+                pair("Video filename", source["name"]),
+                pair("Resolution", dimensions),
+                pair("Frame rate", f"{source['fps']:g} FPS"),
+                pair("Duration", f"{source['duration_seconds']:.3f} seconds"),
+                pair("Source frame count", source["frame_count"]),
+                pair("Camera identifier", camera["camera_id"]),
+                pair("Recording date/time", source["recording_start_timestamp"]),
+            ]),
+        ])
 
-    story.append(heading("Object detection observations and reviews"))
-    story.append(paragraph("Each row is a frame observation. Confidence and cross-view matching remain reviewable. "
-                           "The CSV and JSON files contain all record identifiers and source references."))
-    headers = ["Session time", "Camera", "Video time", "Frame", "Object", "Confidence", "Box [x1,y1,x2,y2]", "Cross-view", "Analyst"]
-    widths = [69, 56, 69, 44, 60, 64, 126, 118, usable_width - 606]
-    records = [[paragraph(name, "SessionHeader") for name in headers]]
-    for row in manifest["observations"]:
-        records.append([paragraph(value, "SessionCell") for value in (
-            f"{row['session_seconds']:.3f} s", row["camera_id"], f"{row['video_seconds']:.3f} s",
-            row["frame_number"], row["object_label"].title(), f"{row['confidence']:.1%}",
-            str(row["box"]), row["corroboration_status"], row.get("analyst_decision", "Not reviewed"))])
-    timeline = LongTable(records, colWidths=widths, repeatRows=1, hAlign="LEFT")
-    timeline.setStyle(TableStyle([
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e9eaf5")),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8f9fc")]),
-        ("LINEBELOW", (0, 0), (-1, -1), .25, colors.HexColor("#dce1eb")),
-        ("LEFTPADDING", (0, 0), (-1, -1), 5), ("RIGHTPADDING", (0, 0), (-1, -1), 5),
-        ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
-    ]))
-    story.append(timeline)
-    reviewed = [row for row in manifest["observations"] if row.get("analyst_decision") not in (None, "Not reviewed")]
-    story.append(heading("Analyst review information"))
-    if reviewed:
-        for row in reviewed:
-            story.append(paragraph(f"{row['observation_id']} - {row['analyst_decision']} | "
-                                   f"Reviewed: {row.get('reviewed_at') or 'Not recorded'} | "
-                                   f"Notes: {row.get('analyst_notes') or 'None'}"))
-    else:
-        story.append(paragraph("No analyst decisions have been recorded for this session."))
-    story.extend([heading("Source references and traceability"),
-                  paragraph("Source paths are recorded above. Session metadata and complete observations are preserved in "
-                            "session.json and combined_observations.csv. Each camera folder contains its annotated video, "
-                            "detections, structured forensic records, and saved analyst review snapshot. "
-                            "This PDF covers the entire multi-camera session.")])
-    for camera in manifest["cameras"]:
-        fingerprints = camera.get("fingerprints", {})
-        story.append(paragraph(f"{camera['camera_id']} fingerprints at report generation - "
-                               f"source video SHA-256: {fingerprints.get('source_video') or 'Unavailable'}; "
-                               f"detections CSV SHA-256: {fingerprints.get('detections_csv') or 'Unavailable'}; "
-                               f"summary JSON SHA-256: {fingerprints.get('summary_json') or 'Unavailable'}."))
-    story.append(paragraph("Source timestamps are not supplied by the current video pipeline. Session times use "
-                           "video-relative offsets and analyst-provided alignment; they are not wall-clock timestamps."))
+    story.append(section("Video and Detection Information"))
+    for camera, report in camera_reports:
+        processing, summary = report["processing"], report["summary"]
+        counts = summary["counts_per_class"]
+        class_summary = "; ".join(f"{name.title()}: {count}" for name, count in sorted(counts.items())) or "None"
+        story.extend([
+            camera_heading(camera, report),
+            field_table([
+                pair("Model used", processing["model_reference"]),
+                pair("Run status", "Completed saved run"),
+                pair("Confidence threshold", f"{processing['confidence_threshold']:.0%}"),
+                pair("Frames analyzed", processing["analyzed_frames"]),
+                pair("Processing device / time", f"{processing['device'].upper()} / {processing['elapsed_seconds']:.2f} seconds"),
+                pair("Analysis completed (UTC)", processing["completed_at_utc"]),
+                pair("Detection summary", f"{summary['total_frame_detections']} observations; "
+                     f"{summary['frames_with_detections']} positive frames; {class_summary}"),
+                pair("Analyst review coverage", report["review_summary"]),
+            ]),
+        ])
 
-    def footer(canvas, document):
+    story.extend([
+        section("Interpretation"),
+        p("The model generated the listed handgun and knife observations at the configured confidence threshold. "
+          "A confidence score describes model certainty and is not an analyst decision. Analyst decisions document "
+          "a later human assessment and do not replace or delete the original model observation."),
+        p("Frame numbers are zero-based. Times are video-relative offsets and are not recording dates. "
+          "Bounding boxes use [x1, y1, x2, y2] source-frame pixel coordinates. Counts represent frame observations, "
+          "so the same physical object may appear more than once."),
+    ])
+    observation_section_added = False
+    for camera, report in camera_reports:
+        if not report["detections"]:
+            elements = [
+                camera_heading(camera, report),
+                p("No handgun or knife observations met the configured confidence threshold."),
+            ]
+            if not observation_section_added:
+                elements.insert(0, section("Object Detection Observations and Reviews"))
+                observation_section_added = True
+            story.append(KeepTogether(elements))
+            continue
+        for index, row in enumerate(report["detections"]):
+            session_row = observations_by_id.get(row["observation_id"], {})
+            cross_view_detail = session_row.get("corroboration_status", "Not recorded")
+            supporting = session_row.get("supporting_observations", [])
+            if supporting:
+                cross_view_detail += f"; supporting observations: {', '.join(supporting)}"
+            if session_row.get("reason"):
+                cross_view_detail += f"; {session_row['reason']}"
+            elements = [
+                p(f"Observation {row['observation_id']}", styles["Observation"]),
+                field_table([
+                    pair("Detection", f"{row['object_label'].title()} | Frame {row['frame_number']} | "
+                         f"{row['video_relative_timestamp_seconds']:.2f} seconds"),
+                    pair("Confidence / bounding box", f"{row['confidence_score']:.2%} / "
+                         f"[{row['x1']}, {row['y1']}, {row['x2']}, {row['y2']}]"),
+                    pair("Cross-camera comparison", cross_view_detail),
+                    pair("Analyst Review Decision", row["analyst_decision"] or "Not reviewed"),
+                    pair("Review timestamp (UTC)", row["reviewed_at"]),
+                ]),
+            ]
+            if index == 0:
+                elements.insert(0, camera_heading(camera, report))
+            if not observation_section_added:
+                elements.insert(0, section("Object Detection Observations and Reviews"))
+                observation_section_added = True
+            story.append(KeepTogether(elements))
+    if not observation_section_added:
+        story.extend([
+            section("Object Detection Observations and Reviews"),
+            p("No handgun or knife observations met the configured confidence threshold."),
+        ])
+
+    story.append(section("Model Performance Metrics"))
+    for camera, report in camera_reports:
+        story.extend([
+            camera_heading(camera, report),
+            field_table([pair(label, value) for label, value in metric_fields(report.get("metrics", {}), "tcr")]),
+        ])
+    story.extend([
+        field_table([pair(label, value) for label, value in metric_fields(_session_mccr(manifest), "mccr")]),
+        section("Analyst Review Information"),
+    ])
+    all_rows = [row for _, report in camera_reports for row in report["detections"]]
+    decisions = Counter(row["analyst_decision"] or "Not reviewed" for row in all_rows)
+    reviewed = sum(row["analyst_decision"] is not None for row in all_rows)
+    decision_summary = "; ".join(f"{decision}: {count}" for decision, count in sorted(decisions.items())) or "No observations"
+    story.append(field_table([
+        pair("Review coverage", f"{reviewed} of {len(all_rows)} observations reviewed"),
+        pair("Decision totals", decision_summary),
+    ]))
+    for camera, report in camera_reports:
+        for index, row in enumerate(report["detections"]):
+            elements = [
+                p(f"Observation {row['observation_id']}", styles["Observation"]),
+                field_table([
+                    pair("Analyst Review Decision", row["analyst_decision"] or "Not reviewed"),
+                    pair("Analyst notes", row["analyst_notes"] or "No notes provided."),
+                    pair("Review timestamp (UTC)", row["reviewed_at"]),
+                ]),
+            ]
+            if index == 0:
+                elements.insert(0, camera_heading(camera, report))
+            story.append(KeepTogether(elements))
+        if not report["detections"]:
+            story.append(KeepTogether([
+                camera_heading(camera, report),
+                p("There are no observations available for analyst review."),
+            ]))
+
+    story.append(section("Source References"))
+    for camera, report in camera_reports:
+        source, processing, artifacts = report["source"], report["processing"], report["artifacts"]
+        story.extend([
+            camera_heading(camera, report),
+            field_table([
+                pair("Source video", source["reference"]),
+                pair("Model", processing["model_reference"]),
+                pair("Annotated video", artifacts["annotated_video"]),
+                pair("Saved summary", artifacts["saved_summary"]["path"]),
+                pair("Pipeline detections", artifacts["pipeline_detections"]["path"]),
+                pair("Metric input records", artifacts["metric_input"]["path"]),
+                pair("Metric calculation script", artifacts["metric_engine"]["path"]),
+            ]),
+        ])
+
+    story.extend([
+        section("Traceability Report"),
+        field_table([
+            pair("Report identifier", report_id),
+            pair("Generated (UTC)", generated),
+            pair("Camera recordings", len(camera_reports)),
+            pair("Incident identifier", manifest.get("scene_id") or "Not recorded"),
+            pair("Alignment", "Confirmed by analyst" if manifest.get("alignment_confirmed_by_analyst") else "Not confirmed"),
+            pair("Alignment method", manifest.get("alignment_method") or "Not recorded"),
+            pair("Matching window", f"+/- {manifest['matching_window_seconds']:.2f} seconds"),
+        ]),
+    ])
+    for camera, report in camera_reports:
+        source, artifacts = report["source"], report["artifacts"]
+        story.extend([
+            camera_heading(camera, report),
+            field_table([
+                pair("Source video fingerprint", source["file_at_report_generation"]["sha256"] or "Unavailable"),
+                pair("Source video check", source["file_at_report_generation"]["status"]),
+                pair("Saved summary fingerprint", artifacts["saved_summary"]["sha256"] or "Unavailable"),
+                pair("Saved summary check", artifacts["saved_summary"]["status"]),
+                pair("Pipeline detections fingerprint", artifacts["pipeline_detections"]["sha256"] or "Unavailable"),
+                pair("Pipeline detections check", artifacts["pipeline_detections"]["status"]),
+                pair("Metric input fingerprint", artifacts["metric_input"]["sha256"] or "Unavailable"),
+                pair("Metric input check", artifacts["metric_input"]["status"]),
+                pair("Metric script fingerprint", artifacts["metric_engine"]["sha256"] or "Unavailable"),
+            ]),
+        ])
+    if camera_reports:
+        story.extend([Spacer(1, 5), p(camera_reports[0][1]["definitions"]["fingerprints"])])
+
+    def footer(canvas, doc):
         canvas.saveState()
-        canvas.setFont("Helvetica", 8)
+        canvas.setFont(regular, 8)
         canvas.setFillColor(colors.HexColor("#66717d"))
-        canvas.drawString(38, 22, "Forensikada | Multi-camera forensic report")
-        canvas.drawRightString(page_size[0] - 38, 22, f"Page {document.page}")
+        canvas.drawString(42, 23, "Forensikada | System-generated report with analyst review information")
+        canvas.drawRightString(A4[0] - 42, 23, f"Page {doc.page}")
         canvas.restoreState()
 
-    doc.build(story, onFirstPage=footer, onLaterPages=footer)
+    document = SimpleDocTemplate(
+        str(path), pagesize=A4, rightMargin=42, leftMargin=42,
+        topMargin=36, bottomMargin=42, title="Forensic detection report", author="Forensikada",
+    )
+    document.build(story, onFirstPage=footer, onLaterPages=footer)

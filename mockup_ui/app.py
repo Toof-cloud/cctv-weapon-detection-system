@@ -3,8 +3,12 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import logging
+from hashlib import sha256
+from math import sin, tau
 from pathlib import Path
+import subprocess
 import sys
 import traceback
 from time import monotonic
@@ -12,6 +16,17 @@ from time import monotonic
 MOCKUP_DIR = Path(__file__).resolve().parent
 ROOT_DIR = MOCKUP_DIR.parent
 TEMP_DIR = MOCKUP_DIR / "temp"
+ASSET_DIR = MOCKUP_DIR / "assets"
+BRAND_LOGO_PATH = ASSET_DIR / "forensikada-logo.png"
+APP_ICON_PATH = ASSET_DIR / "forensikada-app-icon.png"
+
+# Make the common `python mockup_ui/app.py` command use the UI environment when
+# the selected system Python does not have PySide6 installed.
+UI_PYTHON = MOCKUP_DIR / ".venv" / "Scripts" / "python.exe"
+if importlib.util.find_spec("PySide6") is None and UI_PYTHON.is_file():
+    if Path(sys.executable).resolve() != UI_PYTHON.resolve():
+        raise SystemExit(subprocess.call([str(UI_PYTHON), "-B", str(Path(__file__).resolve()), *sys.argv[1:]]))
+
 for directory in (TEMP_DIR, MOCKUP_DIR / "outputs", MOCKUP_DIR / "models"):
     directory.mkdir(parents=True, exist_ok=True)
 sys.dont_write_bytecode = True
@@ -20,8 +35,11 @@ if str(ROOT_DIR) in sys.path:
     sys.path.remove(str(ROOT_DIR))
 sys.path.insert(0, str(ROOT_DIR))
 
-from PySide6.QtCore import QAbstractTableModel, QModelIndex, QSize, Qt, QThread, QTimer, Signal, Slot
-from PySide6.QtGui import QColor, QFontDatabase, QIcon, QImage, QPalette, QPixmap
+from PySide6.QtCore import (
+    QAbstractTableModel, QEasingCurve, QModelIndex, QPropertyAnimation, QRectF, QSize,
+    Qt, QThread, QTimer, Signal, Slot,
+)
+from PySide6.QtGui import QColor, QFontDatabase, QIcon, QImage, QPainter, QPalette, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
     QButtonGroup,
@@ -33,6 +51,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QMainWindow,
+    QMenu,
     QMessageBox,
     QProgressBar,
     QPushButton,
@@ -48,7 +67,6 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QAbstractItemView,
     QCheckBox,
-    QComboBox,
 )
 
 from mockup_ui.model_bridge import (
@@ -56,6 +74,9 @@ from mockup_ui.model_bridge import (
     discover_available_models, read_video, save_result, timecode,
 )
 from mockup_ui.video_player import VideoPlayer
+from mockup_ui.model_selector import ModelSelector
+from mockup_ui.page_shell import DetectionPageShell, page_panel, workspace_heading, summary_metrics, enhancement_heading
+from mockup_ui.ui_theme import apply_theme, current_theme, load_stylesheet, restore_theme
 from mockup_ui.observation_review import REVIEW_DIR, ReviewStore
 from mockup_ui.review_panel import ObservationReviewDialog
 
@@ -139,7 +160,7 @@ class EnhancementFramePreview(QLabel):
         self._source_pixmap = QPixmap.fromImage(image.copy())
         self.setObjectName("enhancementPreview")
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.setMinimumSize(200, 230)
+        self.setMinimumSize(200, 100)
         self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding)
         self._fit()
 
@@ -153,6 +174,114 @@ class EnhancementFramePreview(QLabel):
     def resizeEvent(self, event):
         self._fit()
         super().resizeEvent(event)
+
+
+class EnhancementRestorationPreview(QWidget):
+    """Animated BasicVSR++ restoration sweep shown while enhancement is active."""
+
+    def __init__(self, source_pixmap: QPixmap, parent=None):
+        super().__init__(parent)
+        self.setObjectName("enhancementRestorationPreview")
+        self.setMinimumSize(200, 100)
+        self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding)
+        self._source_pixmap = source_pixmap
+        self._phase = 0.0
+        self._active = False
+        self._timer = QTimer(self)
+        self._timer.setTimerType(Qt.TimerType.PreciseTimer)
+        self._timer.setInterval(16)
+        self._timer.timeout.connect(self._advance)
+
+    @property
+    def phase(self):
+        return self._phase
+
+    @property
+    def is_animating(self):
+        return self._active
+
+    def start(self):
+        self._phase = 0.0
+        self._active = True
+        self._timer.start()
+        self.update()
+
+    def stop(self):
+        self._active = False
+        self._timer.stop()
+        self.update()
+
+    def _advance(self):
+        self._phase = (self._phase + 0.0045) % 1.0
+        self.update()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
+        painter.fillRect(self.rect(), QColor("#111827"))
+        if self._source_pixmap.isNull():
+            return
+
+        fitted = self._source_pixmap.scaled(
+            self.size(), Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation,
+        )
+        left = (self.width() - fitted.width()) // 2
+        top = (self.height() - fitted.height()) // 2
+        image_rect = QRectF(left, top, fitted.width(), fitted.height())
+        painter.drawPixmap(left, top, fitted)
+        painter.fillRect(image_rect, QColor(5, 10, 29, 122))
+
+        # The bidirectional sweep mirrors the forward/backward propagation used
+        # by BasicVSR++. The restored area is revealed behind the scan head.
+        sweep = 1.0 - abs(2.0 * self._phase - 1.0)
+        scan_x = image_rect.left() + image_rect.width() * sweep
+        reveal_width = max(1.0, scan_x - image_rect.left())
+        painter.save()
+        painter.setClipRect(QRectF(image_rect.left(), image_rect.top(), reveal_width, image_rect.height()))
+        painter.drawPixmap(left, top, fitted)
+        painter.fillRect(image_rect, QColor(58, 61, 156, 22))
+        painter.restore()
+
+        tile_width = image_rect.width() / 8.0
+        tile_height = image_rect.height() / 5.0
+        for row in range(5):
+            for column in range(8):
+                tile_center = image_rect.left() + (column + 0.5) * tile_width
+                distance = abs(tile_center - scan_x)
+                if distance > tile_width * 1.7:
+                    continue
+                strength = 1.0 - distance / (tile_width * 1.7)
+                pulse = (sin((self._phase * tau * 4.0) + row * 0.85 + column * 0.4) + 1.0) / 2.0
+                alpha = int(24 + 74 * strength * pulse)
+                tile = QRectF(
+                    image_rect.left() + column * tile_width + 2,
+                    image_rect.top() + row * tile_height + 2,
+                    tile_width - 4,
+                    tile_height - 4,
+                )
+                painter.setPen(QColor(168, 172, 255, alpha))
+                painter.drawRoundedRect(tile, 3, 3)
+
+        for width, alpha in ((18, 20), (10, 40), (4, 105)):
+            painter.fillRect(
+                QRectF(scan_x - width / 2, image_rect.top(), width, image_rect.height()),
+                QColor(120, 127, 255, alpha),
+            )
+        painter.fillRect(QRectF(scan_x - 1, image_rect.top(), 2, image_rect.height()), QColor("#fff2c7"))
+
+        direction = "FORWARD PASS" if self._phase < 0.5 else "BACKWARD PASS"
+        badge = QRectF(image_rect.left() + 12, image_rect.bottom() - 40, 255, 29)
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(QColor(18, 24, 52, 220))
+        painter.drawRoundedRect(badge, 6, 6)
+        painter.setPen(QColor("#eef0ff"))
+        badge_font = painter.font()
+        badge_font.setPixelSize(12)
+        badge_font.setBold(True)
+        painter.setFont(badge_font)
+        painter.drawText(badge.adjusted(10, 0, -8, 0), Qt.AlignmentFlag.AlignVCenter, f"BASICVSR++  ·  {direction}")
 
 
 class EnhancementWorker(QThread):
@@ -176,6 +305,7 @@ class EnhancementWorker(QThread):
 
             self.progress.emit("Running BasicVSR++ video super-resolution on GPU... This may take a few moments.")
             enhancer.enhance_video(str(self.input_path), str(self.output_path))
+            self.progress.emit("Validating the restored video and preparing the enhanced preview...")
 
             if not self.output_path.exists():
                 self.failed.emit("Enhanced video output was not created.")
@@ -200,7 +330,9 @@ class VideoEnhancementDialog(QDialog):
     def __init__(self, video: VideoInfo, parent=None, *, output_path: Path | None = None):
         super().__init__(parent)
         self.video = video
-        self.output_path = output_path or (MOCKUP_DIR / "outputs" / "enhanced_videos" / f"{video.path.stem}_enhanced.mp4")
+        source_key = f"{video.path.resolve()}:{video.size_bytes}:{video.modified_ns}"
+        source_digest = sha256(source_key.encode("utf-8")).hexdigest()[:12]
+        self.output_path = output_path or (MOCKUP_DIR / "outputs" / "enhanced_videos" / f"{video.path.stem}_{source_digest}_enhanced.mp4")
         self.enhanced_video_path: Path | None = None
         self.enhanced_first_frame = None
         self._worker: EnhancementWorker | None = None
@@ -208,96 +340,193 @@ class VideoEnhancementDialog(QDialog):
         self.setObjectName("videoEnhancementDialog")
         self.setWindowTitle("Video Enhancement")
         self.setModal(True)
-        self.resize(1040, 680)
-        self.setMinimumSize(880, 600)
+        self.setMinimumSize(900, 650)
+        available = self.screen().availableGeometry()
+        self.resize(min(1100, available.width() - 48), min(760, available.height() - 60))
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(25, 22, 25, 20)
-        layout.setSpacing(14)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
-        header = QHBoxLayout()
-        heading_copy = QVBoxLayout()
-        heading_copy.setSpacing(2)
-        heading = QLabel("Video Enhancement")
-        heading.setObjectName("dialogHeading")
-        detail = QLabel(
-            f"{video.path.name} · {video.width} × {video.height} · {video.fps:.2f} FPS · "
+        hero = QFrame()
+        hero.setObjectName("enhancementHero")
+        hero_layout = QVBoxLayout(hero)
+        hero_layout.setContentsMargins(24, 14, 24, 14)
+        hero_layout.setSpacing(6)
+        hero_top = QHBoxLayout()
+        eyebrow = QLabel("VIDEO ENHANCEMENT")
+        eyebrow.setObjectName("enhancementEyebrow")
+        hero_top.addWidget(eyebrow)
+        hero_top.addStretch()
+        self.engine_status = QLabel("READY")
+        self.engine_status.setObjectName("enhancementEngineStatus")
+        hero_top.addWidget(self.engine_status)
+        hero_layout.addLayout(hero_top)
+        heading = QLabel("Enhance footage before detection")
+        heading.setObjectName("enhancementHeading")
+        hero_layout.addWidget(heading)
+        subheading = QLabel(
+            "Improve video quality before checking for weapons."
+        )
+        subheading.setObjectName("enhancementSubheading")
+        subheading.setWordWrap(True)
+        hero_layout.addWidget(subheading)
+
+        source_summary = QFrame()
+        source_summary.setObjectName("enhancementSourceSummary")
+        source_row = QHBoxLayout(source_summary)
+        source_row.setContentsMargins(11, 7, 11, 7)
+        source_row.setSpacing(9)
+        source_badge = QLabel("SOURCE VIDEO")
+        source_badge.setObjectName("enhancementSourceBadge")
+        source_row.addWidget(source_badge)
+        source_detail = QLabel(
+            f"{video.path.name}  ·  {video.width} × {video.height}  ·  {video.fps:.2f} FPS  ·  "
             f"{timecode(video.duration)}"
         )
-        detail.setObjectName("dialogDetail")
-        detail.setWordWrap(True)
-        heading_copy.addWidget(heading)
-        heading_copy.addWidget(detail)
-        header.addLayout(heading_copy)
-        header.addStretch()
-        layout.addLayout(header)
+        source_detail.setObjectName("enhancementSourceDetail")
+        source_detail.setWordWrap(True)
+        source_row.addWidget(source_detail, 1)
+        hero_layout.addWidget(source_summary)
+        layout.addWidget(hero)
+
+        body = QFrame()
+        body.setObjectName("enhancementBody")
+        body_layout = QVBoxLayout(body)
+        body_layout.setContentsMargins(20, 12, 20, 12)
+        body_layout.setSpacing(10)
 
         profile = QFrame()
         profile.setObjectName("basicVsrProfile")
         profile_layout = QHBoxLayout(profile)
-        profile_layout.setContentsMargins(13, 9, 13, 9)
+        profile_layout.setContentsMargins(14, 9, 14, 9)
+        profile_layout.setSpacing(9)
         profile_name = QLabel("BasicVSR++")
         profile_name.setObjectName("enhancementModel")
+        profile_layout.addWidget(profile_name)
         profile_description = QLabel("Automatic video enhancement · No manual adjustments required")
         profile_description.setObjectName("enhancementStatus")
-        profile_layout.addWidget(profile_name)
-        profile_layout.addSpacing(8)
-        profile_layout.addWidget(profile_description)
-        profile_layout.addStretch()
-        layout.addWidget(profile)
+        profile_description.setWordWrap(True)
+        profile_layout.addWidget(profile_description, 1)
+        body_layout.addWidget(profile)
 
-        body = QHBoxLayout()
-        body.setSpacing(15)
         previews = QFrame()
         previews.setObjectName("enhancementPreviewArea")
         preview_layout = QHBoxLayout(previews)
-        preview_layout.setContentsMargins(12, 12, 12, 12)
-        preview_layout.setSpacing(11)
+        preview_layout.setContentsMargins(10, 10, 10, 10)
+        preview_layout.setSpacing(12)
 
         original_card = QFrame()
         original_card.setObjectName("enhancementPreviewCard")
         original_layout = QVBoxLayout(original_card)
-        original_layout.setContentsMargins(10, 10, 10, 10)
-        original_title = QLabel("SOURCE FRAME")
+        original_layout.setContentsMargins(11, 10, 11, 11)
+        original_layout.setSpacing(7)
+        original_header = QHBoxLayout()
+        original_title = QLabel("Original video")
         original_title.setObjectName("enhancementPreviewTitle")
-        original_layout.addWidget(original_title)
+        original_header.addWidget(original_title)
+        original_header.addStretch()
+        source_state = QLabel("ORIGINAL")
+        source_state.setObjectName("enhancementPreviewBadge")
+        original_header.addWidget(source_state)
+        original_layout.addLayout(original_header)
         self.source_preview = EnhancementFramePreview(video.first_frame)
         original_layout.addWidget(self.source_preview, 1)
+        source_caption = QLabel("Your original recording")
+        source_caption.setObjectName("enhancementPreviewCaption")
+        original_layout.addWidget(source_caption)
 
         enhanced_card = QFrame()
         enhanced_card.setObjectName("enhancementPreviewCard")
         self.enhanced_layout = QVBoxLayout(enhanced_card)
-        self.enhanced_layout.setContentsMargins(10, 10, 10, 10)
-        enhanced_title = QLabel("ENHANCED PREVIEW")
+        self.enhanced_layout.setContentsMargins(11, 10, 11, 11)
+        self.enhanced_layout.setSpacing(7)
+        enhanced_header = QHBoxLayout()
+        enhanced_title = QLabel("Enhanced video")
         enhanced_title.setObjectName("enhancementPreviewTitle")
-        self.enhanced_layout.addWidget(enhanced_title)
+        enhanced_header.addWidget(enhanced_title)
+        enhanced_header.addStretch()
+        self.preview_status = QLabel("AWAITING RUN")
+        self.preview_status.setObjectName("enhancementPreviewBadge")
+        enhanced_header.addWidget(self.preview_status)
+        self.enhanced_layout.addLayout(enhanced_header)
         self.enhanced_preview = QLabel(
             "Enhanced frame preview\n\nBasicVSR++ output will appear here"
         )
         self.enhanced_preview.setObjectName("enhancementPreviewPlaceholder")
         self.enhanced_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.enhanced_preview.setWordWrap(True)
-        self.enhanced_preview.setMinimumSize(200, 230)
-        self.enhanced_layout.addWidget(self.enhanced_preview, 1)
+        self.enhanced_preview.setMinimumSize(200, 100)
+        self.enhanced_stack = QStackedWidget()
+        self.enhanced_stack.setObjectName("enhancementPreviewStack")
+        self.enhanced_stack.addWidget(self.enhanced_preview)
+        self.restoration_preview = EnhancementRestorationPreview(self.source_preview._source_pixmap)
+        self.enhanced_stack.addWidget(self.restoration_preview)
+        self.enhanced_layout.addWidget(self.enhanced_stack, 1)
+        self.enhanced_caption = QLabel("The result appears here after enhancement")
+        self.enhanced_caption.setWordWrap(True)
+        self.enhanced_caption.setObjectName("enhancementPreviewCaption")
+        self.enhanced_layout.addWidget(self.enhanced_caption)
         preview_layout.addWidget(original_card, 1)
         preview_layout.addWidget(enhanced_card, 1)
-        body.addWidget(previews, 1)
-        layout.addLayout(body, 1)
+        body_layout.addWidget(previews, 1)
 
+        # Retained as a hidden compatibility hook. The visible feedback is the
+        # bidirectional restoration sweep rather than a generic loading bar.
         self.enhancement_progress = QProgressBar()
         self.enhancement_progress.setRange(0, 0)
         self.enhancement_progress.setVisible(False)
-        layout.addWidget(self.enhancement_progress)
 
+        process = QFrame()
+        process.setObjectName("enhancementProcessCard")
+        process_layout = QVBoxLayout(process)
+        process_layout.setContentsMargins(13, 10, 13, 10)
+        process_layout.setSpacing(7)
+        process_header = QHBoxLayout()
+        process_title = QLabel("Enhancement progress")
+        process_title.setObjectName("enhancementProcessTitle")
+        process_header.addWidget(process_title)
+        process_header.addStretch()
+        self.process_status = QLabel("READY TO ENHANCE")
+        self.process_status.setObjectName("enhancementProcessStatus")
+        process_header.addWidget(self.process_status)
+        process_layout.addLayout(process_header)
+        stages = QHBoxLayout()
+        stages.setSpacing(7)
+        self.stage_labels = []
+        for text in ("1  Prepare", "2  Enhance video", "3  Check result"):
+            stage = QLabel(text)
+            stage.setObjectName("enhancementStage")
+            stage.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            stage.setProperty("state", "idle")
+            stages.addWidget(stage, 1)
+            self.stage_labels.append(stage)
+        process_layout.addLayout(stages)
         self.notice = QLabel(
-            "BasicVSR++ super-resolves and restores compressed CCTV footage using bidirectional recurrent alignment on GPU."
+            "Start enhancement, then apply the finished video to continue with detection."
         )
         self.notice.setObjectName("enhancementNotice")
         self.notice.setWordWrap(True)
-        layout.addWidget(self.notice)
+        process_layout.addWidget(self.notice)
+        body_layout.addWidget(process)
 
+        action_bar = QFrame()
+        action_bar.setObjectName("enhancementActionBar")
+        action_layout = QHBoxLayout(action_bar)
+        action_layout.setContentsMargins(13, 9, 13, 9)
+        action_copy = QVBoxLayout()
+        action_copy.setSpacing(1)
+        action_title = QLabel("Ready when you are")
+        action_title.setObjectName("enhancementActionTitle")
+        action_detail = QLabel("Enhance first, then analyze for weapons.")
+        action_detail.setWordWrap(True)
+        action_detail.setObjectName("enhancementActionDetail")
+        action_copy.addWidget(action_title)
+        action_copy.addWidget(action_detail)
+        action_layout.addLayout(action_copy, 1)
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
-        btn_text = "Run BasicVSR++ enhancement"
+        btn_text = "Enhance video"
         out_path = self.output_path
+        existing_frame = None
         if out_path.exists():
             try:
                 import cv2
@@ -307,12 +536,7 @@ class VideoEnhancementDialog(QDialog):
                 if ok and frame is not None:
                     self.enhanced_video_path = out_path
                     self.enhanced_first_frame = frame
-                    self.enhanced_preview.setParent(None)
-                    self.enhanced_preview = EnhancementFramePreview(frame)
-                    self.enhanced_layout.addWidget(self.enhanced_preview, 1)
-                    self.notice.setText(
-                        "BasicVSR++ enhancement completed! Click 'Apply Enhanced Video' to use this video for detection."
-                    )
+                    existing_frame = frame
                     btn_text = "Apply Enhanced Video"
             except Exception:
                 pass
@@ -323,7 +547,56 @@ class VideoEnhancementDialog(QDialog):
         self.run_button.setEnabled(True)
         self.run_button.clicked.connect(self._handle_run_or_apply)
         buttons.rejected.connect(self.reject)
-        layout.addWidget(buttons)
+        action_layout.addWidget(buttons)
+        body_layout.addWidget(action_bar)
+        layout.addWidget(body, 1)
+
+        if existing_frame is not None:
+            self._show_enhanced_frame(existing_frame)
+            self._set_stage(completed=True)
+            self.engine_status.setText("ENHANCED VIDEO READY")
+            self.process_status.setText("RESTORATION COMPLETE")
+            self.preview_status.setText("ENHANCED")
+            self.notice.setText(
+                "BasicVSR++ enhancement completed. Apply the enhanced video to use it for detection."
+            )
+
+    def _set_stage(self, active_index: int | None = None, *, completed=False, failed=False):
+        for index, stage in enumerate(self.stage_labels):
+            if completed:
+                state = "done"
+            elif failed and active_index == index:
+                state = "failed"
+            elif active_index is not None and index < active_index:
+                state = "done"
+            elif active_index == index:
+                state = "active"
+            else:
+                state = "idle"
+            stage.setProperty("state", state)
+            stage.style().unpolish(stage)
+            stage.style().polish(stage)
+
+    def _show_enhanced_frame(self, frame):
+        current = self.enhanced_preview
+        self.enhanced_stack.removeWidget(current)
+        current.deleteLater()
+        self.enhanced_preview = EnhancementFramePreview(frame)
+        self.enhanced_stack.insertWidget(0, self.enhanced_preview)
+        self.enhanced_stack.setCurrentWidget(self.enhanced_preview)
+        self.enhanced_caption.setText("Restored frame · ready to use for weapon detection")
+
+    def _update_enhancement_progress(self, message: str):
+        self.notice.setText(message)
+        if "Connecting" in message:
+            self._set_stage(0)
+            self.process_status.setText("INITIALIZING ENGINE")
+        elif "Running" in message:
+            self._set_stage(1)
+            self.process_status.setText("RESTORING FRAMES")
+        elif "Validating" in message:
+            self._set_stage(2)
+            self.process_status.setText("VERIFYING OUTPUT")
 
     def _handle_run_or_apply(self):
         if self.enhanced_video_path is not None:
@@ -332,38 +605,52 @@ class VideoEnhancementDialog(QDialog):
 
         self.run_button.setEnabled(False)
         self.close_button.setEnabled(False)
-        self.enhancement_progress.setVisible(True)
-        self.notice.setText("Initializing BasicVSR++ video enhancement on GPU... Please wait.")
+        self.engine_status.setText("ENHANCEMENT ACTIVE")
+        self.preview_status.setText("RESTORING")
+        self.enhanced_caption.setText("Processing animation · the finished result will replace it")
+        self.enhanced_stack.setCurrentWidget(self.restoration_preview)
+        self.restoration_preview.start()
+        self._set_stage(0)
+        self.process_status.setText("INITIALIZING ENGINE")
+        self.notice.setText("Initializing BasicVSR++ video enhancement on GPU...")
 
         out_path = self.output_path
         out_path.parent.mkdir(parents=True, exist_ok=True)
 
         self._worker = EnhancementWorker(self.video.path, out_path, self)
-        self._worker.progress.connect(self.notice.setText)
+        self._worker.progress.connect(self._update_enhancement_progress)
         self._worker.succeeded.connect(self._enhancement_succeeded)
         self._worker.failed.connect(self._enhancement_failed)
         self._worker.start()
 
     def _enhancement_succeeded(self, enhanced_path: str, first_frame):
-        self._worker.wait()
+        if self._worker:
+            self._worker.wait()
         self.enhanced_video_path = Path(enhanced_path)
         self.enhanced_first_frame = first_frame
-        self.enhancement_progress.setVisible(False)
-
-        self.enhanced_preview.setParent(None)
-        self.enhanced_preview = EnhancementFramePreview(first_frame)
-        self.enhanced_layout.addWidget(self.enhanced_preview, 1)
-
-        self.notice.setText("BasicVSR++ enhancement completed successfully! Click 'Apply Enhanced Video' to use this video for detection.")
+        self.restoration_preview.stop()
+        self._show_enhanced_frame(first_frame)
+        self._set_stage(completed=True)
+        self.engine_status.setText("ENHANCED VIDEO READY")
+        self.preview_status.setText("ENHANCED")
+        self.process_status.setText("RESTORATION COMPLETE")
+        self.notice.setText("BasicVSR++ enhancement completed. Apply the enhanced video to use it for detection.")
         self.run_button.setText("Apply Enhanced Video")
         self.run_button.setEnabled(True)
         self.close_button.setEnabled(True)
 
     def _enhancement_failed(self, error_msg: str):
-        self._worker.wait()
-        self.enhancement_progress.setVisible(False)
+        if self._worker:
+            self._worker.wait()
+        self.restoration_preview.stop()
+        self.enhanced_stack.setCurrentWidget(self.enhanced_preview)
+        self._set_stage(0, failed=True)
+        self.engine_status.setText("ENHANCEMENT INTERRUPTED")
+        self.preview_status.setText("NOT ENHANCED")
+        self.process_status.setText("ACTION REQUIRED")
+        self.enhanced_caption.setText("Original video remains available for detection")
         self.notice.setText(f"Enhancement error: {error_msg}\nDetection can continue using the original video.")
-        self.run_button.setText("Retry BasicVSR++ enhancement")
+        self.run_button.setText("Retry enhancement")
         self.run_button.setEnabled(True)
         self.close_button.setEnabled(True)
 
@@ -377,6 +664,7 @@ class VideoEnhancementDialog(QDialog):
         if self._worker and self._worker.isRunning():
             event.ignore()
         else:
+            self.restoration_preview.stop()
             event.accept()
 
 
@@ -387,12 +675,12 @@ class DetectionConfigDialog(QDialog):
         self.setObjectName("configurationDialog")
         self.setWindowTitle("Detection configuration")
         self.setModal(True)
-        self.setMinimumWidth(540)
-        self.resize(600, 680)
-        self.setStyleSheet((MOCKUP_DIR / "styles.qss").read_text(encoding="utf-8"))
+        self.setMinimumWidth(640)
+        self.resize(710, 800)
+        self.setStyleSheet(load_stylesheet())
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(24, 22, 24, 20)
-        layout.setSpacing(14)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
         def note(text, name="dialogDetail"):
             widget = QLabel(text)
@@ -401,33 +689,75 @@ class DetectionConfigDialog(QDialog):
             widget.setObjectName(name)
             return widget
 
-        layout.addWidget(note("DETECTION SETUP", "sectionTitle"))
-        layout.addWidget(note(f"Analyze {len(videos)} camera recordings" if len(videos) > 1 else "Analyze imported video", "dialogHeading"))
+        hero = QFrame()
+        hero.setObjectName("configHero")
+        hero_layout = QVBoxLayout(hero)
+        hero_layout.setContentsMargins(28, 20, 28, 20)
+        hero_layout.setSpacing(7)
+        hero_top = QHBoxLayout()
+        hero_top.addWidget(note("DETECTION SETUP", "configEyebrow"))
+        hero_top.addStretch()
+        self.header_ready = note("READY", "configReadyBadge")
+        hero_top.addWidget(self.header_ready)
+        hero_layout.addLayout(hero_top)
+        hero_layout.addWidget(note(
+            f"Analyze {len(videos)} camera recordings" if len(videos) > 1 else "Analyze imported video",
+            "configHeading",
+        ))
         detail = (f"{len(videos)} cameras · {sum(v.frame_count for v in videos):,} total frames · One shared detector configuration"
                   if len(videos) > 1 else f"{video.path.name}\n{video.width} × {video.height} · {video.fps:.2f} FPS · {timecode(video.duration)}")
-        layout.addWidget(note(detail))
+        source = QFrame()
+        source.setObjectName("configSourceSummary")
+        source_layout = QHBoxLayout(source)
+        source_layout.setContentsMargins(11, 8, 11, 8)
+        source_layout.setSpacing(10)
+        source_layout.addWidget(note("VIDEO INPUT", "configSourceBadge"))
+        source_layout.addWidget(note(detail, "configSourceDetail"), 1)
+        hero_layout.addWidget(source)
+        layout.addWidget(hero)
+
+        content = QFrame()
+        content.setObjectName("configBody")
+        content_layout = QVBoxLayout(content)
+        content_layout.setContentsMargins(24, 18, 24, 18)
+        content_layout.setSpacing(13)
         scroll = QScrollArea()
+        scroll.setObjectName("configScroll")
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         body = QWidget()
+        body.setObjectName("configScrollBody")
         stack = QVBoxLayout(body)
         stack.setContentsMargins(0, 0, 8, 0)
         stack.setSpacing(12)
 
-        def card(title):
+        def card(title, description, status_text):
             frame = QFrame()
             frame.setObjectName("configCard")
             box = QVBoxLayout(frame)
             box.setContentsMargins(16, 14, 16, 14)
             box.setSpacing(10)
-            box.addWidget(note(title, "sectionTitle"))
+            header = QHBoxLayout()
+            header.setSpacing(10)
+            copy = QVBoxLayout()
+            copy.setSpacing(2)
+            copy.addWidget(note(title, "configCardTitle"))
+            copy.addWidget(note(description, "configCardDescription"))
+            header.addLayout(copy, 1)
+            status = note(status_text, "configCardStatus")
+            status.setWordWrap(False)
+            status.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            header.addWidget(status)
+            box.addLayout(header)
             stack.addWidget(frame)
-            return box
+            return box, status
 
-        model_box = card("01 / DETECTION MODEL")
-        self.model_combo = QComboBox()
+        model_box, self.model_status = card(
+            "Detection model", "Choose the trained model used to find weapons.", "CHECKING",
+        )
+        self.model_combo = ModelSelector()
         self.model_combo.setObjectName("dialogModelCombo")
-        self.model_combo.setMinimumHeight(38)
+        self.model_combo.setMinimumHeight(40)
         self.model_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         for label_text, path in discover_available_models():
             display_text = f"{label_text} | {path.name}" if label_text and path.name not in label_text else (label_text or path.name)
@@ -435,53 +765,220 @@ class DetectionConfigDialog(QDialog):
             self.model_combo.setItemData(self.model_combo.count() - 1, str(path), Qt.ItemDataRole.ToolTipRole)
             if current_model and path.resolve() == Path(current_model).resolve():
                 self.model_combo.setCurrentIndex(self.model_combo.count() - 1)
+        self.model_combo._update_tooltip(self.model_combo.currentIndex())
         model_box.addWidget(self.model_combo)
-        model_box.addWidget(note("Faster R-CNN · Handgun and knife observations. The selected checkpoint is recorded with each result."))
-        threshold_box = card("02 / CONFIDENCE THRESHOLD")
+        model_box.addWidget(note("Faster R-CNN · Handgun and knife", "configMetaBadge"))
+        model_ready = bool(self.model_combo.count())
+        self.model_status.setText("READY" if model_ready else "MISSING")
+        self.model_status.setProperty("ready", model_ready)
+        self.header_ready.setText("READY" if model_ready else "MODEL REQUIRED")
+
+        threshold_box, self.threshold_status = card(
+            "Confidence threshold", "Only show detections at or above this confidence score.", "ADJUSTABLE",
+        )
         row = QHBoxLayout()
+        row.setContentsMargins(0, 2, 0, 2)
         self.slider = QSlider(Qt.Orientation.Horizontal)
         self.slider.setRange(10, 95)
         self.slider.setValue(threshold)
+        self.slider.setMinimumHeight(28)
         self.value_label = note(f"{threshold}%", "dialogThreshold")
-        self.slider.valueChanged.connect(lambda value: self.value_label.setText(f"{value}%"))
         row.addWidget(self.slider, 1)
         row.addWidget(self.value_label)
         threshold_box.addLayout(row)
-        threshold_box.addWidget(note("Sets the minimum detection confidence. Enabled CCTV filters may apply stricter class thresholds."))
-        filters = card("03 / VALIDATION FILTERS")
-        self.cctv_intel_checkbox = QCheckBox("CCTV intelligence")
-        self.cctv_intel_checkbox.setChecked(True)
-        filters.addWidget(self.cctv_intel_checkbox)
-        filters.addWidget(note("Checks person proximity, motion and object scale to help filter background detections."))
-        self.temporal_checkbox = QCheckBox("Temporal consistency")
-        self.temporal_checkbox.setChecked(True)
-        filters.addWidget(self.temporal_checkbox)
-        filters.addWidget(note("Checks persistence across nearby frames, independently for each camera recording."))
+        scale = QHBoxLayout()
+        scale.addWidget(note("MORE SENSITIVE", "configScaleLabel"))
+        scale.addStretch()
+        self.threshold_hint = note("BALANCED REVIEW", "configThresholdHint")
+        scale.addWidget(self.threshold_hint)
+        scale.addStretch()
+        scale.addWidget(note("STRICTER", "configScaleLabel"))
+        threshold_box.addLayout(scale)
+
+        def update_threshold(value):
+            self.value_label.setText(f"{value}%")
+            self.threshold_hint.setText(
+                "HIGH RECALL" if value < 40 else "BALANCED REVIEW" if value <= 70 else "HIGH PRECISION"
+            )
+        self.slider.valueChanged.connect(update_threshold)
+        update_threshold(threshold)
+
+        filters, self.filters_status = card(
+            "Detection checks", "Use additional checks to reduce false detections.", "2 ACTIVE",
+        )
+
+        def filter_option(title, description):
+            frame = QFrame()
+            frame.setObjectName("configFilter")
+            box = QVBoxLayout(frame)
+            box.setContentsMargins(12, 10, 12, 10)
+            box.setSpacing(5)
+            top = QHBoxLayout()
+            checkbox = QCheckBox(title)
+            checkbox.setChecked(True)
+            top.addWidget(checkbox)
+            top.addStretch()
+            status = note("ACTIVE", "configFilterStatus")
+            top.addWidget(status)
+            box.addLayout(top)
+            box.addWidget(note(description, "configFilterDescription"))
+            filters.addWidget(frame)
+            return frame, checkbox, status
+
+        self.cctv_filter, self.cctv_intel_checkbox, self.cctv_status = filter_option(
+            "CCTV intelligence", "Checks person proximity, motion and object scale to filter background detections.",
+        )
+        self.temporal_filter, self.temporal_checkbox, self.temporal_status = filter_option(
+            "Temporal consistency", "Checks persistence across nearby frames independently for each camera recording.",
+        )
+
+        def refresh_filter(frame, status, checked, available=True):
+            frame.setProperty("active", checked and available)
+            status.setText("ACTIVE" if checked and available else "OFF")
+            for widget in (frame, status):
+                widget.style().unpolish(widget)
+                widget.style().polish(widget)
+
+        self.cctv_intel_checkbox.toggled.connect(
+            lambda checked: refresh_filter(self.cctv_filter, self.cctv_status, checked))
+        self.temporal_checkbox.toggled.connect(
+            lambda checked: refresh_filter(self.temporal_filter, self.temporal_status, checked,
+                                           self.temporal_checkbox.isEnabled()))
+
         def toggle_temporal(enabled):
             self.temporal_checkbox.setEnabled(enabled)
             if not enabled:
                 self.temporal_checkbox.setChecked(False)
+            refresh_filter(self.temporal_filter, self.temporal_status,
+                           self.temporal_checkbox.isChecked(), enabled)
+            active = int(self.cctv_intel_checkbox.isChecked()) + int(self.temporal_checkbox.isChecked())
+            self.filters_status.setText(f"{active} ACTIVE" if active else "OPTIONAL")
         self.cctv_intel_checkbox.toggled.connect(toggle_temporal)
+        self.temporal_checkbox.toggled.connect(
+            lambda _: self.filters_status.setText(
+                f"{int(self.cctv_intel_checkbox.isChecked()) + int(self.temporal_checkbox.isChecked())} ACTIVE"
+            ))
+        refresh_filter(self.cctv_filter, self.cctv_status, True)
+        refresh_filter(self.temporal_filter, self.temporal_status, True)
+
         self.enhancement_notice = note(
             "INPUT FOOTAGE\nNo enhanced video has been created. Detection uses the recordings currently imported. "
             "Apply BasicVSR++ enhancement before analysis if needed.",
             "enhancementNotice")
         stack.addWidget(self.enhancement_notice)
         scroll.setWidget(body)
-        layout.addWidget(scroll, 1)
+        content_layout.addWidget(scroll, 1)
+
+        actions = QFrame()
+        actions.setObjectName("configActions")
+        actions_layout = QHBoxLayout(actions)
+        actions_layout.setContentsMargins(14, 11, 12, 11)
+        actions_layout.setSpacing(12)
+        action_copy = QVBoxLayout()
+        action_copy.setSpacing(1)
+        action_copy.addWidget(note("READY FOR ANALYSIS", "configActionTitle"))
+        action_copy.addWidget(note(
+            f"{sum(v.frame_count for v in videos):,} frames queued for detection",
+            "configActionDetail",
+        ))
+        actions_layout.addLayout(action_copy, 1)
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel)
-        start = buttons.addButton("Analyze all cameras" if len(videos) > 1 else "Start detection", QDialogButtonBox.ButtonRole.AcceptRole)
-        start.setObjectName("primaryButton")
-        start.setEnabled(self.model_combo.count() > 0)
-        start.setDefault(True)
+        self.start_button = buttons.addButton(
+            "Analyze all cameras" if len(videos) > 1 else "Start detection",
+            QDialogButtonBox.ButtonRole.AcceptRole,
+        )
+        self.start_button.setObjectName("primaryButton")
+        self.start_button.setEnabled(self.model_combo.count() > 0)
+        self.start_button.setDefault(True)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
-        layout.addWidget(buttons)
+        actions_layout.addWidget(buttons)
+        content_layout.addWidget(actions)
+        layout.addWidget(content, 1)
 
     @property
     def selected_model(self) -> Path | None:
         data = self.model_combo.currentData()
         return Path(data) if data else None
+
+
+class PulseDot(QWidget):
+    """Continuously animated activity indicator for the detection hero."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.phase = 0.0
+        self.setFixedSize(12, 12)
+        self._animation_timer = QTimer(self)
+        self._animation_timer.setTimerType(Qt.TimerType.PreciseTimer)
+        self._animation_timer.setInterval(16)
+        self._animation_timer.timeout.connect(self._advance)
+
+    def _advance(self):
+        self.phase = (self.phase + 0.045) % 1.0
+        self.update()
+
+    def showEvent(self, event):
+        self._animation_timer.start()
+        super().showEvent(event)
+
+    def hideEvent(self, event):
+        self._animation_timer.stop()
+        super().hideEvent(event)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setPen(Qt.PenStyle.NoPen)
+        wave = (sin(self.phase * tau) + 1) / 2
+        glow = QColor("#b9c0ff")
+        glow.setAlpha(35 + round(wave * 65))
+        painter.setBrush(glow)
+        radius = 4.2 + wave * 1.2
+        painter.drawEllipse(QRectF(6 - radius, 6 - radius, radius * 2, radius * 2))
+        core = QColor("#dfe2ff")
+        core.setAlpha(185 + round(wave * 70))
+        painter.setBrush(core)
+        painter.drawEllipse(QRectF(3.5, 3.5, 5, 5))
+
+
+class ScanWave(QWidget):
+    """Low-cost 60 FPS waveform showing active frame analysis."""
+    bar_count = 9
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.phase = 0.0
+        self.setFixedSize(72, 22)
+        self._animation_timer = QTimer(self)
+        self._animation_timer.setTimerType(Qt.TimerType.PreciseTimer)
+        self._animation_timer.setInterval(16)
+        self._animation_timer.timeout.connect(self._advance)
+
+    def _advance(self):
+        self.phase = (self.phase + 0.018) % 1.0
+        self.update()
+
+    def showEvent(self, event):
+        self._animation_timer.start()
+        super().showEvent(event)
+
+    def hideEvent(self, event):
+        self._animation_timer.stop()
+        super().hideEvent(event)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setPen(Qt.PenStyle.NoPen)
+        bar_width, gap, baseline = 4.0, 3.5, self.height() - 2.0
+        for index in range(self.bar_count):
+            wave = (sin(self.phase * tau + index * 0.72) + 1) / 2
+            height = 4.0 + wave * 15.0
+            color = QColor("#e1e3ff" if wave > 0.72 else "#8589e7")
+            color.setAlpha(155 + round(wave * 100))
+            painter.setBrush(color)
+            x = index * (bar_width + gap)
+            painter.drawRoundedRect(QRectF(x, baseline - height, bar_width, height), 2, 2)
 
 
 class ProcessingDialog(QDialog):
@@ -491,34 +988,70 @@ class ProcessingDialog(QDialog):
         self.camera_count = camera_count
         self._started = monotonic()
         self._allow_close = False
+        self._last_percent = -1
         self.setObjectName("processingDialog")
         self.setWindowTitle("Weapon detection in progress")
         self.setWindowModality(Qt.WindowModality.WindowModal)
         self.setWindowFlag(Qt.WindowType.WindowCloseButtonHint, False)
-        self.setFixedWidth(560)
+        self.setFixedWidth(660)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         hero = QFrame()
         hero.setObjectName("processingHero")
         hero_layout = QVBoxLayout(hero)
-        hero_layout.setContentsMargins(28, 25, 28, 25)
-        hero_layout.setSpacing(6)
-        self.activity = QLabel("●  DETECTION ACTIVE")
+        hero_layout.setContentsMargins(28, 22, 28, 21)
+        hero_layout.setSpacing(7)
+        activity_row = QHBoxLayout()
+        activity_row.setSpacing(6)
+        self.activity_dot = PulseDot()
+        activity_row.addWidget(self.activity_dot)
+        self.activity = QLabel("DETECTION ACTIVE")
         self.activity.setObjectName("processingActivity")
-        hero_layout.addWidget(self.activity)
+        activity_row.addWidget(self.activity)
+        activity_row.addStretch()
+        self.engine_badge = QLabel("FASTER R-CNN · INITIALIZING")
+        self.engine_badge.setObjectName("processingEngine")
+        activity_row.addWidget(self.engine_badge)
+        hero_layout.addLayout(activity_row)
         heading = QLabel("Analyzing video" if camera_count == 1 else f"Analyzing {camera_count} camera recordings")
         heading.setObjectName("processingHeading")
         hero_layout.addWidget(heading)
         context = QLabel("Scanning footage for handgun and knife observations.")
         context.setObjectName("processingContext")
         hero_layout.addWidget(context)
+        signal = QFrame()
+        signal.setObjectName("processingSignal")
+        signal_layout = QHBoxLayout(signal)
+        signal_layout.setContentsMargins(10, 5, 10, 5)
+        signal_layout.setSpacing(4)
+        self.scan_wave = ScanWave()
+        signal_layout.addWidget(self.scan_wave, 0, Qt.AlignmentFlag.AlignVCenter)
+        signal_layout.addSpacing(7)
+        signal_text = QLabel("LIVE FRAME ANALYSIS")
+        signal_text.setObjectName("processingSignalText")
+        signal_layout.addWidget(signal_text)
+        signal_layout.addStretch()
+        hero_layout.addWidget(signal)
         layout.addWidget(hero)
         body = QFrame()
         body.setObjectName("processingBody")
         body_layout = QVBoxLayout(body)
-        body_layout.setContentsMargins(28, 23, 28, 25)
+        body_layout.setContentsMargins(28, 20, 28, 22)
         body_layout.setSpacing(11)
+        stages = QFrame()
+        stages.setObjectName("processingStages")
+        stages_layout = QHBoxLayout(stages)
+        stages_layout.setContentsMargins(5, 5, 5, 5)
+        stages_layout.setSpacing(5)
+        self.stage_labels = []
+        for text in ("01  MODEL READY", "02  FRAME SCAN", "03  VERIFY OUTPUT"):
+            step = QLabel(text)
+            step.setObjectName("processingStep")
+            step.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            stages_layout.addWidget(step, 1)
+            self.stage_labels.append(step)
+        body_layout.addWidget(stages)
         row = QHBoxLayout()
         self.phase = QLabel("PREPARING DETECTOR")
         self.phase.setObjectName("processingPhase")
@@ -535,22 +1068,38 @@ class ProcessingDialog(QDialog):
         self.progress = QProgressBar()
         self.progress.setRange(0, 0)
         self.progress.setTextVisible(False)
-        self.progress.setFixedHeight(12)
+        self.progress.setFixedHeight(14)
         body_layout.addWidget(self.progress)
+        progress_meta = QHBoxLayout()
         self.frames = QLabel(f"Preparing to process {total_frames:,} frames")
         self.frames.setObjectName("processingFrames")
-        body_layout.addWidget(self.frames)
+        progress_meta.addWidget(self.frames)
+        progress_meta.addStretch()
+        self.eta = QLabel("ETA calculating")
+        self.eta.setObjectName("processingEta")
+        progress_meta.addWidget(self.eta)
+        body_layout.addLayout(progress_meta)
         note = QLabel("The annotated video and detection summary will appear when analysis finishes.")
         note.setObjectName("processingNote")
         note.setWordWrap(True)
         body_layout.addWidget(note)
-        self.elapsed = QLabel("Elapsed 00:00")
+        footer = QHBoxLayout()
+        self.elapsed = QLabel("ELAPSED  00:00")
         self.elapsed.setObjectName("processingElapsed")
-        body_layout.addWidget(self.elapsed)
+        footer.addWidget(self.elapsed)
+        footer.addStretch()
+        pipeline = QLabel("LOCAL FORENSIC PIPELINE")
+        pipeline.setObjectName("processingPipeline")
+        footer.addWidget(pipeline)
+        body_layout.addLayout(footer)
         layout.addWidget(body)
+        self._progress_animation = QPropertyAnimation(self.progress, b"value", self)
+        self._progress_animation.setDuration(320)
+        self._progress_animation.setEasingCurve(QEasingCurve.Type.OutCubic)
+        self._set_stage(0)
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._update_elapsed)
-        self._timer.start(1000)
+        self._timer.start(500)
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -562,22 +1111,48 @@ class ProcessingDialog(QDialog):
 
     def _update_elapsed(self):
         seconds = int(monotonic() - self._started)
-        self.elapsed.setText(f"Elapsed {seconds // 60:02d}:{seconds % 60:02d}")
+        self.elapsed.setText(f"ELAPSED  {seconds // 60:02d}:{seconds % 60:02d}")
+        if 0 < self._last_percent < 100 and seconds:
+            remaining = max(0, round(seconds * (100 - self._last_percent) / self._last_percent))
+            self.eta.setText(f"EST. REMAINING  {remaining // 60:02d}:{remaining % 60:02d}")
+
+    def _set_stage(self, active: int, *, complete: bool = False):
+        for index, step in enumerate(self.stage_labels):
+            state = "done" if complete or index < active else "active" if index == active else "pending"
+            step.setProperty("state", state)
+            step.style().unpolish(step)
+            step.style().polish(step)
 
     def update_progress(self, message: str, percent: int):
         self.message.setText(message)
+        self._last_percent = percent
         if percent < 0:
             self.phase.setText("PREPARING DETECTOR")
             self.percent.setText("Starting…")
             self.progress.setRange(0, 0)
             self.frames.setText(f"Preparing to process {self.total_frames:,} frames")
+            self.eta.setText("ETA calculating")
+            self.engine_badge.setText("FASTER R-CNN · INITIALIZING")
+            self._set_stage(0)
         else:
-            self.phase.setText("SCANNING RECORDINGS" if self.camera_count > 1 else "SCANNING VIDEO")
+            verifying = percent >= 99
+            self.phase.setText(
+                "VERIFYING OUTPUT" if verifying else
+                "SCANNING RECORDINGS" if self.camera_count > 1 else "SCANNING VIDEO"
+            )
             self.percent.setText(f"{percent}%")
             self.progress.setRange(0, 100)
-            self.progress.setValue(percent)
+            start = max(0, self.progress.value())
+            self._progress_animation.stop()
+            self._progress_animation.setStartValue(start)
+            self._progress_animation.setEndValue(percent)
+            self._progress_animation.start()
             current = min(self.total_frames, round(self.total_frames * percent / 100))
             self.frames.setText(f"Processing frame {current:,} of {self.total_frames:,} · {percent}% complete")
+            self.engine_badge.setText("FASTER R-CNN · LIVE")
+            self._set_stage(2 if verifying else 1, complete=percent >= 100)
+            if percent >= 100:
+                self.eta.setText("COMPLETE")
 
     def accept(self):
         self._allow_close = True
@@ -759,6 +1334,7 @@ class DetectionCard(QFrame):
 class MainWindow(QMainWindow):
     def __init__(self, initial_video: str | None = None):
         super().__init__()
+        restore_theme()
         if "Inter Variable" not in QFontDatabase.families():
             QFontDatabase.addApplicationFont(str(MOCKUP_DIR / "assets" / "InterVariable.ttf"))
         self.bridge = ModelBridge()
@@ -783,6 +1359,7 @@ class MainWindow(QMainWindow):
 
     def _build_ui(self):
         self.setWindowTitle("Forensikada · Video Weapon Detection")
+        self.setWindowIcon(QIcon(str(APP_ICON_PATH)))
         self.resize(1450, 880)
         self.setMinimumSize(1040, 690)
 
@@ -812,9 +1389,11 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(22, 9, 18, 9)
         layout.setSpacing(10)
         logo = QLabel()
-        logo.setFixedSize(44, 44)
-        logo.setPixmap(QPixmap(str(MOCKUP_DIR / "assets" / "forensikada-logo.png")).scaled(
-            44, 44, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation
+        logo.setObjectName("brandLogo")
+        logo.setFixedSize(92, 44)
+        logo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        logo.setPixmap(QPixmap(str(BRAND_LOGO_PATH)).scaled(
+            90, 44, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation
         ))
         layout.addWidget(logo)
         brand = QVBoxLayout()
@@ -833,6 +1412,11 @@ class MainWindow(QMainWindow):
         self.open_button.setToolTip("Select one video for single-camera analysis, or multiple videos for the multi-camera workspace.")
         self.open_button.setIcon(QIcon(str(MOCKUP_DIR / "assets" / "import-image.png")))
         self.open_button.clicked.connect(self.choose_video)
+        self.close_videos_button = QPushButton("Close videos")
+        self.close_videos_button.setObjectName("headerButton")
+        self.close_videos_button.setToolTip("Close the current recordings and clear this analysis. Saved files are kept.")
+        self.close_videos_button.setEnabled(False)
+        self.close_videos_button.clicked.connect(self.close_videos)
         self.report_button = QPushButton("Forensic report")
         self.report_button.setObjectName("headerButton")
         self.report_button.setToolTip("Review the completed forensic analysis inside the application.")
@@ -844,38 +1428,47 @@ class MainWindow(QMainWindow):
         self.save_button.setIcon(QIcon(str(MOCKUP_DIR / "assets" / "save-result.svg")))
         self.save_button.setEnabled(False)
         self.save_button.clicked.connect(self.save_current_result)
-        for button in (self.open_button, self.report_button, self.save_button):
+        for button in (self.open_button, self.close_videos_button, self.report_button, self.save_button):
             button.setIconSize(QSize(18, 18))
             button.setMinimumHeight(42)
             layout.addWidget(button)
+        self.settings_button = QPushButton()
+        self.settings_button.setObjectName("settingsButton")
+        self.settings_button.setIcon(QIcon(str(ASSET_DIR / "settings.svg")))
+        self.settings_button.setIconSize(QSize(20, 20))
+        self.settings_button.setFixedSize(42, 42)
+        self.settings_button.setAccessibleName("System settings")
+        self.settings_button.setToolTip("System settings")
+        self.settings_menu = QMenu(self)
+        self.settings_menu.addSection("Appearance")
+        self.dark_mode_action = self.settings_menu.addAction("Dark mode")
+        self.dark_mode_action.setCheckable(True)
+        self.dark_mode_action.setChecked(current_theme() == "dark")
+        self.dark_mode_action.triggered.connect(lambda enabled: self.set_theme("dark" if enabled else "light"))
+        self.settings_button.clicked.connect(lambda: self.settings_menu.popup(
+            self.settings_button.mapToGlobal(self.settings_button.rect().bottomLeft())))
+        layout.addWidget(self.settings_button)
         return header
 
+    def set_theme(self, theme, *, persist=True):
+        apply_theme(self, theme, persist=persist)
+        self.dark_mode_action.setChecked(current_theme() == "dark")
+
     def _body(self):
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.setObjectName("mainSplitter")
-        splitter.setChildrenCollapsible(False)
+        splitter = DetectionPageShell("mainSplitter")
         splitter.addWidget(self._sidebar())
         splitter.addWidget(self._workspace())
         splitter.addWidget(self._summary_panel())
-        splitter.setStretchFactor(0, 0)
-        splitter.setStretchFactor(1, 1)
-        splitter.setStretchFactor(2, 0)
-        splitter.setSizes([250, 850, 330])
+        splitter.finish()
         return splitter
 
     def _sidebar(self):
-        panel = QFrame()
-        panel.setObjectName("sidePanel")
-        panel.setMinimumWidth(210)
-        panel.setMaximumWidth(290)
-        layout = QVBoxLayout(panel)
-        layout.setContentsMargins(18, 19, 18, 20)
-        layout.setSpacing(11)
+        panel, layout = page_panel("sidePanel")
         layout.addWidget(self._section("EVIDENCE SOURCE"))
         evidence = QFrame()
         evidence.setObjectName("selectedEvidence")
         evidence_layout = QVBoxLayout(evidence)
-        evidence_layout.setContentsMargins(13, 10, 13, 10)
+        evidence_layout.setContentsMargins(13, 8, 13, 8)
         self.source_name = QLabel("No video selected")
         self.source_name.setTextFormat(Qt.TextFormat.PlainText)
         self.source_name.setObjectName("evidenceTitle")
@@ -887,7 +1480,20 @@ class MainWindow(QMainWindow):
         evidence_layout.addWidget(self.source_meta)
         layout.addWidget(evidence)
 
-        layout.addSpacing(13)
+        enhancement, enhancement_layout = enhancement_heading()
+        self.enhancement_status = QLabel("Import a video to enhance it.")
+        self.enhancement_status.setObjectName("enhancementStatus")
+        self.enhancement_status.setWordWrap(True)
+        enhancement_layout.addWidget(self.enhancement_status)
+        self.enhancement_button = QPushButton("Enhance video")
+        self.enhancement_button.setObjectName("cameraEnhanceButton")
+        self.enhancement_button.setMinimumHeight(30)
+        self.enhancement_button.setToolTip("Open the BasicVSR++ enhancement preview.")
+        self.enhancement_button.setEnabled(False)
+        self.enhancement_button.clicked.connect(self.show_video_enhancement)
+        enhancement_layout.addWidget(self.enhancement_button)
+        layout.addWidget(enhancement)
+
         layout.addWidget(self._section("VIEW MODE"))
         toggle = QFrame()
         toggle.setObjectName("toggleBox")
@@ -910,7 +1516,6 @@ class MainWindow(QMainWindow):
         toggle_layout.addWidget(self.detected_button)
         layout.addWidget(toggle)
 
-        layout.addSpacing(13)
         layout.addWidget(self._section("CONFIDENCE THRESHOLD"))
         threshold_row = QHBoxLayout()
         self.threshold_slider = QSlider(Qt.Orientation.Horizontal)
@@ -936,12 +1541,11 @@ class MainWindow(QMainWindow):
         self.open_review_button.clicked.connect(self.open_saved_review)
         layout.addWidget(self.open_review_button)
 
-        layout.addSpacing(13)
         layout.addWidget(self._section("ANALYSIS STATUS"))
         status_card = QFrame()
         status_card.setObjectName("statusCard")
         status_layout = QVBoxLayout(status_card)
-        status_layout.setContentsMargins(12, 12, 12, 12)
+        status_layout.setContentsMargins(12, 8, 12, 8)
         self.status_title = QLabel("Ready")
         self.status_title.setObjectName("statusTitle")
         self.status_detail = QLabel("")
@@ -967,49 +1571,13 @@ class MainWindow(QMainWindow):
         return panel
 
     def _workspace(self):
-        panel = QFrame()
-        panel.setObjectName("workspace")
-        layout = QVBoxLayout(panel)
-        layout.setContentsMargins(14, 16, 14, 15)
-        layout.setSpacing(10)
-        heading_row = QHBoxLayout()
+        panel, layout = page_panel("workspace")
         self.workspace_title = QLabel("VIDEO WEAPON DETECTION")
         self.workspace_title.setObjectName("workspaceTitle")
         self.workspace_meta = QLabel("Original evidence")
         self.workspace_meta.setObjectName("mutedText")
-        heading_row.addWidget(self.workspace_title)
-        heading_row.addStretch()
-        heading_row.addWidget(self.workspace_meta)
+        heading_row = workspace_heading(self.workspace_title, self.workspace_meta)
         layout.addLayout(heading_row)
-
-        enhancement = QFrame()
-        enhancement.setObjectName("enhancementCard")
-        enhancement.setToolTip("Open the automatic BasicVSR++ enhancement preview.")
-        enhancement_layout = QHBoxLayout(enhancement)
-        enhancement_layout.setContentsMargins(13, 10, 11, 10)
-        enhancement_layout.setSpacing(12)
-        enhancement_copy = QVBoxLayout()
-        enhancement_copy.setSpacing(2)
-        enhancement_heading = QHBoxLayout()
-        enhancement_title = QLabel("VIDEO ENHANCEMENT · BASICVSR++")
-        enhancement_title.setObjectName("enhancementTitle")
-        enhancement_heading.addWidget(enhancement_title)
-        enhancement_heading.addStretch()
-        enhancement_copy.addLayout(enhancement_heading)
-        self.enhancement_status = QLabel(
-            "Import a video to preview automatic enhancement before detection"
-        )
-        self.enhancement_status.setObjectName("enhancementStatus")
-        self.enhancement_status.setWordWrap(True)
-        enhancement_copy.addWidget(self.enhancement_status)
-        enhancement_layout.addLayout(enhancement_copy, 1)
-        self.enhancement_button = QPushButton("Enhance video")
-        self.enhancement_button.setObjectName("enhancementButton")
-        self.enhancement_button.setToolTip("Open the BasicVSR++ enhancement preview.")
-        self.enhancement_button.setEnabled(False)
-        self.enhancement_button.clicked.connect(self.show_video_enhancement)
-        enhancement_layout.addWidget(self.enhancement_button)
-        layout.addWidget(enhancement)
 
         self.player = VideoPlayer()
         self.canvas = self.player.canvas
@@ -1049,20 +1617,9 @@ class MainWindow(QMainWindow):
         return panel
 
     def _summary_panel(self):
-        panel = QFrame()
-        panel.setObjectName("summaryPanel")
-        panel.setMinimumWidth(275)
-        panel.setMaximumWidth(390)
-        layout = QVBoxLayout(panel)
-        layout.setContentsMargins(17, 19, 17, 16)
-        layout.setSpacing(10)
+        panel, layout = page_panel("summaryPanel")
         layout.addWidget(self._section("DETECTION SUMMARY"))
-        metrics = QHBoxLayout()
-        total_card, self.total_metric = self._metric("—", "DETECTIONS")
-        handgun_card, self.handgun_metric = self._metric("—", "HANDGUNS")
-        knife_card, self.knife_metric = self._metric("—", "KNIVES")
-        for card in (total_card, handgun_card, knife_card):
-            metrics.addWidget(card)
+        metrics, (self.total_metric, self.handgun_metric, self.knife_metric) = summary_metrics()
         layout.addLayout(metrics)
 
         self.summary_message = QLabel("Import a video, review the confidence threshold, then start detection.")
@@ -1098,25 +1655,8 @@ class MainWindow(QMainWindow):
         label.setObjectName("sectionTitle")
         return label
 
-    @staticmethod
-    def _metric(value: str, caption: str):
-        card = QFrame()
-        card.setObjectName("metricCard")
-        box = QVBoxLayout(card)
-        box.setContentsMargins(5, 8, 5, 8)
-        box.setSpacing(1)
-        number = QLabel(value)
-        number.setObjectName("metricNumber")
-        number.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        text = QLabel(caption)
-        text.setObjectName("metricLabel")
-        text.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        box.addWidget(number)
-        box.addWidget(text)
-        return card, number
-
     def _apply_style(self):
-        self.setStyleSheet((MOCKUP_DIR / "styles.qss").read_text(encoding="utf-8"))
+        apply_theme(self, current_theme(), persist=False)
 
     def choose_video(self):
         if self._thread or (getattr(self, "_multi_camera_window", None) and self._multi_camera_window.worker):
@@ -1129,6 +1669,51 @@ class MainWindow(QMainWindow):
             self.load_video(filenames[0])
         elif filenames:
             self.open_multi_camera(filenames)
+
+    def close_videos(self):
+        """End the current session without deleting any source or saved output."""
+        multi_camera = getattr(self, "_multi_camera_window", None)
+        if self._thread or (multi_camera and multi_camera.worker):
+            return False
+        self._model_retry.stop()
+        self._analysis_requested = False
+        if self._config_dialog:
+            self._config_dialog.reject()
+        if self._processing_dialog:
+            self._processing_dialog.accept()
+            self._processing_dialog.deleteLater()
+            self._processing_dialog = None
+        if multi_camera:
+            multi_camera.close()
+            self.pages.removeWidget(multi_camera)
+            self._multi_camera_window = None
+            multi_camera.deleteLater()
+        self.mode_tabs.setCurrentIndex(0)
+        self.mode_tabs.setTabEnabled(1, False)
+        self.pages.setCurrentIndex(0)
+        self.player.reset()
+        self.video_info = self.source_path = self.result = None
+        self._enhanced_video_active = False
+        self._clear_results()
+        self.source_name.setText("No video selected")
+        self.source_name.setToolTip("")
+        self.source_meta.setText("Import CCTV footage")
+        self.dimensions_label.setText("No video loaded")
+        self.workspace_meta.setText("Ready to import")
+        self.original_button.setChecked(True)
+        self.original_button.setEnabled(True)
+        for button in (self.detected_button, self.analyze_button, self.enhancement_button, self.review_button):
+            button.setEnabled(False)
+        self.open_review_button.setEnabled(True)
+        self.threshold_slider.setEnabled(True)
+        self.progress.hide()
+        self.progress.setRange(0, 100)
+        self.progress.setValue(0)
+        self.enhancement_status.setText("Import a video to enhance it.")
+        self._update_model_label()
+        self._set_ready("Import a CCTV video to begin a new analysis.")
+        self._sync_header_actions()
+        return True
 
     def open_multi_camera(self, filenames):
         from mockup_ui.multi_camera_panel import MultiCameraDialog
@@ -1143,15 +1728,7 @@ class MainWindow(QMainWindow):
         except (VideoInputError, OSError, ValueError) as exc:
             self._show_error("Camera recordings unavailable", str(exc))
             return
-        self.player.pause()
-        self._model_retry.stop()
-        self._analysis_requested = False
-        if self._config_dialog:
-            self._config_dialog.reject()
-        if existing:
-            self.pages.removeWidget(existing)
-            existing.close()
-            existing.deleteLater()
+        self.close_videos()
         self._multi_camera_window = window
         window.state_changed.connect(self._sync_header_actions)
         self.pages.addWidget(window)
@@ -1160,6 +1737,13 @@ class MainWindow(QMainWindow):
         self._sync_header_actions()
 
     def _mode_changed(self, index):
+        if hasattr(self, "pages") and index < self.pages.count():
+            previous = self.pages.currentWidget()
+            target = self.pages.widget(index)
+            previous_shell = previous if isinstance(previous, DetectionPageShell) else getattr(previous, "page_shell", None)
+            target_shell = target if isinstance(target, DetectionPageShell) else getattr(target, "page_shell", None)
+            if previous_shell and target_shell and previous_shell is not target_shell:
+                target_shell.setSizes(previous_shell.sizes())
         if index == 0:
             multi_camera = getattr(self, "_multi_camera_window", None)
             if multi_camera:
@@ -1176,6 +1760,7 @@ class MainWindow(QMainWindow):
         multi_camera = getattr(self, "_multi_camera_window", None)
         busy = bool(self._thread or (multi_camera and multi_camera.worker))
         self.open_button.setEnabled(not busy)
+        self.close_videos_button.setEnabled(not busy and bool(self.video_info or multi_camera))
         if hasattr(self, "mode_tabs"):
             self.mode_tabs.setEnabled(not busy)
         completed = bool(multi_camera.results) if self.mode_tabs.currentIndex() == 1 and multi_camera else self.result is not None
@@ -1190,6 +1775,11 @@ class MainWindow(QMainWindow):
             self._config_dialog.reject()
         try:
             video = read_video(filename)
+        except (VideoInputError, OSError, ValueError) as exc:
+            self._show_error("Video unavailable", str(exc))
+            return
+        self.close_videos()
+        try:
             self.player.open(video.path)
             self.player.set_locked(True)
         except (VideoInputError, OSError, ValueError) as exc:
@@ -1215,13 +1805,14 @@ class MainWindow(QMainWindow):
         self.threshold_slider.setEnabled(True)
         self.workspace_meta.setText("Imported · ready to analyze")
         self.enhancement_status.setText(
-            "Video ready · Preview automatic BasicVSR++ enhancement before detection"
+            "Optional: BasicVSR++ enhancement"
         )
         self._clear_results()
         self._update_model_label()
         self.status_title.setText("Ready to analyze")
         self.status_detail.setText(f"Selected threshold: {self.threshold_slider.value()}%. Click Analyze video when ready.")
         self.summary_message.setText("Video imported successfully. Enhance it if needed, then choose Analyze video to start detection.")
+        self._sync_header_actions()
 
     def show_detection_configuration(self):
         if self.video_info is None or self._thread:
@@ -1266,7 +1857,7 @@ class MainWindow(QMainWindow):
                 self.source_name.setToolTip(str(new_info.path))
                 self.source_meta.setText(f"{new_info.width} × {new_info.height} pixels\n{new_info.fps:.2f} fps · {timecode(new_info.duration)}")
                 self.dimensions_label.setText(f"{new_info.frame_count:,} frames · Video only")
-                self.enhancement_status.setText("BasicVSR++ Enhanced Video Active · Ready for detection")
+                self.enhancement_status.setText("Enhanced video ready for detection")
                 self.status_detail.setText(f"Enhanced video loaded: {new_info.path.name} · Selected threshold: {self.threshold_slider.value()}%")
                 QMessageBox.information(
                     self,
@@ -1278,11 +1869,14 @@ class MainWindow(QMainWindow):
                 )
             except Exception as exc:
                 QMessageBox.warning(self, "Enhanced Video Load Error", f"Could not load enhanced video:\n{exc}")
+        dialog.deleteLater()
 
     @Slot(int)
     def _configuration_finished(self, code):
         dialog = self._config_dialog
         self._config_dialog = None
+        if dialog is not None:
+            dialog.deleteLater()
         if dialog is None or code != QDialog.DialogCode.Accepted:
             self.status_title.setText("Ready to analyze")
             self.status_detail.setText(f"Video remains imported · Selected threshold: {self.threshold_slider.value()}%")
@@ -1349,7 +1943,7 @@ class MainWindow(QMainWindow):
         self.status_detail.setText("The detection service is loading the trained model to scan the entire video.")
         self.enhancement_status.setText(
             "BasicVSR++ enhanced video is being analyzed" if self._enhanced_video_active else
-            "Enhancement not applied · The detector is analyzing the original imported video"
+            "Analyzing the original video"
         )
         self.workspace_meta.setText("Scanning · please wait")
         self.summary_message.setText("Analyzing the video for weapons. Detection totals will appear after processing completes.")
@@ -1410,7 +2004,7 @@ class MainWindow(QMainWindow):
         )
         self.enhancement_status.setText(
             "BasicVSR++ enhanced video was analyzed" if self._enhanced_video_active else
-            "Enhancement not applied to this run · The original imported video was analyzed"
+            "Enhancement not applied to this run"
         )
 
     @Slot(str, str)
@@ -1608,7 +2202,7 @@ class MainWindow(QMainWindow):
             self._show_error("Observation review unavailable", str(exc))
 
     def open_saved_review(self):
-        if self._thread:
+        if self._thread or (getattr(self, "_multi_camera_window", None) and self._multi_camera_window.worker):
             return
         filename, _ = QFileDialog.getOpenFileName(self, "Open a saved observation review", str(REVIEW_DIR), "Observation review (*.json)")
         if not filename:
@@ -1618,11 +2212,7 @@ class MainWindow(QMainWindow):
         except (OSError, ValueError, KeyError, TypeError) as exc:
             self._show_error("Review file unavailable", f"This file could not be opened as an observation review.\n{exc}")
             return
-        self._model_retry.stop()
-        if self._config_dialog:
-            self._config_dialog.reject()
-        self._analysis_requested = False
-        self.mode_tabs.setCurrentIndex(0)
+        self.close_videos()
         self.video_info, self.source_path = result.video, result.video.path
         self._enhanced_video_active = False
         self.source_name.setText(result.video.path.name)
@@ -1633,9 +2223,10 @@ class MainWindow(QMainWindow):
         self.enhancement_button.setEnabled(result.video.path.is_file())
         self._analysis_succeeded(result)
         self.enhancement_status.setText(
-            "Enhancement not applied to this saved run · The original imported video was analyzed"
+            "Saved run used the original video"
         )
         self.player.pause()
+        self._sync_header_actions()
         self.show_observation_review()
 
     def _set_ready(self, detail):
@@ -1672,10 +2263,23 @@ def parse_args():
     return parser.parse_args()
 
 
+def _set_windows_app_id():
+    """Give Windows a stable identity so the FK icon appears on the taskbar."""
+    if sys.platform != "win32":
+        return
+    try:
+        from ctypes import windll
+        windll.shell32.SetCurrentProcessExplicitAppUserModelID("Forensikada.VideoAnalysis")
+    except (AttributeError, OSError):
+        logging.getLogger(__name__).debug("Could not set the Windows application ID", exc_info=True)
+
+
 def main():
     args = parse_args()
+    _set_windows_app_id()
     application = QApplication(sys.argv[:1])
     application.setApplicationName("Forensikada Video Analysis")
+    application.setWindowIcon(QIcon(str(APP_ICON_PATH)))
     application.setStyle("Fusion")
     palette = QPalette()
     palette.setColor(QPalette.ColorRole.Window, QColor("#f5f6f8"))
