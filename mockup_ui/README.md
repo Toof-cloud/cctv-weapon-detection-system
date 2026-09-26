@@ -6,6 +6,18 @@ videos and detection summaries.** Select one recording for the single-video view
 or multiple recordings for the multi-camera view in the same application window. The service loads the trained model,
 detects its **handgun** and **knife** classes, and produces the boxes and report.
 
+Use **Close videos** in the top toolbar to end the current single-video or
+multi-camera session. It stops playback, releases the video files, and clears the
+displayed results. **Import videos** also replaces the previous session after the
+new recordings have been validated. Save any report you need before moving on;
+existing source files and saved exports are kept. Closing and importing are
+disabled while detection is running.
+
+Detection and enhancement dialogs use larger text and charcoal headers matching
+the home screen. BasicVSR++ enhancement has a simplified **Enhance video** action,
+source/result previews, and progress stages. Its processing animation illustrates
+restoration; the actual enhanced frame appears when processing completes.
+
 **Original project files modified: NONE.** Changes are confined to `mockup_ui/`.
 No model was retrained, replaced, copied or modified. The original whole-video
 detection function is imported and called directly.

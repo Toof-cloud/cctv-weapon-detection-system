@@ -294,6 +294,81 @@ class MultiCameraUiTests(unittest.TestCase):
         self.assertFalse(any(button.text() == "Open camera report" for button in report.findChildren(QPushButton)))
         report.close()
 
+    def test_new_import_and_close_release_the_previous_session(self):
+        main = MainWindow()
+        self.addCleanup(main.close)
+        main.load_video(str(self.videos[0].path))
+        main._analysis_succeeded(fake_result(self.videos[0], "SINGLE"))
+        main.player.canvas.set_zoom(2)
+        first_capture = main.player.capture
+        self.assertTrue(main.player.timer.isActive())
+
+        main.open_multi_camera([str(video.path) for video in self.videos])
+        self.assertFalse(first_capture.isOpened())
+        self.assertIsNone(main.player.capture)
+        self.assertIsNone(main.result)
+        self.assertIsNone(main.video_info)
+        self.assertEqual(main.player.canvas.zoom, 1)
+        multi = main._multi_camera_window
+        results = [fake_result(video, f"CAM-{i}") for i, video in enumerate(self.videos)]
+        multi.completed(results)
+        captures = [card[0].capture for card in multi.cards]
+        preview = CameraPreviewDialog(results[0].output_path, "Test", parent=multi)
+        preview_capture = preview.player.capture
+        preview.reject()
+        self.assertFalse(preview_capture.isOpened())
+
+        main.load_video(str(self.videos[1].path))
+        self.assertTrue(all(not capture.isOpened() for capture in captures))
+        self.assertFalse(multi.play_timer.isActive())
+        self.assertIsNone(main._multi_camera_window)
+        self.assertEqual(main.pages.count(), 1)
+        self.assertFalse(main.mode_tabs.isTabEnabled(1))
+        self.assertIsNone(main.result)
+        self.assertFalse(main.report_button.isEnabled())
+        self.assertEqual(main.observation_model.rowCount(), 0)
+        self.assertTrue(main.close_videos_button.isEnabled())
+        self.assertEqual(main.player.path, self.videos[1].path)
+        self.assertTrue(main.analyze_button.isEnabled())
+
+        main._analysis_succeeded(fake_result(self.videos[1], "NEXT"))
+        current_capture = main.player.capture
+        main.close_videos_button.click()
+        self.assertFalse(current_capture.isOpened())
+        self.assertIsNone(main.player.path)
+        self.assertIsNone(main.source_path)
+        self.assertIsNone(main.video_info)
+        self.assertIsNone(main.result)
+        self.assertFalse(main.player.timer.isActive())
+        self.assertFalse(main._model_retry.isActive())
+        self.assertFalse(main.player.canvas.property("hasImage"))
+        self.assertFalse(main.save_button.isEnabled())
+        self.assertFalse(main.close_videos_button.isEnabled())
+        self.assertTrue(main.open_button.isEnabled())
+        self.assertTrue(results[0].output_path.exists())
+        main.open_multi_camera([str(video.path) for video in self.videos])
+        self.assertEqual(len(main._multi_camera_window.sources), 2)
+        self.assertFalse(main._multi_camera_window.results)
+
+    def test_invalid_import_preserves_session_and_busy_session_cannot_close(self):
+        main = MainWindow()
+        self.addCleanup(main.close)
+        main.open_multi_camera([str(video.path) for video in self.videos])
+        session = main._multi_camera_window
+        with patch.object(main, "_show_error") as error:
+            main.load_video(str(self.folder / "missing.mp4"))
+            error.assert_called_once()
+        self.assertIs(main._multi_camera_window, session)
+        session.worker = object()
+        try:
+            main._sync_header_actions()
+            self.assertFalse(main.close_videos_button.isEnabled())
+            self.assertFalse(main.close_videos())
+            self.assertIs(main._multi_camera_window, session)
+            self.assertTrue(all(card[0].capture.isOpened() for card in session.cards))
+        finally:
+            session.worker = None
+
     def test_camera_views_and_timeline_adapt_to_window_width(self):
         main = MainWindow()
         self.addCleanup(main.close)

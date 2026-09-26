@@ -282,6 +282,32 @@ class VideoUiTests(unittest.TestCase):
         self.assertFalse(dialog.temporal_checkbox.isEnabled())
         self.assertEqual(dialog.filters_status.text(), "OPTIONAL")
 
+    def test_two_detections_can_run_in_the_same_window_after_closing_video(self):
+        calls = []
+        def analyze(video, threshold, progress):
+            calls.append(video.path)
+            progress("Test analysis", 100)
+            return fixture_result(video)
+        self.window.bridge.analyze_video = analyze
+        next_video = make_clip(self.folder / "NEXT_VIDEO.mp4")
+        for video in (self.video, next_video):
+            self.window.load_video(str(video.path))
+            self.window.show_detection_configuration()
+            self.confirm_detection(60)
+            self.wait_finished()
+            self.assertIsNotNone(self.window.result)
+            self.assertEqual(self.window.result.video.path, video.path)
+            self.assertTrue(self.window.report_button.isEnabled())
+            self.assertTrue(self.window.close_videos_button.isEnabled())
+            capture = self.window.player.capture
+            self.window.close_videos_button.click()
+            self.assertFalse(capture.isOpened())
+            self.assertIsNone(self.window.result)
+            self.assertIsNone(self.window._config_dialog)
+            self.assertFalse(self.window._analysis_requested)
+        self.assertEqual(calls, [self.video.path, next_video.path])
+        self.assertEqual(self.errors, [])
+
     def test_import_never_starts_detection_cancel_preserves_video_and_manual_start_waits_for_model(self):
         self.checkpoint.unlink()
         self.window.bridge.analyze_video = lambda v, t, p: fixture_result(v)
@@ -408,6 +434,10 @@ class VideoUiTests(unittest.TestCase):
         self.assertIsNotNone(self.window._processing_dialog)
         self.assertTrue(self.window._processing_dialog.isVisible())
         self.assertEqual(self.window._processing_dialog.camera_count, 1)
+        # The dialog eases its bar to the reported percentage over 320 ms.
+        animation_deadline = time.monotonic() + 1
+        while self.window._processing_dialog.progress.value() != 25 and time.monotonic() < animation_deadline:
+            QTest.qWait(10)
         self.assertEqual(self.window._processing_dialog.progress.value(), 25)
         self.assertLessEqual((self.window._processing_dialog.frameGeometry().center() -
                               self.window.frameGeometry().center()).manhattanLength(), 3)

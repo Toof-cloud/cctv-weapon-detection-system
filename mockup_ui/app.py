@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import logging
+from hashlib import sha256
 from math import sin, tau
 from pathlib import Path
 import subprocess
@@ -49,6 +50,7 @@ from PySide6.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
     QLabel,
+    QListView,
     QMainWindow,
     QMessageBox,
     QProgressBar,
@@ -58,6 +60,7 @@ from PySide6.QtWidgets import (
     QSlider,
     QSplitter,
     QStackedWidget,
+    QStyleFactory,
     QTabBar,
     QVBoxLayout,
     QWidget,
@@ -156,7 +159,7 @@ class EnhancementFramePreview(QLabel):
         self._source_pixmap = QPixmap.fromImage(image.copy())
         self.setObjectName("enhancementPreview")
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.setMinimumSize(200, 230)
+        self.setMinimumSize(200, 100)
         self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding)
         self._fit()
 
@@ -178,7 +181,7 @@ class EnhancementRestorationPreview(QWidget):
     def __init__(self, source_pixmap: QPixmap, parent=None):
         super().__init__(parent)
         self.setObjectName("enhancementRestorationPreview")
-        self.setMinimumSize(200, 230)
+        self.setMinimumSize(200, 100)
         self.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding)
         self._source_pixmap = source_pixmap
         self._phase = 0.0
@@ -268,13 +271,13 @@ class EnhancementRestorationPreview(QWidget):
         painter.fillRect(QRectF(scan_x - 1, image_rect.top(), 2, image_rect.height()), QColor("#fff2c7"))
 
         direction = "FORWARD PASS" if self._phase < 0.5 else "BACKWARD PASS"
-        badge = QRectF(image_rect.left() + 12, image_rect.bottom() - 35, 172, 23)
+        badge = QRectF(image_rect.left() + 12, image_rect.bottom() - 40, 255, 29)
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(QColor(18, 24, 52, 220))
         painter.drawRoundedRect(badge, 6, 6)
         painter.setPen(QColor("#eef0ff"))
         badge_font = painter.font()
-        badge_font.setPixelSize(9)
+        badge_font.setPixelSize(12)
         badge_font.setBold(True)
         painter.setFont(badge_font)
         painter.drawText(badge.adjusted(10, 0, -8, 0), Qt.AlignmentFlag.AlignVCenter, f"BASICVSR++  ·  {direction}")
@@ -326,7 +329,9 @@ class VideoEnhancementDialog(QDialog):
     def __init__(self, video: VideoInfo, parent=None, *, output_path: Path | None = None):
         super().__init__(parent)
         self.video = video
-        self.output_path = output_path or (MOCKUP_DIR / "outputs" / "enhanced_videos" / f"{video.path.stem}_enhanced.mp4")
+        source_key = f"{video.path.resolve()}:{video.size_bytes}:{video.modified_ns}"
+        source_digest = sha256(source_key.encode("utf-8")).hexdigest()[:12]
+        self.output_path = output_path or (MOCKUP_DIR / "outputs" / "enhanced_videos" / f"{video.path.stem}_{source_digest}_enhanced.mp4")
         self.enhanced_video_path: Path | None = None
         self.enhanced_first_frame = None
         self._worker: EnhancementWorker | None = None
@@ -334,8 +339,9 @@ class VideoEnhancementDialog(QDialog):
         self.setObjectName("videoEnhancementDialog")
         self.setWindowTitle("Video Enhancement")
         self.setModal(True)
-        self.resize(1080, 760)
         self.setMinimumSize(900, 650)
+        available = self.screen().availableGeometry()
+        self.resize(min(1100, available.width() - 48), min(760, available.height() - 60))
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
@@ -343,10 +349,10 @@ class VideoEnhancementDialog(QDialog):
         hero = QFrame()
         hero.setObjectName("enhancementHero")
         hero_layout = QVBoxLayout(hero)
-        hero_layout.setContentsMargins(26, 18, 26, 18)
-        hero_layout.setSpacing(8)
+        hero_layout.setContentsMargins(24, 14, 24, 14)
+        hero_layout.setSpacing(6)
         hero_top = QHBoxLayout()
-        eyebrow = QLabel("VIDEO RESTORATION WORKSPACE")
+        eyebrow = QLabel("VIDEO ENHANCEMENT")
         eyebrow.setObjectName("enhancementEyebrow")
         hero_top.addWidget(eyebrow)
         hero_top.addStretch()
@@ -358,9 +364,10 @@ class VideoEnhancementDialog(QDialog):
         heading.setObjectName("enhancementHeading")
         hero_layout.addWidget(heading)
         subheading = QLabel(
-            "BasicVSR++ restores compressed CCTV frames automatically before weapon analysis."
+            "Improve video quality before checking for weapons."
         )
         subheading.setObjectName("enhancementSubheading")
+        subheading.setWordWrap(True)
         hero_layout.addWidget(subheading)
 
         source_summary = QFrame()
@@ -384,8 +391,8 @@ class VideoEnhancementDialog(QDialog):
         body = QFrame()
         body.setObjectName("enhancementBody")
         body_layout = QVBoxLayout(body)
-        body_layout.setContentsMargins(22, 16, 22, 14)
-        body_layout.setSpacing(12)
+        body_layout.setContentsMargins(20, 12, 20, 12)
+        body_layout.setSpacing(10)
 
         profile = QFrame()
         profile.setObjectName("basicVsrProfile")
@@ -397,18 +404,14 @@ class VideoEnhancementDialog(QDialog):
         profile_layout.addWidget(profile_name)
         profile_description = QLabel("Automatic video enhancement · No manual adjustments required")
         profile_description.setObjectName("enhancementStatus")
-        profile_layout.addWidget(profile_description)
-        profile_layout.addStretch()
-        for text in ("BIDIRECTIONAL", "GPU RESTORATION", "DETECTION READY"):
-            capability = QLabel(text)
-            capability.setObjectName("enhancementCapability")
-            profile_layout.addWidget(capability)
+        profile_description.setWordWrap(True)
+        profile_layout.addWidget(profile_description, 1)
         body_layout.addWidget(profile)
 
         previews = QFrame()
         previews.setObjectName("enhancementPreviewArea")
         preview_layout = QHBoxLayout(previews)
-        preview_layout.setContentsMargins(12, 12, 12, 12)
+        preview_layout.setContentsMargins(10, 10, 10, 10)
         preview_layout.setSpacing(12)
 
         original_card = QFrame()
@@ -417,7 +420,7 @@ class VideoEnhancementDialog(QDialog):
         original_layout.setContentsMargins(11, 10, 11, 11)
         original_layout.setSpacing(7)
         original_header = QHBoxLayout()
-        original_title = QLabel("01  SOURCE FRAME")
+        original_title = QLabel("Original video")
         original_title.setObjectName("enhancementPreviewTitle")
         original_header.addWidget(original_title)
         original_header.addStretch()
@@ -427,7 +430,7 @@ class VideoEnhancementDialog(QDialog):
         original_layout.addLayout(original_header)
         self.source_preview = EnhancementFramePreview(video.first_frame)
         original_layout.addWidget(self.source_preview, 1)
-        source_caption = QLabel("Imported frame · unchanged reference")
+        source_caption = QLabel("Your original recording")
         source_caption.setObjectName("enhancementPreviewCaption")
         original_layout.addWidget(source_caption)
 
@@ -437,7 +440,7 @@ class VideoEnhancementDialog(QDialog):
         self.enhanced_layout.setContentsMargins(11, 10, 11, 11)
         self.enhanced_layout.setSpacing(7)
         enhanced_header = QHBoxLayout()
-        enhanced_title = QLabel("02  ENHANCED OUTPUT")
+        enhanced_title = QLabel("Enhanced video")
         enhanced_title.setObjectName("enhancementPreviewTitle")
         enhanced_header.addWidget(enhanced_title)
         enhanced_header.addStretch()
@@ -451,14 +454,15 @@ class VideoEnhancementDialog(QDialog):
         self.enhanced_preview.setObjectName("enhancementPreviewPlaceholder")
         self.enhanced_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.enhanced_preview.setWordWrap(True)
-        self.enhanced_preview.setMinimumSize(200, 230)
+        self.enhanced_preview.setMinimumSize(200, 100)
         self.enhanced_stack = QStackedWidget()
         self.enhanced_stack.setObjectName("enhancementPreviewStack")
         self.enhanced_stack.addWidget(self.enhanced_preview)
         self.restoration_preview = EnhancementRestorationPreview(self.source_preview._source_pixmap)
         self.enhanced_stack.addWidget(self.restoration_preview)
         self.enhanced_layout.addWidget(self.enhanced_stack, 1)
-        self.enhanced_caption = QLabel("Run enhancement to create a restored detection source")
+        self.enhanced_caption = QLabel("The result appears here after enhancement")
+        self.enhanced_caption.setWordWrap(True)
         self.enhanced_caption.setObjectName("enhancementPreviewCaption")
         self.enhanced_layout.addWidget(self.enhanced_caption)
         preview_layout.addWidget(original_card, 1)
@@ -477,7 +481,7 @@ class VideoEnhancementDialog(QDialog):
         process_layout.setContentsMargins(13, 10, 13, 10)
         process_layout.setSpacing(7)
         process_header = QHBoxLayout()
-        process_title = QLabel("RESTORATION PIPELINE")
+        process_title = QLabel("Enhancement progress")
         process_title.setObjectName("enhancementProcessTitle")
         process_header.addWidget(process_title)
         process_header.addStretch()
@@ -488,7 +492,7 @@ class VideoEnhancementDialog(QDialog):
         stages = QHBoxLayout()
         stages.setSpacing(7)
         self.stage_labels = []
-        for text in ("01  LOAD ENGINE", "02  ALIGN + RESTORE", "03  VERIFY OUTPUT"):
+        for text in ("1  Prepare", "2  Enhance video", "3  Check result"):
             stage = QLabel(text)
             stage.setObjectName("enhancementStage")
             stage.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -497,7 +501,7 @@ class VideoEnhancementDialog(QDialog):
             self.stage_labels.append(stage)
         process_layout.addLayout(stages)
         self.notice = QLabel(
-            "BasicVSR++ uses bidirectional recurrent alignment to restore compressed CCTV footage on GPU."
+            "Start enhancement, then apply the finished video to continue with detection."
         )
         self.notice.setObjectName("enhancementNotice")
         self.notice.setWordWrap(True)
@@ -510,15 +514,16 @@ class VideoEnhancementDialog(QDialog):
         action_layout.setContentsMargins(13, 9, 13, 9)
         action_copy = QVBoxLayout()
         action_copy.setSpacing(1)
-        action_title = QLabel("AUTOMATIC ENHANCEMENT")
+        action_title = QLabel("Ready when you are")
         action_title.setObjectName("enhancementActionTitle")
-        action_detail = QLabel("The enhanced video can be applied directly to the weapon detection workflow.")
+        action_detail = QLabel("Enhance first, then analyze for weapons.")
+        action_detail.setWordWrap(True)
         action_detail.setObjectName("enhancementActionDetail")
         action_copy.addWidget(action_title)
         action_copy.addWidget(action_detail)
         action_layout.addLayout(action_copy, 1)
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
-        btn_text = "Run BasicVSR++ enhancement"
+        btn_text = "Enhance video"
         out_path = self.output_path
         existing_frame = None
         if out_path.exists():
@@ -601,7 +606,7 @@ class VideoEnhancementDialog(QDialog):
         self.close_button.setEnabled(False)
         self.engine_status.setText("ENHANCEMENT ACTIVE")
         self.preview_status.setText("RESTORING")
-        self.enhanced_caption.setText("Bidirectional frame restoration in progress")
+        self.enhanced_caption.setText("Processing animation · the finished result will replace it")
         self.enhanced_stack.setCurrentWidget(self.restoration_preview)
         self.restoration_preview.start()
         self._set_stage(0)
@@ -644,7 +649,7 @@ class VideoEnhancementDialog(QDialog):
         self.process_status.setText("ACTION REQUIRED")
         self.enhanced_caption.setText("Original video remains available for detection")
         self.notice.setText(f"Enhancement error: {error_msg}\nDetection can continue using the original video.")
-        self.run_button.setText("Retry BasicVSR++ enhancement")
+        self.run_button.setText("Retry enhancement")
         self.run_button.setEnabled(True)
         self.close_button.setEnabled(True)
 
@@ -669,8 +674,8 @@ class DetectionConfigDialog(QDialog):
         self.setObjectName("configurationDialog")
         self.setWindowTitle("Detection configuration")
         self.setModal(True)
-        self.setMinimumWidth(580)
-        self.resize(620, 720)
+        self.setMinimumWidth(640)
+        self.resize(710, 800)
         self.setStyleSheet((MOCKUP_DIR / "styles.qss").read_text(encoding="utf-8"))
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -742,6 +747,7 @@ class DetectionConfigDialog(QDialog):
             copy.addWidget(note(description, "configCardDescription"))
             header.addLayout(copy, 1)
             status = note(status_text, "configCardStatus")
+            status.setWordWrap(False)
             status.setAlignment(Qt.AlignmentFlag.AlignCenter)
             header.addWidget(status)
             box.addLayout(header)
@@ -749,9 +755,21 @@ class DetectionConfigDialog(QDialog):
             return box, status
 
         model_box, self.model_status = card(
-            "01", "Detection model", "Select the trained checkpoint for this analysis.", "CHECKING",
+            "01", "Detection model", "Choose the trained model used to find weapons.", "CHECKING",
         )
         self.model_combo = QComboBox()
+        # Use a regular list popup rather than Windows' native menu popup,
+        # whose scroll gutters can appear as black bars in dark system themes.
+        self._model_combo_style = QStyleFactory.create("Fusion")
+        self._model_combo_style.setParent(self.model_combo)
+        self.model_combo.setStyle(self._model_combo_style)
+        model_view = QListView(self.model_combo)
+        model_view.setFrameShape(QFrame.Shape.NoFrame)
+        model_view.setUniformItemSizes(True)
+        model_view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.model_combo.setView(model_view)
+        self.model_combo.setMaxVisibleItems(7)
+        model_view.window().setStyleSheet("QFrame { background: white; border: 1px solid #cbd2df; }")
         self.model_combo.setObjectName("dialogModelCombo")
         self.model_combo.setMinimumHeight(40)
         self.model_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
@@ -772,7 +790,7 @@ class DetectionConfigDialog(QDialog):
         self.header_ready.setText("READY" if model_ready else "MODEL REQUIRED")
 
         threshold_box, self.threshold_status = card(
-            "02", "Confidence threshold", "Control which model observations appear in the result.", "ADJUSTABLE",
+            "02", "Confidence threshold", "Only show detections at or above this confidence score.", "ADJUSTABLE",
         )
         row = QHBoxLayout()
         row.setContentsMargins(0, 2, 0, 2)
@@ -802,7 +820,7 @@ class DetectionConfigDialog(QDialog):
         update_threshold(threshold)
 
         filters, self.filters_status = card(
-            "03", "Validation filters", "Add forensic context checks to raw model observations.", "2 ACTIVE",
+            "03", "Detection checks", "Use additional checks to reduce false detections.", "2 ACTIVE",
         )
 
         def filter_option(title, description):
@@ -991,7 +1009,7 @@ class ProcessingDialog(QDialog):
         self.setWindowTitle("Weapon detection in progress")
         self.setWindowModality(Qt.WindowModality.WindowModal)
         self.setWindowFlag(Qt.WindowType.WindowCloseButtonHint, False)
-        self.setFixedWidth(560)
+        self.setFixedWidth(660)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
@@ -1409,6 +1427,11 @@ class MainWindow(QMainWindow):
         self.open_button.setToolTip("Select one video for single-camera analysis, or multiple videos for the multi-camera workspace.")
         self.open_button.setIcon(QIcon(str(MOCKUP_DIR / "assets" / "import-image.png")))
         self.open_button.clicked.connect(self.choose_video)
+        self.close_videos_button = QPushButton("Close videos")
+        self.close_videos_button.setObjectName("headerButton")
+        self.close_videos_button.setToolTip("Close the current recordings and clear this analysis. Saved files are kept.")
+        self.close_videos_button.setEnabled(False)
+        self.close_videos_button.clicked.connect(self.close_videos)
         self.report_button = QPushButton("Forensic report")
         self.report_button.setObjectName("headerButton")
         self.report_button.setToolTip("Review the completed forensic analysis inside the application.")
@@ -1420,7 +1443,7 @@ class MainWindow(QMainWindow):
         self.save_button.setIcon(QIcon(str(MOCKUP_DIR / "assets" / "save-result.svg")))
         self.save_button.setEnabled(False)
         self.save_button.clicked.connect(self.save_current_result)
-        for button in (self.open_button, self.report_button, self.save_button):
+        for button in (self.open_button, self.close_videos_button, self.report_button, self.save_button):
             button.setIconSize(QSize(18, 18))
             button.setMinimumHeight(42)
             layout.addWidget(button)
@@ -1708,6 +1731,51 @@ class MainWindow(QMainWindow):
         elif filenames:
             self.open_multi_camera(filenames)
 
+    def close_videos(self):
+        """End the current session without deleting any source or saved output."""
+        multi_camera = getattr(self, "_multi_camera_window", None)
+        if self._thread or (multi_camera and multi_camera.worker):
+            return False
+        self._model_retry.stop()
+        self._analysis_requested = False
+        if self._config_dialog:
+            self._config_dialog.reject()
+        if self._processing_dialog:
+            self._processing_dialog.accept()
+            self._processing_dialog.deleteLater()
+            self._processing_dialog = None
+        if multi_camera:
+            multi_camera.close()
+            self.pages.removeWidget(multi_camera)
+            self._multi_camera_window = None
+            multi_camera.deleteLater()
+        self.mode_tabs.setCurrentIndex(0)
+        self.mode_tabs.setTabEnabled(1, False)
+        self.pages.setCurrentIndex(0)
+        self.player.reset()
+        self.video_info = self.source_path = self.result = None
+        self._enhanced_video_active = False
+        self._clear_results()
+        self.source_name.setText("No video selected")
+        self.source_name.setToolTip("")
+        self.source_meta.setText("Import CCTV footage")
+        self.dimensions_label.setText("No video loaded")
+        self.workspace_meta.setText("Ready to import")
+        self.original_button.setChecked(True)
+        self.original_button.setEnabled(True)
+        for button in (self.detected_button, self.analyze_button, self.enhancement_button, self.review_button):
+            button.setEnabled(False)
+        self.open_review_button.setEnabled(True)
+        self.threshold_slider.setEnabled(True)
+        self.progress.hide()
+        self.progress.setRange(0, 100)
+        self.progress.setValue(0)
+        self.enhancement_status.setText("Import a video to preview automatic BasicVSR++ enhancement.")
+        self._update_model_label()
+        self._set_ready("Import a CCTV video to begin a new analysis.")
+        self._sync_header_actions()
+        return True
+
     def open_multi_camera(self, filenames):
         from mockup_ui.multi_camera_panel import MultiCameraDialog
         existing = getattr(self, "_multi_camera_window", None)
@@ -1721,15 +1789,7 @@ class MainWindow(QMainWindow):
         except (VideoInputError, OSError, ValueError) as exc:
             self._show_error("Camera recordings unavailable", str(exc))
             return
-        self.player.pause()
-        self._model_retry.stop()
-        self._analysis_requested = False
-        if self._config_dialog:
-            self._config_dialog.reject()
-        if existing:
-            self.pages.removeWidget(existing)
-            existing.close()
-            existing.deleteLater()
+        self.close_videos()
         self._multi_camera_window = window
         window.state_changed.connect(self._sync_header_actions)
         self.pages.addWidget(window)
@@ -1754,6 +1814,7 @@ class MainWindow(QMainWindow):
         multi_camera = getattr(self, "_multi_camera_window", None)
         busy = bool(self._thread or (multi_camera and multi_camera.worker))
         self.open_button.setEnabled(not busy)
+        self.close_videos_button.setEnabled(not busy and bool(self.video_info or multi_camera))
         if hasattr(self, "mode_tabs"):
             self.mode_tabs.setEnabled(not busy)
         completed = bool(multi_camera.results) if self.mode_tabs.currentIndex() == 1 and multi_camera else self.result is not None
@@ -1768,6 +1829,11 @@ class MainWindow(QMainWindow):
             self._config_dialog.reject()
         try:
             video = read_video(filename)
+        except (VideoInputError, OSError, ValueError) as exc:
+            self._show_error("Video unavailable", str(exc))
+            return
+        self.close_videos()
+        try:
             self.player.open(video.path)
             self.player.set_locked(True)
         except (VideoInputError, OSError, ValueError) as exc:
@@ -1800,6 +1866,7 @@ class MainWindow(QMainWindow):
         self.status_title.setText("Ready to analyze")
         self.status_detail.setText(f"Selected threshold: {self.threshold_slider.value()}%. Click Analyze video when ready.")
         self.summary_message.setText("Video imported successfully. Enhance it if needed, then choose Analyze video to start detection.")
+        self._sync_header_actions()
 
     def show_detection_configuration(self):
         if self.video_info is None or self._thread:
@@ -1856,11 +1923,14 @@ class MainWindow(QMainWindow):
                 )
             except Exception as exc:
                 QMessageBox.warning(self, "Enhanced Video Load Error", f"Could not load enhanced video:\n{exc}")
+        dialog.deleteLater()
 
     @Slot(int)
     def _configuration_finished(self, code):
         dialog = self._config_dialog
         self._config_dialog = None
+        if dialog is not None:
+            dialog.deleteLater()
         if dialog is None or code != QDialog.DialogCode.Accepted:
             self.status_title.setText("Ready to analyze")
             self.status_detail.setText(f"Video remains imported · Selected threshold: {self.threshold_slider.value()}%")
@@ -2157,7 +2227,7 @@ class MainWindow(QMainWindow):
             self._show_error("Observation review unavailable", str(exc))
 
     def open_saved_review(self):
-        if self._thread:
+        if self._thread or (getattr(self, "_multi_camera_window", None) and self._multi_camera_window.worker):
             return
         filename, _ = QFileDialog.getOpenFileName(self, "Open a saved observation review", str(REVIEW_DIR), "Observation review (*.json)")
         if not filename:
@@ -2167,11 +2237,7 @@ class MainWindow(QMainWindow):
         except (OSError, ValueError, KeyError, TypeError) as exc:
             self._show_error("Review file unavailable", f"This file could not be opened as an observation review.\n{exc}")
             return
-        self._model_retry.stop()
-        if self._config_dialog:
-            self._config_dialog.reject()
-        self._analysis_requested = False
-        self.mode_tabs.setCurrentIndex(0)
+        self.close_videos()
         self.video_info, self.source_path = result.video, result.video.path
         self._enhanced_video_active = False
         self.source_name.setText(result.video.path.name)
@@ -2185,6 +2251,7 @@ class MainWindow(QMainWindow):
             "Enhancement not applied to this saved run · The original imported video was analyzed"
         )
         self.player.pause()
+        self._sync_header_actions()
         self.show_observation_review()
 
     def _set_ready(self, detail):
