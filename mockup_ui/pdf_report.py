@@ -153,9 +153,8 @@ def write_pdf(report, path):
         ])
 
     story.extend([
-        section("TCR Information"),
+        section("Model Performance Metrics"),
         field_table([pair(label, value) for label, value in metric_fields(report.get("metrics", {}), "tcr")]),
-        section("MCCR Information"),
         field_table([pair(label, value) for label, value in metric_fields(report.get("metrics", {}), "mccr")]),
         section("Analyst Review Information"),
         field_table([

@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QDialog, QHBoxLa
 
 from mockup_ui.observation_review import DECISIONS, ReviewStore, status_label
 from mockup_ui.video_player import VideoCanvas
+from mockup_ui.ui_theme import load_stylesheet
 
 
 class ObservationReviewDialog(QDialog):
@@ -24,7 +25,7 @@ class ObservationReviewDialog(QDialog):
         self.setObjectName("observationReviewDialog")
         self.resize(1120, 800)
         self.setMinimumSize(920, 700)
-        self.setStyleSheet((Path(__file__).parent / "styles.qss").read_text(encoding="utf-8"))
+        self.setStyleSheet(load_stylesheet())
         layout = QVBoxLayout(self)
         layout.setContentsMargins(24, 20, 24, 20)
         heading = QLabel("Observation Review")
