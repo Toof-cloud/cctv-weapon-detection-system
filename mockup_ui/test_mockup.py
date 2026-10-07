@@ -453,6 +453,10 @@ class VideoUiTests(unittest.TestCase):
         while self.window._processing_dialog.progress.value() != 25 and time.monotonic() < animation_deadline:
             QTest.qWait(10)
         self.assertEqual(self.window._processing_dialog.progress.value(), 25)
+        center_deadline = time.monotonic() + 1
+        while (self.window._processing_dialog.frameGeometry().center() -
+               self.window.frameGeometry().center()).manhattanLength() > 3 and time.monotonic() < center_deadline:
+            QTest.qWait(10)
         self.assertLessEqual((self.window._processing_dialog.frameGeometry().center() -
                               self.window.frameGeometry().center()).manhattanLength(), 3)
         self.assertIn("frame 2 of 8", self.window._processing_dialog.frames.text().lower())
