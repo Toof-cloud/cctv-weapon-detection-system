@@ -104,7 +104,7 @@ class MultiCameraUiTests(unittest.TestCase):
         cls.app.setStyle("Fusion")
 
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(dir=Path(__file__).parent / "temp")
+        self.temp = tempfile.TemporaryDirectory(dir=Path(__file__).parent / "temp", ignore_cleanup_errors=True)
         self.addCleanup(self.temp.cleanup)
         self.folder = Path(self.temp.name)
         self.videos = [make_video(self.folder / f"TEST_CAM_{i}.mp4", f"CAMERA {i}") for i in (1, 2)]

@@ -71,7 +71,13 @@ class VideoAdapterTests(unittest.TestCase):
         self.enterContext(patch.object(review_module, "REVIEW_DIR", self.folder / "reviews"))
         self.checkpoint = self.folder / "models" / bridge_module.MODEL_FILENAME
         self.checkpoint.parent.mkdir()
+        self.enterContext(patch.object(bridge_module, "MOCKUP_DIR", self.folder))
+        self.enterContext(patch.object(bridge_module, "ROOT_DIR", self.folder))
         self.enterContext(patch.object(bridge_module, "MODEL_PATH", self.checkpoint))
+        self.enterContext(patch.object(bridge_module, "CANDIDATE_V11_PATH", self.folder / "models" / "nonexistent_v11.pth"))
+        self.enterContext(patch.object(bridge_module, "CANDIDATE_V10_PATH", self.folder / "models" / "nonexistent_v10.pth"))
+        self.enterContext(patch.object(bridge_module, "CANDIDATE_V9_PATH", self.folder / "models" / "nonexistent_v9.pth"))
+        self.enterContext(patch.object(bridge_module, "CANDIDATE_V8_PATH", self.folder / "models" / "nonexistent_v8.pth"))
         self.video = make_clip(self.folder / "證據 TEST_CLIP.mp4")
 
     def test_preview_metadata_and_invalid_video_inputs(self):
@@ -175,11 +181,11 @@ class VideoAdapterTests(unittest.TestCase):
                 bridge.analyze_video(self.video)
 
     def test_ninth_model_is_exclusive_despite_other_weights_and_legacy_settings(self):
-        for name in ("best_weapon_detector.pth", "best_weapon_detector_retrained.pth"):
-            (self.checkpoint.parent / name).write_text("TEST ONLY; never loaded as weights")
-        other = self.checkpoint.parent / "best_weapon_detector_retrained.pth"
+        other = self.checkpoint.parent / "unsupported_legacy_model.pth"
+        other.write_text("TEST ONLY; removed model")
         (self.folder / "settings.json").write_text(json.dumps({"model_path": str(other)}))
         with patch.object(bridge_module, "MOCKUP_DIR", self.folder), \
+             patch.object(bridge_module, "ROOT_DIR", self.folder), \
              patch.dict(os.environ, {"FORENSIKADA_MODEL_PATH": str(other)}):
             bridge = ModelBridge()
             self.assertFalse(bridge.find_model())
@@ -200,7 +206,7 @@ class VideoAdapterTests(unittest.TestCase):
         self.checkpoint.write_text("TEST ONLY; never loaded as weights")
         bridge = ModelBridge()
         self.assertEqual(bridge.model_path, self.checkpoint)
-        other = self.folder / "best_weapon_detector.pth"
+        other = self.folder / "unsupported_foreign.pth"
         other.write_text("TEST ONLY; never loaded as weights")
         self.checkpoint.unlink()
         bridge.model_path = other
@@ -222,10 +228,18 @@ class VideoUiTests(unittest.TestCase):
         self.enterContext(patch.object(review_module, "REVIEW_DIR", self.folder / "reviews"))
         self.checkpoint = self.folder / "models" / bridge_module.MODEL_FILENAME
         self.checkpoint.parent.mkdir()
+        self.enterContext(patch.object(bridge_module, "MOCKUP_DIR", self.folder))
+        self.enterContext(patch.object(bridge_module, "ROOT_DIR", self.folder))
         self.enterContext(patch.object(bridge_module, "MODEL_PATH", self.checkpoint))
+        self.enterContext(patch.object(bridge_module, "CANDIDATE_V11_PATH", self.folder / "models" / "nonexistent_v11.pth"))
+        self.enterContext(patch.object(bridge_module, "CANDIDATE_V10_PATH", self.folder / "models" / "nonexistent_v10.pth"))
+        self.enterContext(patch.object(bridge_module, "CANDIDATE_V9_PATH", self.folder / "models" / "nonexistent_v9.pth"))
+        self.enterContext(patch.object(bridge_module, "CANDIDATE_V8_PATH", self.folder / "models" / "nonexistent_v8.pth"))
         self.video = make_clip(self.folder / "TEST_CLIP.mp4")
         self.checkpoint.write_text("TEST ONLY; never loaded as weights")
         self.window = MainWindow()
+        self.window.threshold = 50
+        self.window.threshold_slider.setValue(50)
         self.window.show()
         QTest.qWait(30)
         self.addCleanup(self.close_window)

@@ -14,11 +14,12 @@ if str(ROOT_DIR) not in sys.path:
 from dataset_analysis.build_model import get_model
 
 DEFAULT_MODEL_CANDIDATES = [
+    ROOT_DIR / "best_weapon_detector_ninth_model.pth",
+    ROOT_DIR / "mockup_ui" / "models" / "best_weapon_detector_ninth_model.pth",
+    ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v11.pth",
     ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v10.pth",
     ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v9.pth",
     ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v8.pth",
-    ROOT_DIR / "mockup_ui" / "models" / "best_weapon_detector_ninth_model.pth",
-    ROOT_DIR / "best_weapon_detector_ninth_model.pth",
     ROOT_DIR / "best_weapon_detector_eighth_model.pth",
     ROOT_DIR / "best_weapon_detector_seventh_model.pth",
     ROOT_DIR / "best_weapon_detector_sixth_model.pth",
@@ -56,7 +57,7 @@ class DetectionService:
 
         model_name = self.model_path.name.lower()
         if "v11" in model_name or "v10" in model_name:
-            checkpoint = torch.load(self.model_path, map_location=self.device)
+            checkpoint = torch.load(self.model_path, map_location=self.device, weights_only=False)
             scales = checkpoint.get("anchor_scales", (8, 16, 32, 64, 128) if "v11" in model_name else (16, 32, 64, 128, 256))
             self.model = get_model(num_classes=3, anchor_scales=scales, pretrained=False)
             rpn_clip = checkpoint.get("rpn_bbox_xform_clip", math.log(1.4))
@@ -67,7 +68,7 @@ class DetectionService:
             self.model.load_state_dict(state_dict)
         elif "candidate" in model_name or "v8" in model_name or "v7" in model_name or "v6" in model_name or "v5" in model_name:
             from research.model_improvement.training.model_builder import build_research_model
-            checkpoint = torch.load(self.model_path, map_location=self.device)
+            checkpoint = torch.load(self.model_path, map_location=self.device, weights_only=False)
             sizes = checkpoint.get("anchor_sizes", ((16,), (32,), (64,), (128,), (192,)))
             ratios = checkpoint.get("aspect_ratios", (0.5, 0.75, 1.0, 1.5, 2.0))
             rpn_clip = checkpoint.get("rpn_bbox_xform_clip", checkpoint.get("bbox_xform_clip"))
@@ -84,17 +85,17 @@ class DetectionService:
             self.model.load_state_dict(state_dict)
         elif "ninth" in model_name or "eighth" in model_name:
             self.model = get_model(num_classes=3, anchor_scales=(16, 32, 64, 128, 256), pretrained=False)
-            checkpoint = torch.load(self.model_path, map_location=self.device)
+            checkpoint = torch.load(self.model_path, map_location=self.device, weights_only=False)
             state_dict = checkpoint["model_state_dict"] if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint else checkpoint
             self.model.load_state_dict(state_dict)
         elif "seventh" in model_name:
             self.model = get_model(num_classes=3, small_anchors=True, pretrained=False)
-            checkpoint = torch.load(self.model_path, map_location=self.device)
+            checkpoint = torch.load(self.model_path, map_location=self.device, weights_only=False)
             state_dict = checkpoint["model_state_dict"] if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint else checkpoint
             self.model.load_state_dict(state_dict)
         else:
             self.model = get_model(num_classes=3, small_anchors=False, pretrained=False)
-            checkpoint = torch.load(self.model_path, map_location=self.device)
+            checkpoint = torch.load(self.model_path, map_location=self.device, weights_only=False)
             state_dict = checkpoint["model_state_dict"] if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint else checkpoint
             self.model.load_state_dict(state_dict)
 

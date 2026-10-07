@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QAbstractSpinBox, QCheckBox, Q
     QPushButton, QProgressBar, QScrollArea, QSlider, QSplitter, QTableWidget, QTableWidgetItem,
     QVBoxLayout, QWidget, QSizePolicy)
 
-from mockup_ui.model_bridge import ModelBridge, read_video, timecode
+from mockup_ui.model_bridge import ModelBridge, get_model_display_name, read_video, timecode
 from mockup_ui.multi_camera import Alignment, CameraSource, build_timeline, export_session, validate_session
 from mockup_ui.observation_review import ReviewStore
 from mockup_ui.report_metrics import calculate_report_metrics
@@ -326,7 +326,9 @@ class MultiCameraDialog(QWidget):
         side.addWidget(status_card)
         side.addWidget(label("TRAINED MODEL", "sectionTitle"))
         model_path = self.bridge.model_path
-        model_text = (f"Faster R-CNN · Handgun / Knife\n{Path(model_path).name}" if model_path and Path(model_path).is_file()
+        model_title = get_model_display_name(model_path) if model_path else ""
+        prefix = f"{model_title}\n" if model_title else ""
+        model_text = (f"{prefix}Faster R-CNN · Handgun / Knife\n{Path(model_path).name}" if model_path and Path(model_path).is_file()
                       else f"Selected checkpoint unavailable\n{Path(model_path).name}" if model_path
                       else "No checkpoint selected")
         self.model_label = label(

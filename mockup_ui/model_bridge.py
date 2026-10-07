@@ -23,14 +23,16 @@ ROOT_DIR = MOCKUP_DIR.parent
 TEMP_DIR = MOCKUP_DIR / "temp"
 OUTPUT_DIR = MOCKUP_DIR / "outputs"
 MODEL_FILENAME = "best_weapon_detector_ninth_model.pth"
-MODEL_PATH = MOCKUP_DIR / "models" / MODEL_FILENAME
-if not MODEL_PATH.is_file():
-    MODEL_PATH = ROOT_DIR / MODEL_FILENAME
-
 CANDIDATE_V11_PATH = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v11.pth"
 CANDIDATE_V10_PATH = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v10.pth"
 CANDIDATE_V9_PATH = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v9.pth"
 CANDIDATE_V8_PATH = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v8.pth"
+MODEL_PATH = ROOT_DIR / MODEL_FILENAME
+if not MODEL_PATH.is_file():
+    MODEL_PATH = MOCKUP_DIR / "models" / MODEL_FILENAME
+if not MODEL_PATH.is_file():
+    MODEL_PATH = CANDIDATE_V11_PATH
+
 VIDEO_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv", ".webm", ".m4v"}
 sys.dont_write_bytecode = True
 if str(ROOT_DIR) in sys.path:
@@ -47,50 +49,80 @@ class ModelSetupError(RuntimeError):
 
 
 def discover_available_models() -> list[tuple[str, Path]]:
-    """Discover available trained checkpoints for the UI (Model V11, Model V10, and Model 9)."""
+    """Discover available trained checkpoints for the UI (Models 1 through 9)."""
     models: list[tuple[str, Path]] = []
     seen: set[Path] = set()
+    seen_names: set[str] = set()
 
     def add_if_exists(label: str, path: Path):
         resolved = path.resolve()
-        if resolved.is_file() and resolved not in seen:
+        if resolved.is_file() and resolved not in seen and resolved.name not in seen_names:
             models.append((label, resolved))
             seen.add(resolved)
+            seen_names.add(resolved.name)
 
-    # 1. Candidate Model V11 (Current Production SOTA)
-    if CANDIDATE_V11_PATH.is_file():
-        add_if_exists("Model V11 (Production SOTA - Multi-Angle & Shadow Immunity)", CANDIDATE_V11_PATH)
-
-    # 2. Candidate Model V10 (High Recall & Bounded Geometry)
-    if CANDIDATE_V10_PATH.is_file():
-        add_if_exists("Model V10 (High Recall & Bounded Geometry)", CANDIDATE_V10_PATH)
-
-    # 3. Model 9 Baseline (Fast R-CNN Standard)
+    # 1. Model 9 (Production SOTA - Multi-Angle & Shadow Immunity) -> best_weapon_detector_ninth_model.pth
     if MODEL_PATH.is_file():
-        add_if_exists("Model 9 (Baseline Faster R-CNN)", MODEL_PATH)
-    if CANDIDATE_V9_PATH.is_file():
-        add_if_exists("Model 9 (Candidate V9 Weights)", CANDIDATE_V9_PATH)
+        add_if_exists("Model 9 (Production SOTA - Multi-Angle & Shadow Immunity)", MODEL_PATH)
+    elif (ROOT_DIR / MODEL_FILENAME).is_file():
+        add_if_exists("Model 9 (Production SOTA - Multi-Angle & Shadow Immunity)", ROOT_DIR / MODEL_FILENAME)
+    elif (MOCKUP_DIR / "models" / MODEL_FILENAME).is_file():
+        add_if_exists("Model 9 (Production SOTA - Multi-Angle & Shadow Immunity)", MOCKUP_DIR / "models" / MODEL_FILENAME)
+    elif CANDIDATE_V11_PATH.is_file():
+        add_if_exists("Model 9 (Production SOTA - Multi-Angle & Shadow Immunity)", CANDIDATE_V11_PATH)
 
-    # 4. Any additional custom checkpoints in mockup_ui/models/
-    models_dir = MOCKUP_DIR / "models"
-    if models_dir.is_dir():
-        for custom_pth in sorted(models_dir.glob("*.pth")):
-            add_if_exists(f"Custom Checkpoint ({custom_pth.stem})", custom_pth)
+    # 2. Model 8 (Balanced Anchors & Distractor Sanitization)
+    add_if_exists("Model 8 (Balanced Anchors & Distractor Sanitization)", ROOT_DIR / "best_weapon_detector_eighth_model.pth")
+
+    # 3. Model 7 (Hard Negative Mining & Small Anchors)
+    add_if_exists("Model 7 (Hard Negative Mining & Small Anchors)", ROOT_DIR / "best_weapon_detector_seventh_model.pth")
+
+    # 4. Model 6 (VIRAT CCTV Negatives & Recall Focus)
+    add_if_exists("Model 6 (VIRAT CCTV Negatives & Recall Focus)", ROOT_DIR / "best_weapon_detector_sixth_model.pth")
+
+    # 5. Model 5 (USRT CCTV-Gun & Knife Dataset)
+    add_if_exists("Model 5 (USRT CCTV-Gun & Knife Dataset)", ROOT_DIR / "best_weapon_detector_fifth_model.pth")
+
+    # 6. Model 4 (Sanitized Batch 2 Dataset)
+    add_if_exists("Model 4 (Sanitized Batch 2 Dataset)", ROOT_DIR / "best_weapon_detector_fourth_model.pth")
+
+    # 7. Model 3 (Expanded Multi-Source Dataset)
+    add_if_exists("Model 3 (Expanded Multi-Source Dataset)", ROOT_DIR / "best_weapon_detector_third_model.pth")
+    add_if_exists("Model 3 (Expanded Multi-Source Dataset)", MOCKUP_DIR / "models" / "best_weapon_detector_third_model.pth")
+
+    # 8. Model 2 (Cleaned Open Images Dataset)
+    add_if_exists("Model 2 (Cleaned Open Images Dataset)", ROOT_DIR / "best_weapon_detector_retrained.pth")
+
+    # 9. Model 1 (Baseline Open Images Prototype)
+    add_if_exists("Model 1 (Baseline Open Images Prototype)", ROOT_DIR / "best_weapon_detector.pth")
 
     return models
 
 
 def default_model_path() -> Path | None:
-    """Default to Candidate Model V11 if available, otherwise V10, then Model 9 Baseline."""
-    if CANDIDATE_V11_PATH.is_file():
-        return CANDIDATE_V11_PATH
-    if CANDIDATE_V10_PATH.is_file():
-        return CANDIDATE_V10_PATH
+    """Default to Model 9 (Production SOTA - best_weapon_detector_ninth_model.pth)."""
     if MODEL_PATH.is_file():
         return MODEL_PATH
-    if CANDIDATE_V9_PATH.is_file():
-        return CANDIDATE_V9_PATH
+    avail = discover_available_models()
+    if avail:
+        return avail[0][1]
     return None
+
+
+def get_model_display_name(path: Path | str | None) -> str:
+    """Return a clean user-facing title for the model (e.g. 'Model 9 (Production SOTA)')."""
+    if not path:
+        return ""
+    resolved = Path(path).resolve()
+    for label, model_path in discover_available_models():
+        if model_path.resolve() == resolved:
+            if " - " in label:
+                return label.split(" - ")[0] + ")"
+            return label
+    name = Path(path).name.lower()
+    if "ninth" in name or "v11" in name:
+        return "Model 9 (Production SOTA)"
+    return ""
 
 
 def timecode(seconds: float) -> str:
@@ -214,26 +246,30 @@ class ModelBridge:
         self.model_path: Path | None = None
         self.set_model_path(model_path)
         self.device = ""
-        self.enable_cctv_intelligence: bool = True
-        self.enable_temporal_consistency: bool = True
+        self.enable_cctv_intelligence: bool = False
+        self.enable_temporal_consistency: bool = False
 
     def set_model_path(self, path: Path | str | None):
         if path is not None:
             resolved = Path(path).resolve()
-            if resolved.is_file():
+            valid_models = {p.resolve() for _, p in discover_available_models()}
+            if resolved.is_file() and resolved in valid_models:
                 self.model_path = resolved
                 return
+            raise ModelSetupError(f"Selected model is not available: {path}")
         self.model_path = default_model_path()
 
     def find_model(self) -> bool:
-        if self.model_path is not None and self.model_path.is_file():
+        valid_models = {p.resolve() for _, p in discover_available_models()}
+        if self.model_path is not None and self.model_path.is_file() and self.model_path.resolve() in valid_models:
             return True
         self.model_path = default_model_path()
         return self.model_path is not None and self.model_path.is_file()
 
     def _prepare_runtime(self, progress):
         if not self.find_model():
-            raise ModelSetupError("Trained model checkpoint not found. Check that model weights exist in research/model_improvement/checkpoints or mockup_ui/models.")
+            self.model_path = None
+            raise ModelSetupError(f"Trained model not found. Place {MODEL_FILENAME} in research/model_improvement/checkpoints/ or mockup_ui/models/.")
         progress("Loading Faster R-CNN detection service…", -1)
         try:
             import torch
@@ -319,9 +355,9 @@ class ModelBridge:
                         box = [0, 0, 0, 0]
 
                     val_status = row.get("validation_status") or row.get("status") or "CONFIRMED_ALERT"
-                    rej_reason = row.get("rejection_reason", "")
-                    # Only confirmed active detections meeting the configured threshold are displayed
-                    if val_status not in ("CONFIRMED_ALERT", "VALIDATED_TEMPORAL"):
+                    rej_reason = (row.get("rejection_reason") or "").strip()
+                    # Only confirmed active detections that passed intelligence filters appear in the table and video
+                    if val_status not in ("CONFIRMED_ALERT", "VALIDATED_TEMPORAL") or rej_reason:
                         continue
                     if conf < threshold:
                         continue

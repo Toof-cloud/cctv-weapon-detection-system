@@ -19,6 +19,7 @@ class VideoEnhancementService:
         self,
         input_video_path: str,
         output_video_path: str,
+        gpu_fraction: float = 0.5,
     ):
 
         frames_dir = "outputs/frames_for_enhancement"
@@ -47,6 +48,7 @@ class VideoEnhancementService:
         self.run_basicvsrpp(
             frames_dir,
             enhanced_dir,
+            gpu_fraction=gpu_fraction,
         )
 
         self.restore_frame_resolution(
@@ -120,6 +122,7 @@ class VideoEnhancementService:
         self,
         input_frames_dir,
         output_frames_dir,
+        gpu_fraction: float = 0.5,
     ):
         """Run chunked BasicVSR++ inference through WSL."""
 
@@ -151,6 +154,7 @@ class VideoEnhancementService:
                 "basicvsr_enhance_folder.py",
                 input_wsl,
                 output_wsl,
+                str(gpu_fraction),
             ],
             capture_output=True,
             text=True,

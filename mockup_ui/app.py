@@ -70,7 +70,7 @@ from PySide6.QtWidgets import (
 
 from mockup_ui.model_bridge import (
     MODEL_FILENAME, ModelBridge, ModelSetupError, VideoAnalysisResult, VideoInfo, VideoInputError,
-    discover_available_models, read_video, save_result, timecode,
+    discover_available_models, get_model_display_name, read_video, save_result, timecode,
 )
 from mockup_ui.video_player import VideoPlayer
 from mockup_ui.model_selector import ModelSelector
@@ -1915,7 +1915,9 @@ class MainWindow(QMainWindow):
         # even if another model is selected or the weights have since been moved.
         path = Path(self.result.model_path) if self.result else self.bridge.model_path
         if path and (self.result is not None or path.is_file()):
-            self.model_label.setText(f"Faster R-CNN · Handgun / Knife\n{path.name}")
+            model_title = get_model_display_name(path)
+            prefix = f"{model_title}\n" if model_title else ""
+            self.model_label.setText(f"{prefix}Faster R-CNN · Handgun / Knife\n{path.name}")
             self.model_label.setToolTip(str(path))
         elif path:
             self.model_label.setText(f"Selected checkpoint unavailable\n{path.name}")

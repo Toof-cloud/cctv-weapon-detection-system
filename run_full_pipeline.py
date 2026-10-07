@@ -160,12 +160,13 @@ def resolve_model_path(model_arg: str | None) -> str | Path | None:
     value = str(model_arg).strip().lower()
     if value in {"auto", "default"}:
         return None
-    if value in {"v11", "candidate11", "model11"}:
+    if value in {"v11", "candidate11", "model11", "ninth", "model9", "nine", "sota", "production"}:
+        m9_pth = ROOT_DIR / "best_weapon_detector_ninth_model.pth"
+        if m9_pth.exists():
+            return m9_pth
         v11_cand = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v11.pth"
         if v11_cand.exists():
             return v11_cand
-    if value in {"ninth", "model9", "nine"}:
-        return ROOT_DIR / "mockup_ui" / "models" / "best_weapon_detector_ninth_model.pth"
     if value in {"eighth", "model8", "eight"}:
         return ROOT_DIR / "best_weapon_detector_eighth_model.pth"
     if value in {"seventh", "model7", "seven"}:
