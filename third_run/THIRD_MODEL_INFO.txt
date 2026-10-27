@@ -1,0 +1,44 @@
+THIRD MODEL REPRODUCIBILITY INFORMATION
+========================================
+
+Dataset source:
+  dataset_analysis/3rd_Model_Dataset
+
+Prepared dataset:
+  training/third_model_data/annotations.csv
+
+Dataset composition:
+  Usable unique images: 2281
+  Handgun images: 1146
+  Knife images: 1135
+  Annotation boxes: 2522
+
+Split:
+  Training: 1596 images (70%)
+  Validation: 342 images (15%)
+  Test: 343 images (15%)
+  Random seed: 42
+  Split type: stratified by class
+
+Class mapping:
+  1 = handgun
+  2 = knife
+
+Training configuration:
+  Architecture: Faster R-CNN ResNet-50 FPN v2
+  Number of classes: 3 (background, handgun, knife)
+  Epochs: 10
+  Batch size: 2
+  Optimizer: SGD
+  Learning rate: 0.005
+  Momentum: 0.9
+  Weight decay: 0.0005
+  CPU threads: 8
+  Device: CUDA when available
+
+Checkpoint:
+  best_weapon_detector_third_model.pth
+
+Evaluation:
+  Run: python third_run/evaluate_third_model.py
+  Metrics are written to THIRD_MODEL_METRICS.txt after evaluation.

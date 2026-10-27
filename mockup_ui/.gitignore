@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+temp/
+outputs/
+settings.json
+models/
+reviews/

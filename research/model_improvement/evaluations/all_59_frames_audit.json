@@ -1,0 +1,578 @@
+[
+  {
+    "image_file": "Screen Recording 2026-09-07 224743_frame_0010.jpg",
+    "clip_name": "Screen Recording 2026-09-07 224743.mp4",
+    "frame_number": 10,
+    "m9_detections": "Handgun (50.2%, 39x45px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 224743_frame_0012.jpg",
+    "clip_name": "Screen Recording 2026-09-07 224743.mp4",
+    "frame_number": 12,
+    "m9_detections": "Handgun (54.3%, 38x44px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 224743_frame_0013.jpg",
+    "clip_name": "Screen Recording 2026-09-07 224743.mp4",
+    "frame_number": 13,
+    "m9_detections": "Handgun (56.3%, 38x44px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 224743_frame_0020.jpg",
+    "clip_name": "Screen Recording 2026-09-07 224743.mp4",
+    "frame_number": 20,
+    "m9_detections": "Handgun (77.4%, 41x42px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 224743_frame_0021.jpg",
+    "clip_name": "Screen Recording 2026-09-07 224743.mp4",
+    "frame_number": 21,
+    "m9_detections": "Handgun (91.3%, 40x42px)",
+    "m9_count": 1,
+    "cand_detections": "Handgun (53.5%, 37x39px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 225138_frame_0006.jpg",
+    "clip_name": "Screen Recording 2026-09-07 225138.mp4",
+    "frame_number": 6,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (51.2%, 212x330px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 225138_frame_0036.jpg",
+    "clip_name": "Screen Recording 2026-09-07 225138.mp4",
+    "frame_number": 36,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (56.4%, 205x332px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 225138_frame_0037.jpg",
+    "clip_name": "Screen Recording 2026-09-07 225138.mp4",
+    "frame_number": 37,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (56.5%, 205x332px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 225138_frame_0038.jpg",
+    "clip_name": "Screen Recording 2026-09-07 225138.mp4",
+    "frame_number": 38,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (58.6%, 205x332px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 225138_frame_0039.jpg",
+    "clip_name": "Screen Recording 2026-09-07 225138.mp4",
+    "frame_number": 39,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (58.5%, 205x332px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 225138_frame_0069.jpg",
+    "clip_name": "Screen Recording 2026-09-07 225138.mp4",
+    "frame_number": 69,
+    "m9_detections": "Knife (50.1%, 210x318px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 225138_frame_0070.jpg",
+    "clip_name": "Screen Recording 2026-09-07 225138.mp4",
+    "frame_number": 70,
+    "m9_detections": "Knife (50.1%, 210x318px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 225138_frame_0071.jpg",
+    "clip_name": "Screen Recording 2026-09-07 225138.mp4",
+    "frame_number": 71,
+    "m9_detections": "Knife (50.1%, 210x318px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 225138_frame_0072.jpg",
+    "clip_name": "Screen Recording 2026-09-07 225138.mp4",
+    "frame_number": 72,
+    "m9_detections": "Knife (50.1%, 210x318px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 225138_frame_0073.jpg",
+    "clip_name": "Screen Recording 2026-09-07 225138.mp4",
+    "frame_number": 73,
+    "m9_detections": "Knife (50.1%, 210x318px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 225703_frame_0007.jpg",
+    "clip_name": "Screen Recording 2026-09-07 225703.mp4",
+    "frame_number": 7,
+    "m9_detections": "Handgun (86.9%, 53x58px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 225703_frame_0008.jpg",
+    "clip_name": "Screen Recording 2026-09-07 225703.mp4",
+    "frame_number": 8,
+    "m9_detections": "Handgun (87.3%, 53x58px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 225703_frame_0009.jpg",
+    "clip_name": "Screen Recording 2026-09-07 225703.mp4",
+    "frame_number": 9,
+    "m9_detections": "Handgun (90.4%, 53x60px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 225703_frame_0015.jpg",
+    "clip_name": "Screen Recording 2026-09-07 225703.mp4",
+    "frame_number": 15,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (67.0%, 333x661px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 225703_frame_0016.jpg",
+    "clip_name": "Screen Recording 2026-09-07 225703.mp4",
+    "frame_number": 16,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (52.4%, 343x666px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 225703_frame_0128.jpg",
+    "clip_name": "Screen Recording 2026-09-07 225703.mp4",
+    "frame_number": 128,
+    "m9_detections": "Handgun (56.3%, 100x84px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 225703_frame_0129.jpg",
+    "clip_name": "Screen Recording 2026-09-07 225703.mp4",
+    "frame_number": 129,
+    "m9_detections": "Handgun (56.1%, 100x84px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230047_frame_0000.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230047.mp4",
+    "frame_number": 0,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (57.1%, 1638x624px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230047_frame_0001.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230047.mp4",
+    "frame_number": 1,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (57.1%, 1638x624px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230047_frame_0002.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230047.mp4",
+    "frame_number": 2,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (61.8%, 1615x615px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230047_frame_0003.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230047.mp4",
+    "frame_number": 3,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (66.7%, 1598x614px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230047_frame_0004.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230047.mp4",
+    "frame_number": 4,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (61.1%, 1610x615px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230249_frame_0012.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230249.mp4",
+    "frame_number": 12,
+    "m9_detections": "Handgun (55.2%, 57x63px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230249_frame_0015.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230249.mp4",
+    "frame_number": 15,
+    "m9_detections": "Handgun (78.7%, 55x66px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230249_frame_0038.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230249.mp4",
+    "frame_number": 38,
+    "m9_detections": "Handgun (61.3%, 54x60px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230249_frame_0049.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230249.mp4",
+    "frame_number": 49,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230249_frame_0050.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230249.mp4",
+    "frame_number": 50,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230249_frame_0060.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230249.mp4",
+    "frame_number": 60,
+    "m9_detections": "Handgun (69.0%, 55x59px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230249_frame_0063.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230249.mp4",
+    "frame_number": 63,
+    "m9_detections": "Handgun (53.9%, 55x64px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230541_frame_0000.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230541.mp4",
+    "frame_number": 0,
+    "m9_detections": "Knife (75.7%, 333x348px)",
+    "m9_count": 1,
+    "cand_detections": "Knife (52.6%, 305x329px), Knife (52.6%, 605x373px)",
+    "cand_count": 2
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230541_frame_0001.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230541.mp4",
+    "frame_number": 1,
+    "m9_detections": "Knife (77.6%, 306x358px)",
+    "m9_count": 1,
+    "cand_detections": "Knife (52.2%, 605x375px), Knife (51.5%, 306x330px)",
+    "cand_count": 2
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230541_frame_0002.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230541.mp4",
+    "frame_number": 2,
+    "m9_detections": "Knife (77.2%, 306x359px)",
+    "m9_count": 1,
+    "cand_detections": "Knife (53.2%, 601x376px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230541_frame_0003.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230541.mp4",
+    "frame_number": 3,
+    "m9_detections": "Knife (77.3%, 306x360px)",
+    "m9_count": 1,
+    "cand_detections": "Knife (56.8%, 602x379px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230541_frame_0004.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230541.mp4",
+    "frame_number": 4,
+    "m9_detections": "Knife (76.5%, 307x361px)",
+    "m9_count": 1,
+    "cand_detections": "Knife (59.2%, 596x378px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230842_frame_0017.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230842.mp4",
+    "frame_number": 17,
+    "m9_detections": "Knife (69.8%, 148x283px)",
+    "m9_count": 1,
+    "cand_detections": "Knife (94.0%, 145x278px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230842_frame_0020.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230842.mp4",
+    "frame_number": 20,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (57.6%, 144x283px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230842_frame_0078.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230842.mp4",
+    "frame_number": 78,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230842_frame_0079.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230842.mp4",
+    "frame_number": 79,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230842_frame_0080.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230842.mp4",
+    "frame_number": 80,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230842_frame_0081.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230842.mp4",
+    "frame_number": 81,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230842_frame_0082.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230842.mp4",
+    "frame_number": 82,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230842_frame_0297.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230842.mp4",
+    "frame_number": 297,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (86.8%, 740x257px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230842_frame_0298.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230842.mp4",
+    "frame_number": 298,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (87.0%, 738x256px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 230842_frame_0299.jpg",
+    "clip_name": "Screen Recording 2026-09-07 230842.mp4",
+    "frame_number": 299,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (83.8%, 753x259px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 231101_frame_0089.jpg",
+    "clip_name": "Screen Recording 2026-09-07 231101.mp4",
+    "frame_number": 89,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (69.1%, 769x604px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 231101_frame_0090.jpg",
+    "clip_name": "Screen Recording 2026-09-07 231101.mp4",
+    "frame_number": 90,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (56.9%, 753x606px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 231101_frame_0091.jpg",
+    "clip_name": "Screen Recording 2026-09-07 231101.mp4",
+    "frame_number": 91,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (58.3%, 754x606px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 231101_frame_0092.jpg",
+    "clip_name": "Screen Recording 2026-09-07 231101.mp4",
+    "frame_number": 92,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (63.8%, 729x606px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 231101_frame_0093.jpg",
+    "clip_name": "Screen Recording 2026-09-07 231101.mp4",
+    "frame_number": 93,
+    "m9_detections": "None",
+    "m9_count": 0,
+    "cand_detections": "Knife (61.9%, 731x606px)",
+    "cand_count": 1
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 231101_frame_0150.jpg",
+    "clip_name": "Screen Recording 2026-09-07 231101.mp4",
+    "frame_number": 150,
+    "m9_detections": "Handgun (56.7%, 110x99px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 231101_frame_0212.jpg",
+    "clip_name": "Screen Recording 2026-09-07 231101.mp4",
+    "frame_number": 212,
+    "m9_detections": "Handgun (50.3%, 74x94px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 231101_frame_0213.jpg",
+    "clip_name": "Screen Recording 2026-09-07 231101.mp4",
+    "frame_number": 213,
+    "m9_detections": "Handgun (55.2%, 74x94px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 231101_frame_0478.jpg",
+    "clip_name": "Screen Recording 2026-09-07 231101.mp4",
+    "frame_number": 478,
+    "m9_detections": "Handgun (59.1%, 63x82px)",
+    "m9_count": 1,
+    "cand_detections": "Handgun (65.5%, 66x89px), Handgun (64.8%, 78x74px)",
+    "cand_count": 2
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 231101_frame_0479.jpg",
+    "clip_name": "Screen Recording 2026-09-07 231101.mp4",
+    "frame_number": 479,
+    "m9_detections": "Handgun (61.8%, 63x86px)",
+    "m9_count": 1,
+    "cand_detections": "Handgun (67.8%, 66x89px), Handgun (64.4%, 78x74px)",
+    "cand_count": 2
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 231205_frame_0006.jpg",
+    "clip_name": "Screen Recording 2026-09-07 231205.mp4",
+    "frame_number": 6,
+    "m9_detections": "Handgun (72.0%, 80x69px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 231205_frame_0007.jpg",
+    "clip_name": "Screen Recording 2026-09-07 231205.mp4",
+    "frame_number": 7,
+    "m9_detections": "Handgun (71.0%, 80x70px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 231205_frame_0008.jpg",
+    "clip_name": "Screen Recording 2026-09-07 231205.mp4",
+    "frame_number": 8,
+    "m9_detections": "Handgun (67.3%, 79x68px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 231205_frame_0009.jpg",
+    "clip_name": "Screen Recording 2026-09-07 231205.mp4",
+    "frame_number": 9,
+    "m9_detections": "Handgun (67.3%, 79x68px)",
+    "m9_count": 1,
+    "cand_detections": "None",
+    "cand_count": 0
+  },
+  {
+    "image_file": "Screen Recording 2026-09-07 231205_frame_0010.jpg",
+    "clip_name": "Screen Recording 2026-09-07 231205.mp4",
+    "frame_number": 10,
+    "m9_detections": "Handgun (93.0%, 79x65px), Handgun (85.9%, 43x51px)",
+    "m9_count": 2,
+    "cand_detections": "Handgun (60.5%, 86x63px)",
+    "cand_count": 1
+  }
+]

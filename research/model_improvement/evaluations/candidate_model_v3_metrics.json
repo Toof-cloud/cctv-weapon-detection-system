@@ -1,0 +1,23 @@
+{
+  "checkpoint": "C:\\Users\\pc\\Documents\\THESIS 1\\cctv-weapon-detection-system\\research\\model_improvement\\checkpoints\\best_candidate_model_v3.pth",
+  "mAP_50": 96.05,
+  "handgun": {
+    "ap_50": 96.43,
+    "precision": 96.43,
+    "recall": 96.43,
+    "f1": 96.43,
+    "tp": 108,
+    "fp": 4,
+    "fn": 4
+  },
+  "knife": {
+    "ap_50": 95.68,
+    "precision": 81.12,
+    "recall": 96.67,
+    "f1": 88.21,
+    "tp": 116,
+    "fp": 27,
+    "fn": 4
+  },
+  "hard_negative_rejection_rate": 96.0
+}
