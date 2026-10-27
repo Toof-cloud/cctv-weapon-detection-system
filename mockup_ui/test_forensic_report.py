@@ -63,10 +63,12 @@ class ForensicReportTests(unittest.TestCase):
         self.assertIn("This is a system-generated report. All detections and validation results are subject to human analyst review and should be treated as reviewable observations, not conclusive findings.", rendered)
         self.assertNotIn("Automated Validation Result", rendered)
         headings = ("Video Metadata", "Video and Detection Information", "Interpretation",
-                    "Object Detection Observations and Reviews", "TCR Information", "MCCR Information", "Analyst Review Information",
+                    "Object Detection Observations and Reviews", "Model Performance Metrics", "Analyst Review Information",
                     "Source References", "Traceability Report")
         positions = [rendered.index(heading) for heading in headings]
         self.assertEqual(positions, sorted(positions))
+        self.assertNotIn("TCR Information", rendered)
+        self.assertNotIn("MCCR Information", rendered)
         self.assertEqual(self.summary_path.read_bytes(), original)
         with self.assertRaises(FileExistsError):
             write_forensic_report(self.summary_path, html.parent)

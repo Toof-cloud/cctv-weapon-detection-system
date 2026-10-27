@@ -14,6 +14,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 import cv2
 import numpy as np
 from PySide6.QtCore import Qt
+from PySide6.QtPdf import QPdfDocument
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication, QFileDialog, QPushButton, QTableWidget
 
@@ -110,6 +111,48 @@ class MultiCameraUiTests(unittest.TestCase):
         self.window = MultiCameraDialog(self.videos)
         self.addCleanup(self.window.close)
 
+    def test_multi_camera_tab_requires_imported_recordings(self):
+        main = MainWindow()
+        self.addCleanup(main.close)
+        main.show()
+        self.assertFalse(main.mode_tabs.isTabEnabled(1))
+        QTest.mouseClick(main.mode_tabs, Qt.MouseButton.LeftButton, pos=main.mode_tabs.tabRect(1).center())
+        self.assertEqual(main.mode_tabs.currentIndex(), 0)
+        self.assertIsNone(getattr(main, "_multi_camera_window", None))
+        with patch.object(QFileDialog, "getOpenFileNames", return_value=([str(v.path) for v in self.videos], "")):
+            main.choose_video()
+        multi = main._multi_camera_window
+        self.assertIs(main.pages.currentWidget(), multi)
+        self.assertTrue(main.mode_tabs.isTabEnabled(1))
+        self.assertEqual(len(multi.sources), 2)
+        self.assertTrue(multi.configure_button.isEnabled())
+        self.assertTrue(main.close_videos_button.isEnabled())
+        multi.remove_recording(1)
+        multi.remove_recording(0)
+        self.assertIsNotNone(multi.empty_camera_hint)
+        self.assertFalse(multi.play_button.isEnabled())
+        self.assertFalse(main.close_videos_button.isEnabled())
+        self.assertFalse(main.mode_tabs.isTabEnabled(1))
+        self.assertEqual(main.mode_tabs.currentIndex(), 0)
+        main.close_videos()
+        self.assertFalse(main.mode_tabs.isTabEnabled(1))
+        self.assertEqual(main.pages.count(), 1)
+
+    def test_single_video_keeps_multi_camera_tab_disabled(self):
+        main = MainWindow()
+        self.addCleanup(main.close)
+        main.load_video(str(self.videos[0].path))
+        capture = main.player.capture
+        main.mode_tabs.setCurrentIndex(1)
+        self.assertFalse(main.mode_tabs.isTabEnabled(1))
+        self.assertEqual(main.mode_tabs.currentIndex(), 0)
+        self.assertEqual(main.video_info.path, self.videos[0].path)
+        self.assertIs(main.player.capture, capture)
+        self.assertTrue(capture.isOpened())
+        self.assertFalse(main.report_button.isEnabled())
+        main.mode_tabs.setCurrentIndex(0)
+        self.assertIs(main.pages.currentWidget(), main.pages.widget(0))
+
     def test_batch_processing_playback_review_export_and_reset(self):
         self.window.scene.setText("TEST-SCENE")
         self.window.alignment.method = "Synthetic shared start"
@@ -146,12 +189,49 @@ class MultiCameraUiTests(unittest.TestCase):
         self.assertEqual(manifest["observations"][0]["analyst_decision"], "Reject")
         self.assertEqual(len(manifest["cameras"]), 2)
         self.assertTrue((exported / "forensic_report.pdf").is_file())
-        self.assertEqual(set(exported.rglob("*.pdf")), {exported / "forensic_report.pdf"})
+        self.assertEqual(set(exported.rglob("*.pdf")), {
+            exported / "forensic_report.pdf",
+            *(exported / camera["export_folder"] / "forensic_report.pdf" for camera in manifest["cameras"]),
+        })
+        document = QPdfDocument(self.app)
+        self.assertEqual(document.load(str(exported / "forensic_report.pdf")), QPdfDocument.Error.None_)
+        self.assertGreater(document.pagePointSize(0).width(), document.pagePointSize(0).height())
+        report_text = "\n".join(document.getAllText(page).text() for page in range(document.pageCount()))
+        for expected in ("Forensic Detection Report", "Video Metadata", "CAM-01", "CAM-02",
+                         "Object Detection Observations and Reviews", "Model Performance Metrics",
+                         "Analyst Review Information", "Source References and Traceability",
+                         "Session time", "Cross-view"):
+            self.assertIn(expected, report_text)
+        headings = ("Video Metadata", "Video and Detection Information", "Interpretation",
+                    "Model Performance Metrics", "Object Detection Observations and Reviews",
+                    "Analyst Review Information", "Source References and Traceability")
+        positions = [report_text.index(heading) for heading in headings]
+        self.assertEqual(positions, sorted(positions))
+        self.assertNotIn("TCR Information", report_text)
+        self.assertNotIn("MCCR Information", report_text)
+        document.close()
+        document.deleteLater()
+        del document
+        self.app.processEvents()
+        QTest.qWait(20)
         for camera in manifest["cameras"]:
             camera_folder = exported / camera["export_folder"]
             self.assertTrue((camera_folder / "annotated.mp4").is_file())
             self.assertTrue((camera_folder / "forensic_report.json").is_file())
             self.assertTrue((camera_folder / "forensic_records.csv").is_file())
+            individual = QPdfDocument(self.app)
+            self.assertEqual(individual.load(str(camera_folder / "forensic_report.pdf")), QPdfDocument.Error.None_)
+            self.assertGreater(individual.pagePointSize(0).height(), individual.pagePointSize(0).width())
+            text = "\n".join(individual.getAllText(page).text() for page in range(individual.pageCount()))
+            self.assertIn(camera["camera_id"], text)
+            self.assertIn("Temporal Consistency Rate (TCR)", text)
+            self.assertNotIn("MCCR", text)
+            self.assertNotIn("Cross-camera", text)
+            individual.close()
+            individual.deleteLater()
+            del individual
+            self.app.processEvents()
+            QTest.qWait(20)
         self.window.configure()
         self.assertEqual(self.window.results, [])
         self.assertTrue(self.window.setup.isEnabled())
@@ -174,8 +254,20 @@ class MultiCameraUiTests(unittest.TestCase):
             self.assertIsNotNone(popup)
             self.assertTrue(popup.isVisible())
             self.assertEqual(popup.camera_count, 2)
+            deadline = time.monotonic() + 1
+            while popup.progress.value() != 20 and time.monotonic() < deadline:
+                QTest.qWait(10)
             self.assertEqual(popup.progress.value(), 20)
             self.assertIn("CAM-01", popup.message.text())
+            self.assertEqual([step.property("state") for step in popup.stage_labels],
+                             ["done", "active", "pending"])
+            self.assertEqual(popup.engine_badge.text(), "FASTER R-CNN · LIVE")
+            self.assertEqual(popup.scan_wave.bar_count, 9)
+            phase = popup.scan_wave.phase
+            QTest.qWait(40)
+            self.assertNotEqual(popup.scan_wave.phase, phase)
+            # Position is intentionally transient during the 560 ms spring entrance.
+            QTest.qWait(600)
             self.assertLessEqual((popup.frameGeometry().center() - self.window.frameGeometry().center()).manhattanLength(), 12)
         finally:
             gate.set()
@@ -267,6 +359,81 @@ class MultiCameraUiTests(unittest.TestCase):
         self.assertEqual(tables[1].item(0, 1).text(), "CAM-01")
         self.assertFalse(any(button.text() == "Open camera report" for button in report.findChildren(QPushButton)))
         report.close()
+
+    def test_new_import_and_close_release_the_previous_session(self):
+        main = MainWindow()
+        self.addCleanup(main.close)
+        main.load_video(str(self.videos[0].path))
+        main._analysis_succeeded(fake_result(self.videos[0], "SINGLE"))
+        main.player.canvas.set_zoom(2)
+        first_capture = main.player.capture
+        self.assertTrue(main.player.timer.isActive())
+
+        main.open_multi_camera([str(video.path) for video in self.videos])
+        self.assertFalse(first_capture.isOpened())
+        self.assertIsNone(main.player.capture)
+        self.assertIsNone(main.result)
+        self.assertIsNone(main.video_info)
+        self.assertEqual(main.player.canvas.zoom, 1)
+        multi = main._multi_camera_window
+        results = [fake_result(video, f"CAM-{i}") for i, video in enumerate(self.videos)]
+        multi.completed(results)
+        captures = [card[0].capture for card in multi.cards]
+        preview = CameraPreviewDialog(results[0].output_path, "Test", parent=multi)
+        preview_capture = preview.player.capture
+        preview.reject()
+        self.assertFalse(preview_capture.isOpened())
+
+        main.load_video(str(self.videos[1].path))
+        self.assertTrue(all(not capture.isOpened() for capture in captures))
+        self.assertFalse(multi.play_timer.isActive())
+        self.assertIsNone(main._multi_camera_window)
+        self.assertEqual(main.pages.count(), 1)
+        self.assertFalse(main.mode_tabs.isTabEnabled(1))
+        self.assertIsNone(main.result)
+        self.assertFalse(main.report_button.isEnabled())
+        self.assertEqual(main.observation_model.rowCount(), 0)
+        self.assertTrue(main.close_videos_button.isEnabled())
+        self.assertEqual(main.player.path, self.videos[1].path)
+        self.assertTrue(main.analyze_button.isEnabled())
+
+        main._analysis_succeeded(fake_result(self.videos[1], "NEXT"))
+        current_capture = main.player.capture
+        main.close_videos_button.click()
+        self.assertFalse(current_capture.isOpened())
+        self.assertIsNone(main.player.path)
+        self.assertIsNone(main.source_path)
+        self.assertIsNone(main.video_info)
+        self.assertIsNone(main.result)
+        self.assertFalse(main.player.timer.isActive())
+        self.assertFalse(main._model_retry.isActive())
+        self.assertFalse(main.player.canvas.property("hasImage"))
+        self.assertFalse(main.save_button.isEnabled())
+        self.assertFalse(main.close_videos_button.isEnabled())
+        self.assertTrue(main.open_button.isEnabled())
+        self.assertTrue(results[0].output_path.exists())
+        main.open_multi_camera([str(video.path) for video in self.videos])
+        self.assertEqual(len(main._multi_camera_window.sources), 2)
+        self.assertFalse(main._multi_camera_window.results)
+
+    def test_invalid_import_preserves_session_and_busy_session_cannot_close(self):
+        main = MainWindow()
+        self.addCleanup(main.close)
+        main.open_multi_camera([str(video.path) for video in self.videos])
+        session = main._multi_camera_window
+        with patch.object(main, "_show_error") as error:
+            main.load_video(str(self.folder / "missing.mp4"))
+            error.assert_called_once()
+        self.assertIs(main._multi_camera_window, session)
+        session.worker = object()
+        try:
+            main._sync_header_actions()
+            self.assertFalse(main.close_videos_button.isEnabled())
+            self.assertFalse(main.close_videos())
+            self.assertIs(main._multi_camera_window, session)
+            self.assertTrue(all(card[0].capture.isOpened() for card in session.cards))
+        finally:
+            session.worker = None
 
     def test_camera_views_and_timeline_adapt_to_window_width(self):
         main = MainWindow()

@@ -178,16 +178,18 @@ class ObservationReviewTests(unittest.TestCase):
         delete(document)  # Release the PDF even if a following assertion fails.
         for required in ("This is a system-generated report. All detections and validation results are subject to human analyst review and should be treated as reviewable observations, not conclusive findings.",
                          "Video Metadata", "Video and Detection Information", "Interpretation",
-                         "Object Detection Observations and Reviews", "TCR Information", "MCCR Information", "Analyst Review Information",
+                         "Object Detection Observations and Reviews", "Model Performance Metrics", "Analyst Review Information",
                          "Source References", "Traceability Report", "Analyst Review Decision",
                          "Reject", "Uncertain", "<not markup>", saved["reviewedAt"]):
             self.assertIn(required, " ".join(text.split()))
         headings = ("Video Metadata", "Video and Detection Information", "Interpretation",
-                    "Object Detection Observations and Reviews", "TCR Information", "MCCR Information", "Analyst Review Information",
+                    "Object Detection Observations and Reviews", "Model Performance Metrics", "Analyst Review Information",
                     "Source References", "Traceability Report")
         positions = [text.index(heading) for heading in headings]
         self.assertEqual(positions, sorted(positions))
         self.assertNotIn("Automated Validation Result", text)
+        self.assertNotIn("TCR Information", text)
+        self.assertNotIn("MCCR Information", text)
         self.assertNotRegex(text, r"\bPART\b")
         dialog = ForensicReportDialog(self.result)
         self.assertNotIn("Automated validation", dialog.model.HEADERS)

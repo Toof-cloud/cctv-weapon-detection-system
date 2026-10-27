@@ -216,9 +216,8 @@ li{{margin:5px 0}}footer{{margin-top:28px;border-top:1px solid #dce0e8;padding-t
 <p>Frame numbers are zero-based. Times are video-relative offsets and are not recording dates. Bounding boxes use [x1, y1, x2, y2] source-frame pixel coordinates. Counts represent frame observations, so the same physical object may appear more than once.</p>
 <h2>Object Detection Observations and Reviews</h2>
 <div class="table-wrap"><table><thead><tr><th>Observation</th><th>Frame (0-based)</th><th>Video offset (s)</th><th>Object label</th><th>Box [x1, y1, x2, y2]</th><th>Confidence</th><th>Analyst Review Decision</th></tr></thead><tbody>{table_rows}</tbody></table></div>
-<h2>TCR Information</h2>
+<h2>Model Performance Metrics</h2>
 {fields(metric_fields(report.get("metrics", {}), "tcr"))}
-<h2>MCCR Information</h2>
 {fields(metric_fields(report.get("metrics", {}), "mccr"))}
 <h2>Analyst Review Information</h2>
 {fields([('Review coverage', report['review_summary']), ('Decision totals', decision_summary)])}
