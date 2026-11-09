@@ -178,3 +178,28 @@ FP: 29 (10 Handgun, 19 Knife)
 FN: 16 (7 Handgun, 9 Knife)
 Negative Image Rejection Rate (Zero-Alarm): 47/51 (92.16%)
 Status: Completed (RTX 5060 Ti GPU, 8 CPU thread limit)
+
+* Model 10 Metrics (Thesis 2 Phase: CostiCatargiu Held Non-Weapon Hard Negatives + Full-Range 256px Anchor Recovery)
+Checkpoint: best_weapon_detector_tenth_model.pth
+Dataset: CCTV Multi-Source + CostiCatargiu/Yolov12_WeaponDetection (NoGUN v5 Held Non-Weapons + WeaponDataset v11 Knives/Pistols + 296 Targeted CCTV Residual Hard Negatives)
+Train images: 2804 base scenes + 296 injected CCTV hard negatives (3100 effective training items)
+Validation images: 275
+Test images (Apples-to-Apples M9 Held-Out Split): 279 (228 Weapon, 51 Pure CCTV Negative)
+Anchor configuration: Full-Range Scales ((16,), (32,), (64,), (128,), (256,)), aspect_ratios=(0.33, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0), rpn/roi_bbox_xform_clip=ln(1.95)
+Batch size: 2
+Confidence threshold: 0.50
+IoU threshold: 0.50
+Precision: 0.923077 (92.31%)
+Recall: 0.957983 (95.80%)
+F1: 0.940206 (94.02%)
+AP(Handgun): 0.952595 (95.26%)
+AP(Knife): 0.951804 (95.18%)
+mAP@0.5: 0.952200 (95.22%)
+TP: 228 (109 Handgun, 119 Knife)
+FP: 19 (7 Handgun, 12 Knife)
+FN: 10 (5 Handgun, 5 Knife — reduced from 63 in Model 9; Knife FN reduced by 91.5% from 59 to 5!)
+Negative Image Rejection Rate (Zero-Alarm): 47/51 (92.16%)
+Pure Held Non-Weapon Grid Specificity (18 pure held-object cells): 17/18 (94.44% clean)
+Strictly Unseen Internal CCTV Benchmark (185 unseen images, 0% overlap with Models 1-10): Precision 97.22%, Recall 96.55%, F1 96.89%, mAP@0.5 97.71%, TP 140 / FP 4 / FN 5, Negative Rejection 40/40 (100.00%)
+Unified External Benchmark (350 unseen images: 185 Unseen Internal CCTV + 165 Unseen CostiCatargiu incl. 60 Held Non-Weapons): Precision 72.05%, Recall 67.03%, F1 69.45%, mAP@0.5 62.38%, External Negative Rejection 84/100 (84.00%)
+Status: Completed (RTX 5060 Ti GPU, 8 CPU thread limit)

@@ -35,9 +35,11 @@ Device: NVIDIA GeForce RTX 5060 Ti
 
 ---
 
-## 2. Launching and Operating the Graphical User Interfaces (UI)
+## 2. Launching and Operating the Graphical User Interfaces (UI + Backend)
 
-FORENSIKADA provides two interactive graphical desktop interfaces designed for surveillance operators, forensic examiners, and defense presentation:
+FORENSIKADA is built with an integrated architecture: **launching either UI automatically runs both the frontend interface and the complete GPU backend pipeline together** (PyTorch Faster R-CNN inference, BasicVSR++ super-resolution, CCTV Intelligence kinematics, and automated forensic report generators in dedicated background worker threads).
+
+FORENSIKADA provides two interactive graphical desktop interfaces:
 
 ---
 
@@ -152,7 +154,7 @@ python run_full_pipeline.py `
 | :--- | :---: | :--- |
 | `--video` *(Required)* | None | Path to the source CCTV recording (e.g. `samples/handgun_test-video.mp4`). |
 | `--output` | `outputs/full_pipeline_run` | Directory where videos, CSV logs, keyframe crops, and PDF reports are saved. |
-| `--model` | `auto` | Specifies the model: `auto` (uses Model 9), `ninth`, `eighth`, `seventh`, `sixth`, `fifth`, or direct path to a `.pth` file. |
+| `--model` | `auto` | Specifies the model: `auto` (uses Model 10), `tenth`, `ninth`, `eighth`, `seventh`, `sixth`, `fifth`, or direct path to a `.pth` file. |
 | `--confidence` | `0.50` | Minimum detection confidence threshold (between `0.0` and `1.0`). |
 | `--fps` | `5` | Frames-per-second sampling rate (e.g., `10` for high temporal density, `5` for standard throughput). |
 | `--no-enhancement` | *False* | **Recommended for speed:** Bypasses BasicVSR++ super-resolution and runs directly on the source footage. |
@@ -253,6 +255,15 @@ python benchmarks/run_unseen_jabez_model5_benchmark.py
 * Model 9: `outputs/unseen_jabez_model9_evaluation/`
 * Model 8: `outputs/unseen_jabez_model8_evaluation/`
 * Model 5: `outputs/unseen_jabez_model5_evaluation/`
+
+### C. Unified Zero-Leakage External Benchmark (Models 1 to 10)
+Runs the unified benchmark across all 10 models on 350 unseen images (including 60 held non-weapon confounders):
+
+```powershell
+python training/model_10/evaluate_all_models_unified.py
+```
+
+*Results are saved in:* `training/unified_external_benchmark/unified_models_1_to_10_results.csv` and `.json`.
 
 ---
 

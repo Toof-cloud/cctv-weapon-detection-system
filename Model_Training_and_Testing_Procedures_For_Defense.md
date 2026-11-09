@@ -1,12 +1,12 @@
-# All Models (1 to 9) Training, Dataset, and Testing Technical Factsheet
+# All Models (1 to 10) Training, Dataset, and Testing Technical Factsheet
 
 * **Thesis Project:** FORENSIKADA (Multi-Camera CCTV Weapon Detection System)  
 * **University:** National University – Manila (*CCIT – Computer Science Department*)  
-* **Purpose:** Consolidated factual technical data for all model iterations (Models 1 through 9) for direct integration into thesis manuscript tables, methodology (Chapter 3), results & discussion (Chapter 4), and defense presentations.
+* **Purpose:** Consolidated factual technical data for all model iterations (Models 1 through 10) for direct integration into thesis manuscript tables, methodology (Chapter 3), results & discussion (Chapter 4), and defense presentations.
 
 ---
 
-## Section 1: Master Comparative Summary Table (Models 1 to 9)
+## Section 1: Master Comparative Summary Table (Models 1 to 10)
 
 | Model | Dataset & Sourcing Focus | Train / Val / Test Images | Precision | Recall | F1-Score | AP (Handgun) | AP (Knife) | mAP@0.50 | TP / FP / FN | Key Finding / Forensic Diagnosis |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
@@ -15,10 +15,33 @@
 | **Model 3** | Armas + Hugging Face + Howard Knife | 1,596 / 342 / 343 (2,281 Total) | 48.14% | 58.20% | 52.69% | 09.69% | 83.65% | 46.67% | 220 / 237 / 158 | Handgun AP collapsed to 9.69% due to 207 bad scaling annotations in Batch 2. |
 | **Model 4** | Sanitized Batch 2 (88 bad purged) | 1,553 / 333 / 333 (2,219 Total) | 67.06% | 59.95% | 63.31% | 12.76% | 91.33% | 52.04% | 226 / 111 / 151 | Knife reached 91.3%, but handguns failed in CCTV (0% TP; macro studio scale mismatch). |
 | **Model 5** | USRT CCTV-Gun (Mendeley) + Knife + Negs | 1,653 / 354 / 356 (2,363 Total) | 85.37% | 90.93% | 88.07% | 85.97% | 89.78% | 87.87% | 321 / 55 / 32 | Handgun crisis solved! AP surged to 85.97%. Fan & door false alarms eliminated. |
-| **Model 6** | VIRAT CCTV Negatives + Augmented Knife | 1,765 / 378 / 380 (2,523 Total) | 75.17% | 93.48% | 83.33% | 91.77% | 92.68% | 92.23% | 330 / 109 / 23 | Highest Recall (93.48%). CCTV knife sensitivity surged to 100 frames. Over-triggers on diagonal textures. |
+| **Model 6** | VIRAT CCTV Negatives + Augmented Knife | 1,765 / 378 / 380 (2,523 Total) | 75.17% | 93.48% | 83.33% | 91.77% | 92.68% | 92.23% | 330 / 109 / 23 | High Recall (93.48%). CCTV knife sensitivity surged to 100 frames. Over-triggers on diagonal textures. |
 | **Model 7** | Hard Negative Mining (Bare Hands/Rails) + Small Anchors + Cosine LR | 1,838 / 393 / 397 (2,628 Total) | 70.48% | 90.65% | 79.31% | 86.98% | 88.10% | 87.54% | 320 / 134 / 33 | 85.7% hard negative rejection. Small anchors ((8, 16, 32, 64, 128)) triggered on sub-12px noise. |
 | **Model 8** | Balanced Anchors (16–256px) + Sanitized Negatives (Phones/VIRAT) + Specular Jitter | 2,095 / 260 / 265 (2,620 Total) | 81.18% | 92.44% | 86.44% | 94.02% | 88.22% | 91.12% | 220 / 51 / 18 | Silver gun flaw solved (AP surged to 94.02%). Phone floor false alarms eliminated. |
-| **Model 9** | Multi-Angle & Shadow Invariance SOTA (8px Anchors + Bounded Regression Clamp + 296 CCTV Residual Negatives) | 2,214 (+296 Negs) / 275 / 279 (2,768 Total Base + Injected Negatives) | **94.09%** | 73.53% | 82.55% | 90.82% | 53.24% | 72.03% | 175 / 11 / 63 | **Production SOTA:** Highest precision (94.09%) and lowest false alarm count (11 FP) across all models. Door shadow & empty hand false positives suppressed; regression clamp prevents oversized box drift. |
+| **Model 9** | Multi-Angle & Shadow Invariance (8–128px Anchors + $\ln(1.4)$ Clamp + 296 CCTV Residual Negatives) | 2,214 (+296 Negs) / 275 / 279 (2,768 Base + Injected Negs) | **94.09%** | 73.53% | 82.55% | 90.82% | 53.24% | 72.03% | 175 / **11** / 63 | Highest precision (94.09%) and 11 FP, but dropping the 256px anchor + $\ln(1.4)$ clamp capped max reach at ~250px, causing 59 Knife FN. |
+| **Model 10** | **Thesis 2 SOTA: Held Non-Weapon Hard Negatives (`CostiCatargiu` NoGUN v5 + Weapon v11) + Full-Scale 16–256px Anchors** | **2,804 (+296 Negs) / 275 / 279 (3,358 Base + Injected Negs)** | 92.31% | **95.80%** | **94.02%** | **95.26%** | **95.18%** | **95.22%** | **228** / 19 / **10** | **Thesis 2 Production SOTA:** Highest Recall (**95.80%**), F1 (**94.02%**), and mAP@0.50 (**95.22%**) in project history! False Negatives slashed by **84.1%** (63 $\rightarrow$ 10; Knife FN: 59 $\rightarrow$ 5) with **94.44%** held non-weapon specificity. |
+
+---
+
+## Section 1B: Unified External Benchmark Across Models 1 to 10 (Adviser Zero-Leakage Evaluation)
+
+To fulfill the thesis adviser's recommendation for an apples-to-apples evaluation across all historical iterations (**Models 1 through 10**) without retraining legacy checkpoints, all 10 models were evaluated on two strictly held-out, zero-leakage benchmarks (`0%` overlap with any training or validation image from Models 1 through 10):
+1. **Strictly Unseen Internal CCTV Benchmark (`185` images):** `114 Handgun`, `31 Knife`, and `40 Hard Negatives` (`145` ground-truth weapon instances) strictly outside all Model 1–10 training and validation splits.
+2. **Unified External & Unseen Benchmark (`350` images):** Combines the `185` Strictly Unseen Internal CCTV images with `165` Unseen External [`CostiCatargiu/Yolov12_WeaponDetection`](https://github.com/CostiCatargiu/Yolov12_WeaponDetection) test images (`55 Knife`, `50 Pistol`, and `60 Held Non-Weapon Confounders` such as phones, bottles, wallets, keys, remotes, umbrellas, and tools held in hands). Total: `134 Handgun`, `116 Knife`, `100 Hard Negatives` (`273` ground-truth weapon instances).
+
+| Model | Checkpoint | Unseen185 Precision | Unseen185 Recall | Unseen185 F1 | Unseen185 mAP@0.50 | Unseen185 TP / FP / FN | Unseen185 Neg Rej (40) | Ext350 Precision | Ext350 Recall | Ext350 F1 | Ext350 mAP@0.50 | Ext350 Neg Rej (100) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Model 1** | `best_weapon_detector.pth` | 11.70% | 13.79% | 12.66% | 19.70% | 20 / 151 / 125 | 11/40 (27.5%) | 18.91% | 19.05% | 18.98% | 12.24% | 43/100 (43.0%) |
+| **Model 2** | `best_weapon_detector_retrained.pth` | 17.78% | 11.03% | 13.62% | 19.25% | 16 / 74 / 129 | 21/40 (52.5%) | 27.36% | 20.15% | 23.21% | 13.40% | 57/100 (57.0%) |
+| **Model 3** | `best_weapon_detector_third_model.pth` | 33.00% | 22.76% | 26.94% | 46.06% | 33 / 67 / 112 | 16/40 (40.0%) | 34.34% | 24.91% | 28.87% | 18.41% | 62/100 (62.0%) |
+| **Model 4** | `best_weapon_detector_fourth_model.pth` | 13.19% | 21.38% | 16.32% | 46.86% | 31 / 204 / 114 | 17/40 (42.5%) | 19.76% | 24.18% | 21.75% | 18.76% | 55/100 (55.0%) |
+| **Model 5** | `best_weapon_detector_fifth_model.pth` | 90.78% | 88.28% | 89.51% | 91.00% | 128 / 13 / 17 | 35/40 (87.5%) | 61.98% | 59.71% | 60.82% | 55.05% | 73/100 (73.0%) |
+| **Model 6** | `best_weapon_detector_sixth_model.pth` | 71.81% | 93.10% | 81.08% | 93.92% | 135 / 53 / 10 | 29/40 (72.5%) | 48.83% | 61.17% | 54.31% | 54.59% | 60/100 (60.0%) |
+| **Model 7** | `best_weapon_detector_seventh_model.pth` | 67.01% | 91.03% | 77.19% | 88.59% | 132 / 65 / 13 | 28/40 (70.0%) | 45.11% | 60.81% | 51.79% | 51.75% | 60/100 (60.0%) |
+| **Model 8** | `best_weapon_detector_eighth_model.pth` | 84.24% | 95.86% | 89.68% | 96.53% | 139 / 26 / 6 | 35/40 (87.5%) | 55.38% | 65.93% | 60.20% | 59.62% | 59/100 (59.0%) |
+| **Model 9** | `best_weapon_detector_ninth_model.pth` | **98.40%** | 84.83% | 91.11% | 68.63% | 123 / **2** / 22 | **40/40 (100%)** | 67.14% | 51.65% | 58.39% | 46.81% | 82/100 (82.0%) |
+| **Model 10** | `best_weapon_detector_tenth_model.pth` | 97.22% | **96.55%** | **96.89%** | **97.71%** | **140** / 4 / **5** | **40/40 (100%)** | **72.05%** | **67.03%** | **69.45%** | **62.38%** | **84/100 (84.0%)** |
+
 
 ---
 
@@ -348,6 +371,51 @@
   3. **Hand-Shadow & Gesture Immunity:** Targeted mining of `CAM2_SCENE001` and `CAM2_SCENE002` resolved false triggers from empty hand shadows against wooden doors.
   4. **Ponytail & Dark Apparel Suppression:** Neutralized actor ponytail and dark customer shoulder shadow false alarms.
   5. **Bounded Geometric Stability:** Decoupled $\ln(1.4)$ regression clamping effectively terminated oversized bounding box drift under partial occlusions.
+* **Forensic Diagnosis of Model 9's 63 False Negatives (`4 Handgun, 59 Knife`):**
+  * Shifting RPN `anchor_scales` from `(16, 32, 64, 128, 256)` down to `(8, 16, 32, 64, 128)` while clamping RPN and RoI box regression to $\ln(1.4)$ ($1.4\times \cdot 1.4\times = 1.96\times$) capped the maximum reachable box dimension from a `128px` anchor at `~250px`.
+  * Consequently, medium-to-large knives (`250–450px`) in the held-out test set were mathematically unreachable at $\text{IoU} \ge 0.50$, causing `59` Knife False Negatives.
+
+---
+
+### Model 10 (Thesis 2 Production SOTA): Held Non-Weapon Confounder Immunity & Full-Scale Recall Recovery
+* **Checkpoint Filename:** `best_weapon_detector_tenth_model.pth` *(Architecture: `FasterRCNN_ResNet50_FPN_V2_Model10_HeldObjectHardNeg_FullScale`)*
+* **Dataset Name:** CCTV Multi-Source + `CostiCatargiu/Yolov12_WeaponDetection` Held Non-Weapon Confounder & Weapon Dataset
+* **Sourced From:**
+  * **Internal Base Dataset (`2,214` Train / `275` Val / `279` Test):** USRT CCTV-Gun (`1,128` images) + Howard Clean Knife (`1,135` images) + `505` authentic surveillance negatives.
+  * **External Companion Dataset (`CostiCatargiu/Yolov12_WeaponDetection` — Roboflow `NoGUN v5` + `WeaponDataset v11`, `590` curated training scenes):**
+    * **Held Non-Weapon Hard Negatives (`250` training + `60` external test scenes, Class 0):** Explicit human-held non-weapon confounders (`no_weapon` class from `NoGUN v5` / `WeaponDataset v11` — smartphones, metal/glass water bottles, beer bottles, wallets, keys, remotes, umbrellas, selfie sticks, coffee cups, and hand tools held in hands), plus `34` dedicated crops from `DatasetExamples/no_weapon_grid1.png` and `no_weapon_grid2.png`.
+    * **Curated Knives & Pistols (`340` training + `105` external test scenes):** `190` diverse close/medium/CCTV knives (Class 2) and `150` pistols (Class 1) with `CostiCatargiu`'s corrected bounding box labels (`long_gun` strictly excluded per two-class thesis scope).
+  * **Injected Targeted CCTV Residual Hard Negatives (`296` background samples):** Preserved all `296` targeted empirical surveillance negative crops (`CAM2_SCENE001`, `CAM2_SCENE002`, `Unseen 225703`, `Unseen 230249`, `hard_negatives`, `hard_negatives_fullframe`) from Model 9.
+* **Storage Folder:** `training/model_10/tenth_model_data/` and `training/unified_external_benchmark/`
+* **Dataset Statistics:**
+  * Effective Training Set: **3,100 items** (`2,804` base + `CostiCatargiu` scenes + `296` targeted CCTV residual hard negatives)
+  * Validation Set: **275 images**
+  * Apples-to-Apples Held-Out Test Set (Model 9 Split): **279 images** (`228` Weapon scenes / `238` weapon instances + `51` pure CCTV negative scenes)
+  * Strictly Unseen Internal CCTV Benchmark: **185 images** (`114` Handgun, `31` Knife, `40` Hard Negatives; `0%` overlap with any Model 1–10 train/val split)
+  * Unified External Benchmark: **350 images** (`185` Strictly Unseen Internal CCTV + `165` Unseen External `CostiCatargiu` test images including `60` held non-weapon confounders)
+* **Architecture & Full-Range Anchor Recovery:**
+  * Architecture: Faster R-CNN with ResNet-50 Feature Pyramid Network (ResNet-50 FPN v2)
+  * Full-Range Anchor Scales: `((16,), (32,), (64,), (128,), (256,))`
+    * Restores the `256px` FPN level so medium-to-large blades (`250–450px`) and close-range weapons are covered directly without losing small surveillance handgun sensitivity (`16px` and `32px`).
+  * Aspect Ratios: `(0.33, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0)` across all 5 FPN levels to capture slender horizontal and vertical knife blades (`1:3` and `3:1`).
+  * Relaxed Stage-Decoupled Regression Clamp:
+    * RPN & RoI bbox transform clip: $\ln(1.95) \approx 0.6678$ (up from $\ln(1.4)$ in Model 9), allowing elongated diagonal knives to regress accurately to ground-truth boundaries while still preventing full-frame background drift.
+* **Test Split Metrics on the 279-Image Held-Out Split ($\text{IoU} \ge 0.50$, $\text{Conf} \ge 0.50$, Apples-to-Apples vs. Model 9):**
+  * Precision: **92.31%** (0.923077)
+  * Recall: **95.80%** (0.957983) *(+22.27 pp over Model 9 — HIGHEST RECALL IN PROJECT HISTORY!)*
+  * F1-Score: **94.02%** (0.940206) *(+11.47 pp over Model 9 — HIGHEST F1-SCORE IN PROJECT HISTORY!)*
+  * AP (Handgun): **95.26%** (0.952595) *(up from 90.82% in Model 9)*
+  * AP (Knife): **95.18%** (0.951804) *(+41.94 pp surge over Model 9's 53.24%!)*
+  * mAP@0.50: **95.22%** (0.952200) *(+23.19 pp over Model 9 — HIGHEST mAP@0.50 IN PROJECT HISTORY!)*
+  * True Positives: **228** (`109` Handgun, `119` Knife — up from `175` in Model 9)
+  * False Positives: **19** (`7` Handgun, `12` Knife)
+  * False Negatives: **10** (`5` Handgun, `5` Knife — **slashed by 84.1% from 63 down to 10; Knife FN slashed by 91.5% from 59 down to 5!**)
+  * Hard Negative Scene Rejection Specificity: **47/51 images (92.16% zero-alarm rate)**
+  * Pure Held Non-Weapon Confounder Specificity (`18` pure held-object cells in `no_weapon_grid1/2`): **17/18 clean (94.44% specificity)** (vs. `72.22%` in Model 8 and `88.89%` in Model 9)
+* **Unified External & Strictly Unseen Benchmark Performance:**
+  * **On the 185-Image Strictly Unseen Internal CCTV Benchmark:** Precision **97.22%**, Recall **96.55%**, F1 **96.89%**, mAP@0.50 **97.71%**, `140 TP / 4 FP / 5 FN`, Negative Rejection **40/40 (100.00%)**.
+  * **On the 350-Image Unified External Benchmark:** Precision **72.05%**, Recall **67.03%**, F1 **69.45%**, mAP@0.50 **62.38%**, External Negative Rejection (`100` negatives incl. `60` held non-weapon confounders) **84/100 (84.00%)** — ranking **#1 across all 10 models** on every unified metric!
+
 
 ---
 

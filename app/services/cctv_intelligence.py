@@ -593,7 +593,7 @@ class CCTVIntelligenceFilter:
                         rejection_reason = f"TRANSLUCENT_WALL_SHADOW (deep_dark={deep_dark_ratio:.1%} < 0.8% on bright surface)"
                     elif cname == "handgun" and skin_ratio >= 0.55:
                         rejection_reason = f"BARE_HUMAN_LIMB (skin={skin_ratio:.1%} >= 55% empty hand/arm)"
-                    elif mean_s >= 45.0 and 80 <= mean_h <= 135 and deep_dark_ratio < 0.12 and (cname == "handgun" or lap_var < 100.0 or mean_v < 90.0):
+                    elif mean_s >= 45.0 and 80 <= mean_h <= 135 and (deep_dark_ratio < 0.12 or (mean_s >= 70.0 and mean_v < 85.0)) and (cname == "handgun" or lap_var < 100.0 or mean_v < 90.0):
                         rejection_reason = f"VIVID_FABRIC_OR_FURNITURE_TRAP (blue_fabric S={mean_s:.1f} >= 45, H={mean_h:.1f})"
                     elif lap_var < 18.0 and mean_v < 85.0:
                         rejection_reason = f"SMOOTH_SHADOW_OR_FABRIC_TRAP (laplacian={lap_var:.1f} < 18.0 on dark gradient)"

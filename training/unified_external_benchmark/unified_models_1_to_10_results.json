@@ -1,0 +1,776 @@
+{
+  "Model 1": {
+    "checkpoint": "best_weapon_detector.pth",
+    "external_benchmark_350": {
+      "Precision": 0.1890909090909091,
+      "Recall": 0.19047619047619047,
+      "F1": 0.18978102189781024,
+      "AP_Handgun": 0.06716736055760705,
+      "AP_Knife": 0.1775793765723741,
+      "mAP": 0.12237336856499058,
+      "TP": 52,
+      "FP": 223,
+      "FN": 221,
+      "per_class": {
+        "Handgun": {
+          "TP": 16,
+          "FP": 155,
+          "FN": 122
+        },
+        "Knife": {
+          "TP": 36,
+          "FP": 68,
+          "FN": 99
+        }
+      },
+      "neg_clean": 43,
+      "neg_total": 100,
+      "neg_rate": 0.43
+    },
+    "unseen_internal_cctv_185": {
+      "Precision": 0.11695906432748537,
+      "Recall": 0.13793103448275862,
+      "F1": 0.12658227848101267,
+      "AP_Handgun": 0.029548278333284324,
+      "AP_Knife": 0.3645182540694462,
+      "mAP": 0.19703326620136527,
+      "TP": 20,
+      "FP": 151,
+      "FN": 125,
+      "per_class": {
+        "Handgun": {
+          "TP": 7,
+          "FP": 128,
+          "FN": 107
+        },
+        "Knife": {
+          "TP": 13,
+          "FP": 23,
+          "FN": 18
+        }
+      },
+      "neg_clean": 11,
+      "neg_total": 40,
+      "neg_rate": 0.275
+    },
+    "m9_benchmark_279": null,
+    "no_weapon_grid_audit": null
+  },
+  "Model 2": {
+    "checkpoint": "best_weapon_detector_retrained.pth",
+    "external_benchmark_350": {
+      "Precision": 0.2736318407960199,
+      "Recall": 0.20146520146520147,
+      "F1": 0.2320675105485232,
+      "AP_Handgun": 0.039103775871261695,
+      "AP_Knife": 0.22893104372689738,
+      "mAP": 0.13401740979907953,
+      "TP": 55,
+      "FP": 146,
+      "FN": 218,
+      "per_class": {
+        "Handgun": {
+          "TP": 7,
+          "FP": 69,
+          "FN": 131
+        },
+        "Knife": {
+          "TP": 48,
+          "FP": 77,
+          "FN": 87
+        }
+      },
+      "neg_clean": 57,
+      "neg_total": 100,
+      "neg_rate": 0.57
+    },
+    "unseen_internal_cctv_185": {
+      "Precision": 0.17777777777777778,
+      "Recall": 0.1103448275862069,
+      "F1": 0.13617021276595742,
+      "AP_Handgun": 0.008771929824561403,
+      "AP_Knife": 0.3763114459740097,
+      "mAP": 0.19254168789928555,
+      "TP": 16,
+      "FP": 74,
+      "FN": 129,
+      "per_class": {
+        "Handgun": {
+          "TP": 1,
+          "FP": 50,
+          "FN": 113
+        },
+        "Knife": {
+          "TP": 15,
+          "FP": 24,
+          "FN": 16
+        }
+      },
+      "neg_clean": 21,
+      "neg_total": 40,
+      "neg_rate": 0.525
+    },
+    "m9_benchmark_279": null,
+    "no_weapon_grid_audit": null
+  },
+  "Model 3": {
+    "checkpoint": "best_weapon_detector_third_model.pth",
+    "external_benchmark_350": {
+      "Precision": 0.3434343434343434,
+      "Recall": 0.2490842490842491,
+      "F1": 0.28874734607218683,
+      "AP_Handgun": 0.03913043478260869,
+      "AP_Knife": 0.3289989465812904,
+      "mAP": 0.18406469068194956,
+      "TP": 68,
+      "FP": 130,
+      "FN": 205,
+      "per_class": {
+        "Handgun": {
+          "TP": 7,
+          "FP": 31,
+          "FN": 131
+        },
+        "Knife": {
+          "TP": 61,
+          "FP": 99,
+          "FN": 74
+        }
+      },
+      "neg_clean": 62,
+      "neg_total": 100,
+      "neg_rate": 0.62
+    },
+    "unseen_internal_cctv_185": {
+      "Precision": 0.33,
+      "Recall": 0.22758620689655173,
+      "F1": 0.26938775510204077,
+      "AP_Handgun": 0.003955968352253182,
+      "AP_Knife": 0.9172655535374459,
+      "mAP": 0.46061076094484954,
+      "TP": 33,
+      "FP": 67,
+      "FN": 112,
+      "per_class": {
+        "Handgun": {
+          "TP": 2,
+          "FP": 17,
+          "FN": 112
+        },
+        "Knife": {
+          "TP": 31,
+          "FP": 50,
+          "FN": 0
+        }
+      },
+      "neg_clean": 16,
+      "neg_total": 40,
+      "neg_rate": 0.4
+    },
+    "m9_benchmark_279": null,
+    "no_weapon_grid_audit": null
+  },
+  "Model 4": {
+    "checkpoint": "best_weapon_detector_fourth_model.pth",
+    "external_benchmark_350": {
+      "Precision": 0.19760479041916168,
+      "Recall": 0.24175824175824176,
+      "F1": 0.21746293245469522,
+      "AP_Handgun": 0.018708673026543617,
+      "AP_Knife": 0.3564289206687923,
+      "mAP": 0.18756879684766795,
+      "TP": 66,
+      "FP": 268,
+      "FN": 207,
+      "per_class": {
+        "Handgun": {
+          "TP": 9,
+          "FP": 211,
+          "FN": 129
+        },
+        "Knife": {
+          "TP": 57,
+          "FP": 57,
+          "FN": 78
+        }
+      },
+      "neg_clean": 55,
+      "neg_total": 100,
+      "neg_rate": 0.55
+    },
+    "unseen_internal_cctv_185": {
+      "Precision": 0.13191489361702127,
+      "Recall": 0.21379310344827587,
+      "F1": 0.1631578947368421,
+      "AP_Handgun": 0.0016613503455608718,
+      "AP_Knife": 0.9354838709677419,
+      "mAP": 0.4685726106566514,
+      "TP": 31,
+      "FP": 204,
+      "FN": 114,
+      "per_class": {
+        "Handgun": {
+          "TP": 2,
+          "FP": 183,
+          "FN": 112
+        },
+        "Knife": {
+          "TP": 29,
+          "FP": 21,
+          "FN": 2
+        }
+      },
+      "neg_clean": 17,
+      "neg_total": 40,
+      "neg_rate": 0.425
+    },
+    "m9_benchmark_279": null,
+    "no_weapon_grid_audit": null
+  },
+  "Model 5": {
+    "checkpoint": "best_weapon_detector_fifth_model.pth",
+    "external_benchmark_350": {
+      "Precision": 0.6197718631178707,
+      "Recall": 0.5970695970695971,
+      "F1": 0.6082089552238805,
+      "AP_Handgun": 0.7315697085917551,
+      "AP_Knife": 0.3695050790583676,
+      "mAP": 0.5505373938250613,
+      "TP": 163,
+      "FP": 100,
+      "FN": 110,
+      "per_class": {
+        "Handgun": {
+          "TP": 102,
+          "FP": 12,
+          "FN": 36
+        },
+        "Knife": {
+          "TP": 61,
+          "FP": 88,
+          "FN": 74
+        }
+      },
+      "neg_clean": 73,
+      "neg_total": 100,
+      "neg_rate": 0.73
+    },
+    "unseen_internal_cctv_185": {
+      "Precision": 0.9078014184397163,
+      "Recall": 0.8827586206896552,
+      "F1": 0.8951048951048951,
+      "AP_Handgun": 0.8563859552064441,
+      "AP_Knife": 0.9637096774193548,
+      "mAP": 0.9100478163128994,
+      "TP": 128,
+      "FP": 13,
+      "FN": 17,
+      "per_class": {
+        "Handgun": {
+          "TP": 98,
+          "FP": 4,
+          "FN": 16
+        },
+        "Knife": {
+          "TP": 30,
+          "FP": 9,
+          "FN": 1
+        }
+      },
+      "neg_clean": 35,
+      "neg_total": 40,
+      "neg_rate": 0.875
+    },
+    "m9_benchmark_279": null,
+    "no_weapon_grid_audit": null
+  },
+  "Model 6": {
+    "checkpoint": "best_weapon_detector_sixth_model.pth",
+    "external_benchmark_350": {
+      "Precision": 0.48830409356725146,
+      "Recall": 0.6117216117216118,
+      "F1": 0.5430894308943088,
+      "AP_Handgun": 0.7644980433184352,
+      "AP_Knife": 0.3272048038959096,
+      "mAP": 0.5458514236071724,
+      "TP": 167,
+      "FP": 175,
+      "FN": 106,
+      "per_class": {
+        "Handgun": {
+          "TP": 107,
+          "FP": 39,
+          "FN": 31
+        },
+        "Knife": {
+          "TP": 60,
+          "FP": 136,
+          "FN": 75
+        }
+      },
+      "neg_clean": 60,
+      "neg_total": 100,
+      "neg_rate": 0.6
+    },
+    "unseen_internal_cctv_185": {
+      "Precision": 0.7180851063829787,
+      "Recall": 0.9310344827586207,
+      "F1": 0.8108108108108109,
+      "AP_Handgun": 0.9038745961640697,
+      "AP_Knife": 0.9745785360357105,
+      "mAP": 0.9392265660998902,
+      "TP": 135,
+      "FP": 53,
+      "FN": 10,
+      "per_class": {
+        "Handgun": {
+          "TP": 104,
+          "FP": 29,
+          "FN": 10
+        },
+        "Knife": {
+          "TP": 31,
+          "FP": 24,
+          "FN": 0
+        }
+      },
+      "neg_clean": 29,
+      "neg_total": 40,
+      "neg_rate": 0.725
+    },
+    "m9_benchmark_279": null,
+    "no_weapon_grid_audit": null
+  },
+  "Model 7": {
+    "checkpoint": "best_weapon_detector_seventh_model.pth",
+    "external_benchmark_350": {
+      "Precision": 0.45108695652173914,
+      "Recall": 0.608058608058608,
+      "F1": 0.5179407176287051,
+      "AP_Handgun": 0.7329415142505015,
+      "AP_Knife": 0.3020646291726829,
+      "mAP": 0.5175030717115922,
+      "TP": 166,
+      "FP": 202,
+      "FN": 107,
+      "per_class": {
+        "Handgun": {
+          "TP": 107,
+          "FP": 76,
+          "FN": 31
+        },
+        "Knife": {
+          "TP": 59,
+          "FP": 126,
+          "FN": 76
+        }
+      },
+      "neg_clean": 60,
+      "neg_total": 100,
+      "neg_rate": 0.6
+    },
+    "unseen_internal_cctv_185": {
+      "Precision": 0.6700507614213198,
+      "Recall": 0.9103448275862069,
+      "F1": 0.7719298245614036,
+      "AP_Handgun": 0.8780826345543749,
+      "AP_Knife": 0.8936853185983917,
+      "mAP": 0.8858839765763833,
+      "TP": 132,
+      "FP": 65,
+      "FN": 13,
+      "per_class": {
+        "Handgun": {
+          "TP": 103,
+          "FP": 41,
+          "FN": 11
+        },
+        "Knife": {
+          "TP": 29,
+          "FP": 24,
+          "FN": 2
+        }
+      },
+      "neg_clean": 28,
+      "neg_total": 40,
+      "neg_rate": 0.7
+    },
+    "m9_benchmark_279": null,
+    "no_weapon_grid_audit": null
+  },
+  "Model 8": {
+    "checkpoint": "best_weapon_detector_eighth_model.pth",
+    "external_benchmark_350": {
+      "Precision": 0.5538461538461539,
+      "Recall": 0.6593406593406593,
+      "F1": 0.6020066889632106,
+      "AP_Handgun": 0.8033156295903593,
+      "AP_Knife": 0.3891259843682685,
+      "mAP": 0.5962208069793139,
+      "TP": 180,
+      "FP": 145,
+      "FN": 93,
+      "per_class": {
+        "Handgun": {
+          "TP": 112,
+          "FP": 21,
+          "FN": 26
+        },
+        "Knife": {
+          "TP": 68,
+          "FP": 124,
+          "FN": 67
+        }
+      },
+      "neg_clean": 59,
+      "neg_total": 100,
+      "neg_rate": 0.59
+    },
+    "unseen_internal_cctv_185": {
+      "Precision": 0.8424242424242424,
+      "Recall": 0.9586206896551724,
+      "F1": 0.896774193548387,
+      "AP_Handgun": 0.9460144215366432,
+      "AP_Knife": 0.9846646185355862,
+      "mAP": 0.9653395200361147,
+      "TP": 139,
+      "FP": 26,
+      "FN": 6,
+      "per_class": {
+        "Handgun": {
+          "TP": 108,
+          "FP": 10,
+          "FN": 6
+        },
+        "Knife": {
+          "TP": 31,
+          "FP": 16,
+          "FN": 0
+        }
+      },
+      "neg_clean": 35,
+      "neg_total": 40,
+      "neg_rate": 0.875
+    },
+    "m9_benchmark_279": {
+      "Precision": 0.7913669064748201,
+      "Recall": 0.9243697478991597,
+      "F1": 0.8527131782945736,
+      "AP_Handgun": 0.940025946529729,
+      "AP_Knife": 0.8803279228607968,
+      "mAP": 0.9101769346952628,
+      "TP": 220,
+      "FP": 58,
+      "FN": 18,
+      "per_class": {
+        "Handgun": {
+          "TP": 108,
+          "FP": 17,
+          "FN": 6
+        },
+        "Knife": {
+          "TP": 112,
+          "FP": 41,
+          "FN": 12
+        }
+      },
+      "neg_clean": 40,
+      "neg_total": 51,
+      "neg_rate": 0.7843137254901961
+    },
+    "no_weapon_grid_audit": {
+      "total_pure_noweapon_cells": 18,
+      "hallucinated_cells": 5,
+      "clean_cells": 13,
+      "specificity": 0.7222222222222222,
+      "details": [
+        {
+          "grid": 1,
+          "row": 1,
+          "col": 3,
+          "desc": "Man holding glass beer bottle",
+          "detections": [
+            [
+              2,
+              0.8814831376075745
+            ]
+          ]
+        },
+        {
+          "grid": 1,
+          "row": 2,
+          "col": 2,
+          "desc": "Couple holding sandwich & coffee cup",
+          "detections": [
+            [
+              2,
+              0.7077096104621887
+            ]
+          ]
+        },
+        {
+          "grid": 1,
+          "row": 4,
+          "col": 4,
+          "desc": "Hand holding selfie stick & tripod",
+          "detections": [
+            [
+              2,
+              0.9737695455551147
+            ],
+            [
+              2,
+              0.936769425868988
+            ]
+          ]
+        },
+        {
+          "grid": 2,
+          "row": 1,
+          "col": 1,
+          "desc": "Hand gripping umbrella handle",
+          "detections": [
+            [
+              2,
+              0.7618851065635681
+            ]
+          ]
+        },
+        {
+          "grid": 2,
+          "row": 4,
+          "col": 2,
+          "desc": "Hands holding two metal water bottles",
+          "detections": [
+            [
+              2,
+              0.8782278299331665
+            ],
+            [
+              2,
+              0.7489244937896729
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  "Model 9": {
+    "checkpoint": "best_weapon_detector_ninth_model.pth",
+    "external_benchmark_350": {
+      "Precision": 0.6714285714285714,
+      "Recall": 0.5164835164835165,
+      "F1": 0.5838509316770187,
+      "AP_Handgun": 0.8126984557147158,
+      "AP_Knife": 0.12346302285590782,
+      "mAP": 0.4680807392853118,
+      "TP": 141,
+      "FP": 69,
+      "FN": 132,
+      "per_class": {
+        "Handgun": {
+          "TP": 113,
+          "FP": 14,
+          "FN": 25
+        },
+        "Knife": {
+          "TP": 28,
+          "FP": 55,
+          "FN": 107
+        }
+      },
+      "neg_clean": 82,
+      "neg_total": 100,
+      "neg_rate": 0.82
+    },
+    "unseen_internal_cctv_185": {
+      "Precision": 0.984,
+      "Recall": 0.8482758620689655,
+      "F1": 0.9111111111111111,
+      "AP_Handgun": 0.9646752015173069,
+      "AP_Knife": 0.40783410138248855,
+      "mAP": 0.6862546514498977,
+      "TP": 123,
+      "FP": 2,
+      "FN": 22,
+      "per_class": {
+        "Handgun": {
+          "TP": 110,
+          "FP": 1,
+          "FN": 4
+        },
+        "Knife": {
+          "TP": 13,
+          "FP": 1,
+          "FN": 18
+        }
+      },
+      "neg_clean": 40,
+      "neg_total": 40,
+      "neg_rate": 1.0
+    },
+    "m9_benchmark_279": {
+      "Precision": 0.9405405405405406,
+      "Recall": 0.7310924369747899,
+      "F1": 0.822695035460993,
+      "AP_Handgun": 0.9625359156559581,
+      "AP_Knife": 0.5043252922935545,
+      "mAP": 0.7334306039747562,
+      "TP": 174,
+      "FP": 11,
+      "FN": 64,
+      "per_class": {
+        "Handgun": {
+          "TP": 110,
+          "FP": 5,
+          "FN": 4
+        },
+        "Knife": {
+          "TP": 64,
+          "FP": 6,
+          "FN": 60
+        }
+      },
+      "neg_clean": 47,
+      "neg_total": 51,
+      "neg_rate": 0.9215686274509803
+    },
+    "no_weapon_grid_audit": {
+      "total_pure_noweapon_cells": 18,
+      "hallucinated_cells": 2,
+      "clean_cells": 16,
+      "specificity": 0.8888888888888888,
+      "details": [
+        {
+          "grid": 1,
+          "row": 1,
+          "col": 3,
+          "desc": "Man holding glass beer bottle",
+          "detections": [
+            [
+              2,
+              0.620090126991272
+            ]
+          ]
+        },
+        {
+          "grid": 1,
+          "row": 3,
+          "col": 1,
+          "desc": "Worker holding window squeegee",
+          "detections": [
+            [
+              1,
+              0.5372347235679626
+            ],
+            [
+              1,
+              0.5163806676864624
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  "Model 10": {
+    "checkpoint": "best_weapon_detector_tenth_model.pth",
+    "external_benchmark_350": {
+      "Precision": 0.7204724409448819,
+      "Recall": 0.6703296703296703,
+      "F1": 0.6944971537001898,
+      "AP_Handgun": 0.8160093976203262,
+      "AP_Knife": 0.4316890248258535,
+      "mAP": 0.6238492112230898,
+      "TP": 183,
+      "FP": 71,
+      "FN": 90,
+      "per_class": {
+        "Handgun": {
+          "TP": 113,
+          "FP": 9,
+          "FN": 25
+        },
+        "Knife": {
+          "TP": 70,
+          "FP": 62,
+          "FN": 65
+        }
+      },
+      "neg_clean": 84,
+      "neg_total": 100,
+      "neg_rate": 0.84
+    },
+    "unseen_internal_cctv_185": {
+      "Precision": 0.9722222222222222,
+      "Recall": 0.9655172413793104,
+      "F1": 0.9688581314878894,
+      "AP_Handgun": 0.95518341307815,
+      "AP_Knife": 0.998991935483871,
+      "mAP": 0.9770876742810105,
+      "TP": 140,
+      "FP": 4,
+      "FN": 5,
+      "per_class": {
+        "Handgun": {
+          "TP": 109,
+          "FP": 3,
+          "FN": 5
+        },
+        "Knife": {
+          "TP": 31,
+          "FP": 1,
+          "FN": 0
+        }
+      },
+      "neg_clean": 40,
+      "neg_total": 40,
+      "neg_rate": 1.0
+    },
+    "m9_benchmark_279": {
+      "Precision": 0.9230769230769231,
+      "Recall": 0.957983193277311,
+      "F1": 0.9402061855670104,
+      "AP_Handgun": 0.9525953526885058,
+      "AP_Knife": 0.9518044922740623,
+      "mAP": 0.952199922481284,
+      "TP": 228,
+      "FP": 19,
+      "FN": 10,
+      "per_class": {
+        "Handgun": {
+          "TP": 109,
+          "FP": 7,
+          "FN": 5
+        },
+        "Knife": {
+          "TP": 119,
+          "FP": 12,
+          "FN": 5
+        }
+      },
+      "neg_clean": 47,
+      "neg_total": 51,
+      "neg_rate": 0.9215686274509803
+    },
+    "no_weapon_grid_audit": {
+      "total_pure_noweapon_cells": 18,
+      "hallucinated_cells": 1,
+      "clean_cells": 17,
+      "specificity": 0.9444444444444444,
+      "details": [
+        {
+          "grid": 2,
+          "row": 4,
+          "col": 2,
+          "desc": "Hands holding two metal water bottles",
+          "detections": [
+            [
+              2,
+              0.7267909646034241
+            ]
+          ]
+        }
+      ]
+    }
+  }
+}

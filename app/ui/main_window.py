@@ -193,7 +193,8 @@ class MainWindow(QMainWindow):
         settings_layout.addWidget(QLabel("Model:"))
         self.model_combo = QComboBox()
         self.model_combo.addItems([
-            "Candidate Model V11 (Multi-Scale Anchor & Hand-Shadow Calibrated) [Recommended]",
+            "Model 10 (Thesis 2 SOTA - Held Non-Weapon Immunity & 95.8% Recall) [Recommended]",
+            "Candidate Model V11 (Multi-Scale Anchor & Hand-Shadow Calibrated)",
             "Candidate Model V10 (High Recall & Bounded Geometry)",
             "Candidate Model V9 (Calibrated Anchors & Dynamic Gating)",
             "Model 9 Baseline (Fast R-CNN Standard)",
@@ -371,23 +372,25 @@ class MainWindow(QMainWindow):
 
         selected_model_idx = self.model_combo.currentIndex()
         if selected_model_idx == 0:
-            chosen_model_path = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v11.pth"
+            chosen_model_path = ROOT_DIR / "best_weapon_detector_tenth_model.pth"
         elif selected_model_idx == 1:
-            chosen_model_path = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v10.pth"
+            chosen_model_path = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v11.pth"
         elif selected_model_idx == 2:
-            chosen_model_path = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v9.pth"
+            chosen_model_path = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v10.pth"
         elif selected_model_idx == 3:
-            chosen_model_path = ROOT_DIR / "best_weapon_detector_ninth_model.pth"
+            chosen_model_path = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v9.pth"
         elif selected_model_idx == 4:
-            chosen_model_path = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v8.pth"
+            chosen_model_path = ROOT_DIR / "best_weapon_detector_ninth_model.pth"
         elif selected_model_idx == 5:
-            chosen_model_path = ROOT_DIR / "best_weapon_detector_seventh_model.pth"
+            chosen_model_path = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v8.pth"
         elif selected_model_idx == 6:
-            chosen_model_path = ROOT_DIR / "best_weapon_detector_sixth_model.pth"
+            chosen_model_path = ROOT_DIR / "best_weapon_detector_seventh_model.pth"
         elif selected_model_idx == 7:
+            chosen_model_path = ROOT_DIR / "best_weapon_detector_sixth_model.pth"
+        elif selected_model_idx == 8:
             chosen_model_path = ROOT_DIR / "best_weapon_detector_fifth_model.pth"
         else:
-            chosen_model_path = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v11.pth"
+            chosen_model_path = ROOT_DIR / "best_weapon_detector_tenth_model.pth"
 
         self.worker = AnalysisWorker(
             camera_configs=configs,
