@@ -34,6 +34,9 @@ outputs/
 data/*
 !data/README.md
 
+datasets/*
+!datasets/README.md
+
 models/*
 !models/README.md
 

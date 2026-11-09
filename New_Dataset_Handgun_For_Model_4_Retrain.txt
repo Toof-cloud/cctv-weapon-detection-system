@@ -1,0 +1,263 @@
+Used tool: read_url_content
+Used tool: read_url_content
+Viewed content.md:1-800
+
+The raw HTML isn't useful. Let me read the arxiv paper content which will have the dataset statistics:
+
+Viewed content.md:1-114
+
+Let me get the full paper content for the image counts:
+
+Used tool: read_url_content
+Ran command: `Select-String -Path "C:\Users\pc\.gemini\antigravity\brain\0a76ef80-0e13-4900-915a-d98dea62b0ba\.system_generated\steps\33\content.md" -Pattern "images|train|test|total|split|MGD|USRT|UCF|handgun|annotation|Table" -CaseSensitive:$false | Select-Object -First 60 | ForEach-Object { $_.LineNumber.ToString() + ": " + $_.Line.Substring(0, [Math]::Min($_.Line.Length, 200)) }`
+Viewed content.md:177-225
+
+Here's exactly what you need to know about the **CCTV-Gun Benchmark**:
+
+### Where to Check It
+- **GitHub repo**: https://github.com/srikarym/CCTV-Gun — contains code, annotations, and trained models
+- **Paper** (full details + tables): https://arxiv.org/html/2303.10703v3
+
+### Image Counts
+
+The dataset is **handgun-only** (no rifles, no SMGs) with a total of **7,767 annotated images** from 3 real CCTV sources:
+
+| Sub-dataset | Images | Source | Resolution | Notes |
+|---|---|---|---|---|
+| **MGD** (Monash Gun Dataset) | **2,857** | 250 recorded CCTV videos (indoor + outdoor) | 512×512 | Stock images already removed. Clear, most images contain a handgun |
+| **USRT** (US Real-time Gun Detection) | **3,294** | 3 CCTV cameras, mock attack | 1920×1080 | Only 1,115 have handguns (rest are negatives). Knives/shotguns treated as background |
+| **UCF** (UCF Crime Scene) | **1,616** | 57 robbery + 17 shooting real CCTV videos | 320×240 | Real crime scenes, heavy occlusion, low-res |
+| **Total** | **7,767** | | | |
+
+### Why This Is Perfect for You
+
+1. **Handgun-only** — no rifles/SMGs to filter out
+2. **Real CCTV footage** — overhead angles, blur, low-res, occlusion (exactly what `NEW_KNIFE_VIDEO_11s.mp4` looks like)
+3. **Includes negative examples** — 2,197 images from USRT have a person but NO handgun (helps prevent false positives like your wall hallucinations)
+4. **Built on mmdetection** — has ready-made **Faster R-CNN** configs, so you can plug it straight in
+5. **Annotated challenge factors** — each test image tagged with blur/occlusion/similar-object
+
+### How to Get the Data
+
+Go to the GitHub repo → look for `dataset_instructions.md` — it tells you how to download the 3 constituent datasets (MGD, USRT, UCF) and apply their annotations. The repo provides the annotations and code; the raw images come from the original dataset sources linked in the instructions.
+
+Skip to content
+Navigation Menu
+
+srikarym
+/
+CCTV-Gun
+Public
+Code
+Issues
+1
+Pull requests
+Projects
+Security and quality
+Insights
+author
+Srikar
+hope setup works now
+8d815bb
+ · 
+3 years ago
+Name		
+configs
+add dataset setup
+3 years ago
+data
+add ucf frames
+3 years ago
+mmdet
+final config
+3 years ago
+requirements
+hope setup works now
+3 years ago
+resources
+Update qq group qrcode in README_zh-CN.md (#8370)
+4 years ago
+scripts
+add dataset setup
+3 years ago
+tools
+update dataset setup
+3 years ago
+.gitignore
+add ucf frames
+3 years ago
+CITATION.cff
+fix citation file (#6006)
+5 years ago
+LICENSE
+[Docs] Add header for files (#5900)
+5 years ago
+README.md
+hope setup works now
+3 years ago
+dataset_instructions.md
+update dataset setup
+3 years ago
+setup.py
+hope setup works now
+3 years ago
+Repository files navigation
+README
+Apache-2.0 license
+Introduction
+This repo contains training and evaluation code of CCTV-GUN benchmark. It uses mmdetection to train object detection models. Our arXiv submission can be found here.
+
+Requirements
+We follow the installation instructions in the mmdetection documentation here. Specifically, our code requires mmcls=0.25.0, mmcv-full=1.7.0 and torch=1.13.0.
+
+The output of conda env export > env.yml  can be found in env.yml. It can be used to create a conda virtual environment with
+
+conda env create  -f env.yml
+conda activate env_cc
+pip install openmim
+mim install mmcv-full==1.7.0
+pip install -e . 
+Data
+We use images from three datasets :
+
+Monash Gun dataset (MGD) 1
+US Real-time Gun detection dataset (USRT) 2
+UCF Crime scene dataset (UCF) 3
+Instructions on how to download these datasets can be found in dataset_instructions.md .
+
+Setup
+We perform two kinds of assessment : Intra-dataset and Cross-dataset (See paper for more details). We train five detection models :
+
+Faster R-CNN 4
+Swin-T 5
+Deformable DETR 6
+DetectoRS 7
+ConvNeXt-T 8
+Training
+All of the above datasets consists of two classes : Person (class 0) and Handgun (class 1). To train a detection model on this dataset, run
+
+python tools/train.py --config <path/to/model/config.py> --dataset-config <path/to/dataset/config.py> <extra_args>
+Model config files link
+
+Dataset config files link
+
+Trained models link
+
+Extra args
+To adjust the training batch size
+
+<base_command> --cfg-options data.samples_per_gpu=<batch-size>
+Using weights and biases to log metrics: After you create an account in wandb, change entity and project in train.py to your wandb username and project name. Then
+
+<base_command> --use-wandb --wandb-name <name-of-the-experiment>
+Examples:
+Train a Swin-T on MGD (Intra-dataset)
+
+python tools/train.py --config configs/gun_detection/swin_transformer.py --dataset-config configs/_base_/datasets/gun_detection/mgd.py --cfg-options data.samples_per_gpu=6
+Train a detectoRS model on MGD+USRT (Inter-dataset)
+
+python tools/train.py --config configs/gun_detection/detectors.py --dataset-config configs/_base_/datasets/gun_detection/mgd_usrt.py --cfg-options data.samples_per_gpu=4
+Fine-tune MGD+USRT trained Deformable-DETR model on UCF (Inter-dataset)
+
+python tools/train.py --config configs/gun_detection/deformable_detr.py --dataset-config configs/_base_/datasets/gun_detection/ucf.py --cfg-options data.samples_per_gpu=6 --load-from <path/to/trained/model.pth>
+Testing
+To evaluate a trained model, run
+
+python tools/test.py --config <path/to/model/config.py> --dataset-config <path/to/dataset/config.py> --checkpoint <path/to/trained/model> --work-dir <path/to/save/test/scores> --eval bbox
+Examples:
+Evaluate a faster-rcnn trained on MGD on MGD's test set (Intra-dataset)
+
+python tools/test.py --config configs/gun_detection/faster_rcnn.py --dataset-config configs/_base_/datasets/gun_detection/mgd.py --checkpoint <path/to/mgd/trained/model.pth> --work-dir <path/to/save/test/scores> --eval bbox
+Evaluate a ConvNeXt trained on MGD+USRT on the entirety of UCF (Inter-dataset)
+
+python tools/test.py --config configs/gun_detection/convnext.py --dataset-config configs/_base/datasets/gun_detection/ucf_test_full.py --checkpoint <path/to/mgd+usrt/trained/model.pth> --work-dir <path/to/save/test/scores> --eval bbox
+To save the bounding box predictions on test set , add --save-path <path/to/output/folder> to the above command.
+
+Citations
+Please consider citing the following references in your publications if it helps your research
+
+@misc{yellapragada2023cctvgun,
+      title={CCTV-Gun: Benchmarking Handgun Detection in CCTV Images}, 
+      author={Srikar Yellapragada and Zhenghong Li and Kevin Bhadresh Doshi and Purva Makarand Mhasakar and Heng Fan and Jie Wei and Erik Blasch and Haibin Ling},
+      year={2023},
+      eprint={2303.10703},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+
+@article{lim2021deep,
+  title={Deep multi-level feature pyramids: Application for non-canonical firearm detection in video surveillance},
+  author={Lim, JunYi and Al Jobayer, Md Istiaque and Baskaran, Vishnu Monn and Lim, Joanne MunYee and See, John and Wong, KokSheik},
+  journal={Engineering applications of artificial intelligence},
+  volume={97},
+  pages={104094},
+  year={2021},
+  publisher={Elsevier}
+}
+
+@article{gonzalez2020real,
+  title={Real-time gun detection in CCTV: An open problem},
+  author={Gonz{\'a}lez, Jose L Salazar and Zaccaro, Carlos and {\'A}lvarez-Garc{\'\i}a, Juan A and Morillo, Luis M Soria and Caparrini, Fernando Sancho},
+  journal={Neural networks},
+  volume={132},
+  pages={297--308},
+  year={2020},
+  publisher={Elsevier}
+}
+
+@inproceedings{sultani2018real,
+  title={Real-world anomaly detection in surveillance videos},
+  author={Sultani, Waqas and Chen, Chen and Shah, Mubarak},
+  booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+  pages={6479--6488},
+  year={2018}
+}
+References
+Footnotes
+Lim, JunYi, et al. "Deep multi-level feature pyramids: Application for non-canonical firearm detection in video surveillance." Engineering applications of artificial intelligence 97 (2021): 104094. ↩
+
+González, Jose L. Salazar, et al. "Real-time gun detection in CCTV: An open problem." Neural networks 132 (2020): 297-308. ↩
+
+Sultani, Waqas, Chen Chen, and Mubarak Shah. "Real-world anomaly detection in surveillance videos." Proceedings of the IEEE conference on computer vision and pattern recognition. 2018. ↩
+
+Ren, Shaoqing, et al. "Faster r-cnn: Towards real-time object detection with region proposal networks." Advances in neural information processing systems 28 (2015). ↩
+
+Liu, Ze, et al. "Swin transformer: Hierarchical vision transformer using shifted windows." Proceedings of the IEEE/CVF international conference on computer vision. 2021. ↩
+
+Zhu, Xizhou, et al. "Deformable detr: Deformable transformers for end-to-end object detection." arXiv preprint arXiv:2010.04159 (2020). ↩
+
+Qiao, Siyuan, Liang-Chieh Chen, and Alan Yuille. "Detectors: Detecting objects with recursive feature pyramid and switchable atrous convolution." Proceedings of the IEEE/CVF conference on computer vision and pattern recognition. 2021. ↩
+
+Liu, Zhuang, et al. "A convnet for the 2020s." Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. 2022. ↩
+
+About
+No description or website provided.
+Topics
+Resources
+Readme
+Apache-2.0 license
+
+Cite this repository
+Activity
+Stars
+27 stars
+Watchers
+1 watching
+Forks
+10 forks
+Report repository
+Releases
+44tags
+Contributors
+2
+ (2)
+@srikarym
+srikarymSrikar Yellapragada
+@purva98
+purva98
+Languages
+Python
+99.9%
+Shell
+0.1%
+ 
