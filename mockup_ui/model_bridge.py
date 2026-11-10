@@ -61,6 +61,12 @@ def discover_available_models() -> list[tuple[str, Path]]:
             seen.add(resolved)
             seen_names.add(resolved.name)
 
+    # 0. Model 10 (Thesis 2 SOTA - Held Non-Weapon Immunity & Full-Scale Recall) -> best_weapon_detector_tenth_model.pth
+    if (ROOT_DIR / "best_weapon_detector_tenth_model.pth").is_file():
+        add_if_exists("Model 10 (Thesis 2 SOTA - Held Non-Weapon Immunity & Full-Scale Recall)", ROOT_DIR / "best_weapon_detector_tenth_model.pth")
+    elif (MOCKUP_DIR / "models" / "best_weapon_detector_tenth_model.pth").is_file():
+        add_if_exists("Model 10 (Thesis 2 SOTA - Held Non-Weapon Immunity & Full-Scale Recall)", MOCKUP_DIR / "models" / "best_weapon_detector_tenth_model.pth")
+
     # 1. Model 9 (Production SOTA - Multi-Angle & Shadow Immunity) -> best_weapon_detector_ninth_model.pth
     if MODEL_PATH.is_file():
         add_if_exists("Model 9 (Production SOTA - Multi-Angle & Shadow Immunity)", MODEL_PATH)
@@ -100,7 +106,13 @@ def discover_available_models() -> list[tuple[str, Path]]:
 
 
 def default_model_path() -> Path | None:
-    """Default to Model 9 (Production SOTA - best_weapon_detector_ninth_model.pth)."""
+    """Default to Model 10 (Thesis 2 SOTA) if available, otherwise Model 9 (Production SOTA)."""
+    m10_root = ROOT_DIR / "best_weapon_detector_tenth_model.pth"
+    m10_mock = MOCKUP_DIR / "models" / "best_weapon_detector_tenth_model.pth"
+    if m10_root.is_file():
+        return m10_root
+    if m10_mock.is_file():
+        return m10_mock
     if MODEL_PATH.is_file():
         return MODEL_PATH
     avail = discover_available_models()
@@ -110,7 +122,7 @@ def default_model_path() -> Path | None:
 
 
 def get_model_display_name(path: Path | str | None) -> str:
-    """Return a clean user-facing title for the model (e.g. 'Model 9 (Production SOTA)')."""
+    """Return a clean user-facing title for the model (e.g. 'Model 10 (Thesis 2 SOTA)', 'Model 9 (Production SOTA)')."""
     if not path:
         return ""
     resolved = Path(path).resolve()
@@ -120,6 +132,8 @@ def get_model_display_name(path: Path | str | None) -> str:
                 return label.split(" - ")[0] + ")"
             return label
     name = Path(path).name.lower()
+    if "tenth" in name:
+        return "Model 10 (Thesis 2 SOTA)"
     if "ninth" in name or "v11" in name:
         return "Model 9 (Production SOTA)"
     return ""
