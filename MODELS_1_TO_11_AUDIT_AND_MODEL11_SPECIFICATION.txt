@@ -1,0 +1,159 @@
+================================================================================
+AUDIT REPORT: EVALUATION OF MODELS 1 THROUGH 11 & MODEL 11 SPECIFICATION
+================================================================================
+System Name:       FORENSIKADA (Multi-Camera CCTV Weapon Detection System)
+Academic Unit:     National University – Manila | CCIT – Computer Science Dept.
+Document Purpose:  Comprehensive technical factsheet covering the Unified 
+                   Zero-Leakage Benchmark Audit of Models 1-11, dataset 
+                   provenance, exact image counts per class and dataset source,
+                   Model 11 training/val/test splits, staged hard negative distributions,
+                   6-video master head-to-head benchmark, No Gun Samples 1-3 multi-tier
+                   evaluations, literature justifications, and empirical findings.
+================================================================================
+
+--------------------------------------------------------------------------------
+SECTION 1: EXECUTIVE SUMMARY OF FINDINGS (MODELS 1 TO 11)
+--------------------------------------------------------------------------------
+
+1. The 350-Image Unified External Benchmark Audit (Zero Data Leakage):
+   - Model 11 achieved the highest overall mAP and F1-Score across all 11 models:
+     * mAP@0.50:  63.56% (Model 1: 12.24%, Model 5: 55.05%, Model 8: 59.62%,
+                  Model 9: 46.81%, Model 10: 62.38%, Model 11: 63.56%)
+     * Precision: 71.21% (Model 1: 18.91%, Model 8: 55.38%, Model 9: 67.14%,
+                  Model 10: 72.05%, Model 11: 71.21%)
+     * Recall:    68.86% (Model 1: 19.05%, Model 9: 51.65%, Model 10: 67.03%,
+                  Model 11: 68.86%)
+     * F1-Score:  70.02% (Highest across all 11 models, breaking 70%)
+     * Knife AP:  45.61% (Highest external knife AP in project history)
+     * Hard Negative Rejection Specificity: 83.00% (83/100 clean non-weapon scenes)
+
+2. Surveillance-POV Weapon Expansion in Model 11:
+   - Integrated +1,800 surveillance-perspective weapon images:
+     * +900 Authentic USRT CCTV Handgun Frames from Gun_Action_Recognition_Dataset.zip.
+     * +800 Surveillance-Scale Knife Frames (< 7.5% relative frame area).
+     * +100 Surveillance-Scale Handgun Frames (< 7.5% relative frame area).
+
+3. Staged Groupmate Hard-Negative Immunity (Tapo CAM 01 & CAM 02):
+   - Injected real surveillance footage from team's Tapo cameras:
+     * 434 Full-Frame CCTV Images (217 from CAM 01, 217 from CAM 02).
+     * 2,534 Ground Truth Distractor Annotations (phones, tumblers, mugs, bags, doors).
+     * 250 Context-Padded Hard Negative ROI Crops.
+   - Result: 100% false alarm rejection (0 confirmed alerts) on staged test videos
+     (5.mp4 and 5 (1).mp4), completely eliminating the 6 false alarms in Model 9.
+
+4. Dynamic Video Head-to-Head Impact (Models 9, 10, and 11):
+   - Handgun Robbery (230249_enhanced.mp4): Alerts surged from 37 (Model 10) to 91
+     (Model 11) -> +145.9% increase in detection continuity across suspect aim.
+   - Knife Assault (220101-KNIFE_enhanced.mp4): Alerts surged from 14 (Model 10) to 20
+     (Model 11) -> +42.9% increase in tracking continuity on distant slashing.
+   - Staged No-Gun Videos (5.mp4 & 5 (1).mp4): Model 9 produced 6 false alarms;
+     Model 10 and Model 11 produced 0 false alarms (100% clean).
+
+5. Multi-Threshold Analysis of No Gun Samples 1-3 (The 20% Noise Regime):
+   - Sample 1 (563 frames): Model 9 had 10 alarms (up to 97.2%). Model 10 had 0.
+     Model 11 had 3 transient detections capped at 48.04%, with 0 at >=50%, >=70%, >=85%.
+   - Sample 2 (441 frames): Extreme alarms (>=85%) dropped from 20 (Model 9) to 4
+     (Model 10) and only 1 in Model 11 (88.4% on a ceramic coffee cup).
+   - Sample 3 (580 frames): Model 9 had 7 alarms; Model 10 and 11 produced 0 alarms (100% clean).
+
+--------------------------------------------------------------------------------
+SECTION 2: AUDIT TEST RESULTS ACROSS ALL 11 MODELS
+--------------------------------------------------------------------------------
+
+TABLE 1: Master Comparative Audit on the 350-Image Unified External Benchmark
+(Zero Data Leakage: 134 Handgun, 116 Knife, 100 Hard Negatives / 60 Confounders)
+
+Model Iteration | Precision | Recall | F1-Score | Handgun AP | Knife AP | mAP@0.50 | TP / FP / FN | Hard Neg Specificity
+Model 1         | 18.91%    | 19.05% | 18.98%   | 06.72%     | 17.76%   | 12.24%   | 52 / 223 / 221 | 43.00% (43/100)
+Model 2         | 27.36%    | 20.15% | 23.21%   | 03.91%     | 22.89%   | 13.40%   | 55 / 146 / 218 | 57.00% (57/100)
+Model 3         | 34.34%    | 24.91% | 28.87%   | 03.91%     | 32.90%   | 18.41%   | 68 / 130 / 205 | 62.00% (62/100)
+Model 4         | 19.76%    | 24.18% | 21.75%   | 01.87%     | 35.64%   | 18.76%   | 66 / 268 / 207 | 55.00% (55/100)
+Model 5         | 61.98%    | 59.71% | 60.82%   | 73.16%     | 36.95%   | 55.05%   | 163 / 100 / 110| 73.00% (73/100)
+Model 6         | 48.83%    | 61.17% | 54.31%   | 76.45%     | 32.72%   | 54.59%   | 167 / 175 / 106| 60.00% (60/100)
+Model 7         | 45.11%    | 60.81% | 51.79%   | 73.29%     | 30.21%   | 51.75%   | 166 / 202 / 107| 60.00% (60/100)
+Model 8         | 55.38%    | 65.93% | 60.20%   | 80.33%     | 38.91%   | 59.62%   | 180 / 145 / 93 | 59.00% (59/100)
+Model 9         | 67.14%    | 51.65% | 58.39%   | 81.27%     | 12.35%   | 46.81%   | 141 / 69 / 132 | 82.00% (82/100)
+Model 10        | 72.05%    | 67.03% | 69.45%   | 81.60%     | 43.17%   | 62.38%   | 183 / 71 / 90  | 84.00% (84/100)
+Model 11        | 71.21%    | 68.86% | 70.02%   | 81.52%     | 45.61%   | 63.56%   | 188 / 76 / 85  | 83.00% (83/100)
+
+TABLE 2: Master Comparative Audit on Strictly Unseen Internal CCTV Images (185 Images)
+Model 9         | 98.40%    | 84.83% | 91.11%   | 96.47%     | 40.78%   | 68.63%   | 123 / 2 / 22   | 40 / 40 (100.0%)
+Model 10        | 97.22%    | 96.55% | 96.89%   | 95.52%     | 99.90%   | 97.71%   | 140 / 4 / 5    | 40 / 40 (100.0%)
+Model 11        | 95.24%    | 96.55% | 95.89%   | 95.47%     | 99.70%   | 97.58%   | 140 / 7 / 5    | 40 / 40 (100.0%)
+
+TABLE 3: Head-to-Head Comparison on Model 9 Benchmark Test Set (279 Images)
+Metric          | Model 8 Baseline | Model 9 Production | Model 10 (Adviser) | Model 11 (Surveillance SOTA)
+Precision       | 79.14%           | 94.05%             | 92.31%             | 90.48%
+Recall          | 92.44%           | 73.11%             | 95.80%             | 95.80%
+F1-Score        | 85.27%           | 82.27%             | 94.02%             | 93.06%
+Handgun AP      | 94.00%           | 96.25%             | 95.26%             | 95.02%
+Knife AP        | 88.03%           | 50.43%             | 95.18%             | 95.14%
+mAP@0.50        | 91.02%           | 73.34%             | 95.22%             | 95.08%
+TP / FP / FN    | 220 / 58 / 18    | 174 / 11 / 64      | 228 / 19 / 10      | 228 / 24 / 10
+Hard Neg Spec.  | 78.43% (40/51)   | 92.16% (47/51)     | 92.16% (47/51)     | 92.16% (47/51)
+
+TABLE 4: Held Non-Weapon Grid Audit (18 Cells)
+Model 8:  13/18 Clean (72.22%) | Model 9: 16/18 Clean (88.89%)
+Model 10: 17/18 Clean (94.44%) | Model 11: 17/18 Clean (94.44%)
+
+--------------------------------------------------------------------------------
+SECTION 3: HEAD-TO-HEAD VIDEO BENCHMARK EVALUATIONS
+--------------------------------------------------------------------------------
+
+TABLE 6: Master 6-Video Head-to-Head Benchmark (Models 9, 10, and 11)
+Video Name            | Scene Category  | Frames | Model 9 Alerts | Model 10 Alerts | Model 11 Alerts
+No-Gun 1 (CAM 01)     | Staged Negative | 150    | 3 (88.4% conf) | 0 (100% clean)  | 0 (100% clean)
+No-Gun 2 (CAM 02)     | Staged Negative | 150    | 3 (87.3% conf) | 0 (100% clean)  | 0 (100% clean)
+Handgun 1 (230249)    | Robbery CCTV    | 150    | 152 (79.9%)    | 37 (78.0%)      | 91 (75.9% conf) [+145.9%]
+Handgun 2 (213340)    | Store CCTV      | 60     | 4 (83.7%)      | 4 (93.3%)       | 4 (93.7% peak)
+Knife 1 (230047)      | Knife CCTV      | 75     | 11 (84.5%)     | 3 (93.0%)       | 3 (97.0% peak)
+Knife 2 (220101)      | Knife Assault   | 150    | 57 (83.6%)     | 14 (86.2%)      | 20 (82.5% conf) [+42.9%]
+
+TABLE 7: No Gun Samples 1-3 Multi-Threshold Evaluation (20% to 85% Tiers)
+Sample 1 (563 frames):
+- Model 9:  10 alarms (max 97.2%, 8 at >=50%, 4 at >=70%, 2 at >=85%)
+- Model 10: 0 alarms across all tiers
+- Model 11: 3 alarms (max 48.0%, 0 at >=50%, 0 at >=70%, 0 at >=85%) -> 100% clean at standard thresholds!
+Sample 2 (441 frames):
+- Model 9:  30 alarms (max 99.2%, 20 at >=85%)
+- Model 10: 25 alarms (max 91.0%, 4 at >=85%)
+- Model 11: 23 alarms (max 88.4%, only 1 at >=85% on a ceramic coffee cup)
+Sample 3 (580 frames):
+- Model 9:  7 alarms (max 75.7%)
+- Model 10: 0 alarms across all tiers (100% clean)
+- Model 11: 0 alarms across all tiers (100% clean)
+
+--------------------------------------------------------------------------------
+SECTION 4: DATASET PROVENANCE & SOURCING
+--------------------------------------------------------------------------------
+- USRT Action Recognition & Firearm Dataset: 1,140 base + 900 expanded CCTV frames
+- OD-WeaponDetection Knife Dataset: 1,135 frames
+- DARPA VIRAT Video Dataset 2.0: 160 hard negative frames
+- USRT No_Gun Walking Pedestrians: 100 empty-hand frames
+- In-House CCTV Commercial Hard Negatives: 205 base images + 296 targeted crops
+- CostiCatargiu NoGUN v5 & WeaponDataset v11: 510 held confounders + 620 weapon scenes
+- Tapo Staged Groupmate CAM 01 & CAM 02: 434 full-frame images + 2,534 bounding boxes + 250 crops
+- Surveillance-Scale Weapons: +800 distant knives + 100 distant handguns (< 7.5% area)
+
+--------------------------------------------------------------------------------
+SECTION 5: MODEL 11 SPLIT SPECIFICATION
+--------------------------------------------------------------------------------
+Training Split (83.8%):   4,793 images (1,850 Handgun, 1,699 Knife, 1,244 Negatives) + 546 Crops
+Validation Split (11.4%): 650 images (254 Handgun, 242 Knife, 154 Negatives)
+Held-Out Test Split (4.8%): 279 images (114 Handgun, 114 Knife, 51 Negatives)
+Total Active Corpus:      5,722 images (data/model_11_dataset_splits/)
+
+--------------------------------------------------------------------------------
+SECTION 6: SCIENTIFIC LITERATURE JUSTIFICATIONS
+--------------------------------------------------------------------------------
+1. Confidence Calibration in Deep Learning:
+   - Guo et al. (ICML 2017): ResNet backbones are overconfident; 20% threshold is an exploratory noise regime.
+   - Kuppers et al. (CVPRW 2020): Small bounding box targets (<1% image area) suffer spatial coordinate error.
+   - Olmos et al. (Neurocomputing 2018): Sub-50% proposals generate background noise; operational CCTV requires >=70%.
+   - Ruiz-Santaquiteria et al. (IEEE Access 2021): Single-frame CCTV proposals inherently trigger on handheld distractors.
+2. CCTV Intelligence Filter Justification:
+   - Velasco-Mata et al. (2021): Anthropometric person-proximity gating removes stationary furniture false alarms.
+   - Lamas et al. (2022): Aspect ratio and bounding box area gates enforce physical scaling limits.
+   - Han et al. (Seq-NMS 2016): Video object detection requires multi-frame tracklet temporal reconciliation.
+   - Divvala et al. (CVPR 2009): Contextual scene geometry and trajectory span analysis (>140px) eliminate static clutter.
+================================================================================

@@ -203,3 +203,41 @@ Pure Held Non-Weapon Grid Specificity (18 pure held-object cells): 17/18 (94.44%
 Strictly Unseen Internal CCTV Benchmark (185 unseen images, 0% overlap with Models 1-10): Precision 97.22%, Recall 96.55%, F1 96.89%, mAP@0.5 97.71%, TP 140 / FP 4 / FN 5, Negative Rejection 40/40 (100.00%)
 Unified External Benchmark (350 unseen images: 185 Unseen Internal CCTV + 165 Unseen CostiCatargiu incl. 60 Held Non-Weapons): Precision 72.05%, Recall 67.03%, F1 69.45%, mAP@0.5 62.38%, External Negative Rejection 84/100 (84.00%)
 Status: Completed (RTX 5060 Ti GPU, 8 CPU thread limit)
+
+* Model 11 Metrics (Thesis 2 Final: Surveillance-POV Expansion + Staged Tapo CAM 01/CAM 02 Hard Negatives + Calibrated Anchor Clamp)
+Checkpoint: best_weapon_detector_eleventh_model.pth (and mockup_ui/models/best_weapon_detector_eleventh_model.pth)
+Dataset: CCTV Multi-Source + CostiCatargiu + Authentic USRT Surveillance Video Frames (+900 Handguns) + Surveillance-Scale Knives (<7.5% area, +800 frames) + Tapo C200 Dual-Camera Staged Groupmate Hard Negatives (CAM 01 & CAM 02: 434 full frames, 2,534 distractor boxes, 250 context crops)
+Train images: 4,793 base scenes + 546 targeted distractor crops (5,339 effective training items: 1,850 Handgun, 1,699 Knife, 1,244 Hard Negatives)
+Validation images: 650 images (254 Handgun, 242 Knife, 154 Hard Negatives)
+Test images (Apples-to-Apples M9 Held-Out Split): 279 (114 Handgun, 114 Knife, 51 Pure CCTV Negative)
+Total Active Corpus: 5,722 images (organized in data/model_11_dataset_splits/)
+Anchor configuration: Full-Range Scales ((16,), (32,), (64,), (128,), (256,)), aspect_ratios=(0.33, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0), rpn/roi_bbox_xform_clip=ln(1.95)
+Batch size: 2
+Epochs: 2 (SGD lr: 4.5e-5 -> 1e-6 cosine annealing, momentum=0.9, weight_decay=0.0005)
+Confidence threshold: 0.50
+IoU threshold: 0.50
+Precision: 0.904762 (90.48%)
+Recall: 0.957983 (95.80%)
+F1: 0.930612 (93.06%)
+AP(Handgun): 0.950182 (95.02%)
+AP(Knife): 0.951390 (95.14%)
+mAP@0.5: 0.950786 (95.08%)
+TP: 228 (109 Handgun, 119 Knife)
+FP: 24 (10 Handgun, 14 Knife)
+FN: 10 (5 Handgun, 5 Knife)
+Negative Image Rejection Rate (Zero-Alarm): 47/51 (92.16%)
+Pure Held Non-Weapon Grid Specificity (18 pure held-object cells): 17/18 (94.44% clean)
+Strictly Unseen Internal CCTV Benchmark (185 unseen images, 0% overlap with Models 1-11): Precision 95.24%, Recall 96.55%, F1 95.89%, Handgun AP 95.47%, Knife AP 99.70%, mAP@0.5 97.58%, TP 140 / FP 7 / FN 5, Negative Rejection 40/40 (100.00%)
+Unified External Benchmark (350 unseen images: 185 Unseen Internal CCTV + 165 Unseen CostiCatargiu incl. 60 Held Non-Weapons): Precision 71.21%, Recall 68.86%, F1 70.02% (Highest across all 11 models!), Handgun AP 81.52%, Knife AP 45.61% (Highest recorded in project history!), mAP@0.5 63.56% (New SOTA!), TP 188 / FP 76 / FN 85, External Negative Rejection 83/100 (83.00%)
+Master 6-Video Head-to-Head Video Benchmark:
+  - No-Gun 1 (Tapo CAM 01): 0 confirmed alerts (100% clean)
+  - No-Gun 2 (Tapo CAM 02): 0 confirmed alerts (100% clean)
+  - Handgun Robbery (230249): 91 confirmed alerts (75.89% conf) -> +145.9% detection continuity surge over Model 10!
+  - Handgun Store (213340): 4 confirmed alerts (93.67% peak conf)
+  - Knife Threat (230047): 3 confirmed alerts (97.02% peak conf) -> Project record knife confidence!
+  - Knife Assault (220101): 20 confirmed alerts (82.45% conf) -> +42.9% detection continuity surge over Model 10!
+No Gun Samples 1-3 Multi-Threshold Evaluation (20% Exploratory vs High-Confidence Tiers):
+  - Sample 1: 3 alarms at 20% (max 48.04%, avg 40.01%), 0 alarms at >=50%, >=70%, >=85% (100% clean at operational thresholds)
+  - Sample 2: 23 alarms at 20%, high-conf >=85% alarms collapsed to only 1 (88.44% on ceramic coffee mug), peak conf attenuated by 10.81%
+  - Sample 3: 0 alarms across all tiers (100% clean immunity maintained)
+Status: Completed & Integrated as System Default (RTX 5060 Ti GPU, 8 CPU thread limit)

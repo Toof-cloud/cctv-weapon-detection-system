@@ -61,6 +61,12 @@ def discover_available_models() -> list[tuple[str, Path]]:
             seen.add(resolved)
             seen_names.add(resolved.name)
 
+    # -1. Model 11 (Surveillance-POV Expansion & Staged Tapo Hard-Negative Immunity SOTA) -> best_weapon_detector_eleventh_model.pth
+    if (ROOT_DIR / "best_weapon_detector_eleventh_model.pth").is_file():
+        add_if_exists("Model 11 (Surveillance-POV Expansion & Staged Hard-Negative Immunity)", ROOT_DIR / "best_weapon_detector_eleventh_model.pth")
+    elif (MOCKUP_DIR / "models" / "best_weapon_detector_eleventh_model.pth").is_file():
+        add_if_exists("Model 11 (Surveillance-POV Expansion & Staged Hard-Negative Immunity)", MOCKUP_DIR / "models" / "best_weapon_detector_eleventh_model.pth")
+
     # 0. Model 10 (Thesis 2 SOTA - Held Non-Weapon Immunity & Full-Scale Recall) -> best_weapon_detector_tenth_model.pth
     if (ROOT_DIR / "best_weapon_detector_tenth_model.pth").is_file():
         add_if_exists("Model 10 (Thesis 2 SOTA - Held Non-Weapon Immunity & Full-Scale Recall)", ROOT_DIR / "best_weapon_detector_tenth_model.pth")
@@ -106,7 +112,13 @@ def discover_available_models() -> list[tuple[str, Path]]:
 
 
 def default_model_path() -> Path | None:
-    """Default to Model 10 (Thesis 2 SOTA) if available, otherwise Model 9 (Production SOTA)."""
+    """Default to Model 11 / Model 10 (Thesis 2 SOTA) if available, otherwise Model 9 (Production SOTA)."""
+    m11_root = ROOT_DIR / "best_weapon_detector_eleventh_model.pth"
+    m11_mock = MOCKUP_DIR / "models" / "best_weapon_detector_eleventh_model.pth"
+    if m11_root.is_file():
+        return m11_root
+    if m11_mock.is_file():
+        return m11_mock
     m10_root = ROOT_DIR / "best_weapon_detector_tenth_model.pth"
     m10_mock = MOCKUP_DIR / "models" / "best_weapon_detector_tenth_model.pth"
     if m10_root.is_file():
@@ -122,7 +134,7 @@ def default_model_path() -> Path | None:
 
 
 def get_model_display_name(path: Path | str | None) -> str:
-    """Return a clean user-facing title for the model (e.g. 'Model 10 (Thesis 2 SOTA)', 'Model 9 (Production SOTA)')."""
+    """Return a clean user-facing title for the model (e.g. 'Model 11 (Surveillance-POV SOTA)', 'Model 10 (Thesis 2 SOTA)')."""
     if not path:
         return ""
     resolved = Path(path).resolve()
@@ -132,6 +144,8 @@ def get_model_display_name(path: Path | str | None) -> str:
                 return label.split(" - ")[0] + ")"
             return label
     name = Path(path).name.lower()
+    if "eleventh" in name:
+        return "Model 11 (Surveillance-POV Expansion & Staged Hard-Negative Immunity)"
     if "tenth" in name:
         return "Model 10 (Thesis 2 SOTA)"
     if "ninth" in name or "v11" in name:

@@ -649,10 +649,6 @@ class CCTVIntelligenceFilter:
                         w_disp = det.get("displacement", 0.0)
                         if crop_fill < 0.030 and line_ratio < 0.75 and w_disp < 8.0 and not is_wooden_weapon and conf < 0.90:
                             rejection_reason = f"SPARSE_THIN_STICK_TRAP (fill={crop_fill:.1%} < 3.0% on background stick)"
-                        elif cname == "handgun" and (is_wooden_weapon or is_metallic_blade or is_elongated_blade):
-                            det["class_name"] = "knife"
-                            cname = "knife"
-                            det["morphology_calibrated"] = True
 
             # Human proximity assessment & closest person association
             is_adjacent_to_person = False
@@ -730,7 +726,7 @@ class CCTVIntelligenceFilter:
                         # and horizontally separated from the torso by up to allowed_reach (0.35 * p_h).
                         is_extended_arm_aim = (not is_inside_horizontal) and (min_edge_dist <= allowed_reach) and (cy >= pbox[1] + 0.12 * p_h)
                         effective_min_reach_y = 0.15 if is_extended_arm_aim else self.min_person_reach_y
-                        if (effective_min_reach_y <= rel_y <= effective_max_reach_y) or is_overhead:
+                        if ((effective_min_reach_y <= rel_y <= effective_max_reach_y) or is_overhead) and not det.get("is_static", False):
                             is_held_by_person = True
 
             # Check 3: Spatial person presence & proximity gating
@@ -791,10 +787,15 @@ class CCTVIntelligenceFilter:
                     and (wbox[3] >= pbox[1] - 0.22 * p_h)
                     and (pbox[0] - 0.20 * p_w <= cx <= pbox[2] + 0.20 * p_w)
                 )
-                # When an arm is horizontally outstretched (extended arm aiming), the hand/weapon is at shoulder height (rel_y >= 0.15)
-                # and horizontally separated from the torso by up to allowed_reach (0.35 * p_h).
-                is_extended_arm_aim = (not (pbox[0] <= cx <= pbox[2])) and (min_edge_dist <= allowed_reach) and (cy >= pbox[1] + 0.12 * p_h)
-                effective_min_reach_y = 0.15 if is_extended_arm_aim else self.min_person_reach_y
+                torso_x_center = (cx - pbox[0]) / max(1, p_w)
+                # Extended arm aiming: weapon center is near/outside the lateral edge of the torso box
+                # or ultra-high confidence (>= 0.96) firearm aiming at shoulder/eye level.
+                is_extended_arm_aim = (
+                    (not (pbox[0] + 0.18 * p_w <= cx <= pbox[2] - 0.18 * p_w))
+                    and (min_edge_dist <= allowed_reach)
+                    and (cy >= pbox[1] + 0.08 * p_h)
+                ) or (conf >= 0.96 and cy >= pbox[1] + 0.08 * p_h)
+                effective_min_reach_y = 0.08 if is_extended_arm_aim else self.min_person_reach_y
                 if rel_y < effective_min_reach_y and not is_overhead:
                     rejection_reason = f"UNPHYSICAL_PERSON_LOCATION (rel_y={rel_y:.2f} head/hair/hat region)"
                 elif rel_y > effective_max_reach_y:
@@ -808,24 +809,23 @@ class CCTVIntelligenceFilter:
                     if box_h > 130 and aspect_ratio < 0.52 and wbox[3] >= pbox[3] - 0.25 * p_h:
                         rejection_reason = f"UNPHYSICAL_ARCHITECTURAL_COLUMN (vertical post h={box_h}px, AR={aspect_ratio:.2f})"
 
-                # Far-away torso accessory / cross-body sling-bag discrimination:
-                # When a person is distant/mid-distance (p_h <= 320px), dark pouches/bags resting on the chest/torso/hip
-                # without arm extension are sling bags or pouches, not handheld weapons.
-                if rejection_reason is None and cname == "handgun" and p_h <= 320:
-                    torso_x_center = (cx - pbox[0]) / max(1, p_w)
-                    if 0.05 <= torso_x_center <= 1.15 and 0.20 <= rel_y <= 0.70:
+                # Far-away torso accessory / cross-body sling-bag / held beverage cup discrimination:
+                # Only applies to detections resting strictly inside the mid-torso (0.20 <= torso_x_center <= 0.80)
+                # on distant/mid-field persons (p_h <= 340px) where confidence < 0.85, never on outstretched arms.
+                if rejection_reason is None and cname == "handgun" and p_h <= 340 and conf < 0.85:
+                    if 0.20 <= torso_x_center <= 0.80 and 0.30 <= rel_y <= 0.68:
                         rejection_reason = f"FAR_FIELD_TORSO_ACCESSORY (torso pouch rel_x={torso_x_center:.2f}, rel_y={rel_y:.2f} on distant person)"
 
             # Check 4: Static environmental trap suppression
-            # If an object is static, it is suppressed UNLESS it is physically held by a person (e.g. suspect aiming steadily).
+            # If an object is static, it is suppressed UNLESS it is physically held by a person AND exhibits natural hand micro-motion.
             if rejection_reason is None and self.enable_motion_filtering:
                 if det.get("is_static", False):
-                    if not is_held_by_person:
-                        tf = det.get("track_frames", 0)
-                        disp = det.get("displacement", 0.0)
+                    tf = det.get("track_frames", 0)
+                    disp = det.get("displacement", 0.0)
+                    if (not is_held_by_person) or (tf >= 7 and disp <= 7.0):
                         rejection_reason = f"STATIC_BACKGROUND_TRAP ({tf} frames, drift={disp}px)"
                         # Register in persistent exclusion memory for unheld fixtures (e.g. counter POS terminals, railings)
-                        if self.motion_tracker and (not is_adjacent_to_person or not is_held_by_person):
+                        if self.motion_tracker and (not is_adjacent_to_person or not is_held_by_person or (tf >= 7 and disp <= 7.0)):
                             self.motion_tracker.register_static_zone(cx, cy, cname)
 
             eval_entry = {
@@ -886,17 +886,43 @@ class CCTVIntelligenceFilter:
         if required_hits <= 1:
             return records
 
-        # If any detection in a tracklet was confirmed as STATIC_BACKGROUND_TRAP,
-        # then all earlier unconfirmed frames in that stationary tracklet are also static background traps.
-        static_track_ids = set()
+        # Compute full-trajectory spatial span for each motion track_id across the video.
+        # True stationary fixtures (e.g. corded desk phones, shelf cartons) stay within <= 18px across their entire lifespan.
+        # Moving handheld weapons (e.g. suspect walking across room then pausing to aim) have trajectory span > 25px.
+        track_coords: Dict[Any, List[Tuple[float, float]]] = {}
         for r in records:
-            t_id = r.get("temporal_track_id")
-            if t_id is not None and "STATIC_BACKGROUND_TRAP" in str(r.get("rejection_reason", "")):
-                static_track_ids.add(t_id)
+            m_id = r.get("track_id")
+            if m_id is not None:
+                cx_r = 0.5 * (float(r.get("x1", 0)) + float(r.get("x2", 0)))
+                cy_r = 0.5 * (float(r.get("y1", 0)) + float(r.get("y2", 0)))
+                track_coords.setdefault(m_id, []).append((cx_r, cy_r))
+
+        track_span: Dict[Any, float] = {}
+        for m_id, pts in track_coords.items():
+            xs = [p[0] for p in pts]
+            ys = [p[1] for p in pts]
+            track_span[m_id] = math.hypot(max(xs) - min(xs), max(ys) - min(ys))
+
+        static_track_ids = set()
+        static_motion_ids = set()
+        for r in records:
+            if "STATIC_BACKGROUND_TRAP" in str(r.get("rejection_reason", "")):
+                m_id = r.get("track_id")
+                # Treat the track as a stationary fixture unless it traversed a large room trajectory (> 140.0px)
+                if m_id is not None and track_span.get(m_id, 0.0) <= 140.0:
+                    static_motion_ids.add(m_id)
+                    if r.get("temporal_track_id") is not None:
+                        static_track_ids.add(r.get("temporal_track_id"))
+                elif m_id is not None and track_span.get(m_id, 0.0) > 140.0:
+                    # Suspect walked across the room with weapon and briefly paused to aim -> restore frame
+                    r["rejection_reason"] = ""
+                    r["status"] = "CONFIRMED_ALERT"
+                    r["validation_status"] = "VALIDATED_TEMPORAL"
 
         for r in records:
             t_id = r.get("temporal_track_id")
-            if t_id in static_track_ids:
+            m_id = r.get("track_id")
+            if (t_id is not None and t_id in static_track_ids) or (m_id is not None and m_id in static_motion_ids):
                 r["status"] = "SUPPRESSED"
                 r["validation_status"] = "STATIC_BACKGROUND_TRAP"
                 r["rejection_reason"] = "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
