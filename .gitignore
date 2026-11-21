@@ -47,6 +47,10 @@ dataset_analysis/3rd_Model_Dataset/
 removed_images/
 review_batch/
 archive/
+tmp/
+output/
+DEFENSE/
+CHAT_CONTEXT/
 
 # Large dump files (> 100MB exceeds GitHub push limits)
 CHAT_CONTEXT/full_repository_dump.txt
@@ -72,5 +76,10 @@ research/model_improvement/visual_comparisons*/
 research/model_improvement/annotated_frames*/
 research/model_improvement/annotated_videos*/
 research/model_improvement/dataset/hard_negatives*/
+
+# Web deployment staging bundle (pushed separately to Hugging Face Spaces)
+hf_space_bundle/
+web_app/library_data/videos/
+
 
 

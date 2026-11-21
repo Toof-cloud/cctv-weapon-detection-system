@@ -219,11 +219,11 @@ IoU threshold: 0.50
 Precision: 0.904762 (90.48%)
 Recall: 0.957983 (95.80%)
 F1: 0.930612 (93.06%)
-AP(Handgun): 0.950182 (95.02%)
-AP(Knife): 0.951390 (95.14%)
-mAP@0.5: 0.950786 (95.08%)
+AP(Handgun): 0.952214 (95.22%)
+AP(Knife): 0.949291 (94.93%)
+mAP@0.5: 0.950753 (95.08%)
 TP: 228 (109 Handgun, 119 Knife)
-FP: 24 (10 Handgun, 14 Knife)
+FP: 24 (8 Handgun, 16 Knife)
 FN: 10 (5 Handgun, 5 Knife)
 Negative Image Rejection Rate (Zero-Alarm): 47/51 (92.16%)
 Pure Held Non-Weapon Grid Specificity (18 pure held-object cells): 17/18 (94.44% clean)
@@ -240,4 +240,47 @@ No Gun Samples 1-3 Multi-Threshold Evaluation (20% Exploratory vs High-Confidenc
   - Sample 1: 3 alarms at 20% (max 48.04%, avg 40.01%), 0 alarms at >=50%, >=70%, >=85% (100% clean at operational thresholds)
   - Sample 2: 23 alarms at 20%, high-conf >=85% alarms collapsed to only 1 (88.44% on ceramic coffee mug), peak conf attenuated by 10.81%
   - Sample 3: 0 alarms across all tiers (100% clean immunity maintained)
+Status: Completed & Integrated as System Default (RTX 5060 Ti GPU, 8 CPU thread limit)
+
+* Model 12 Metrics (Final Production Model: Complete Surveillance-POV Expansion + Unlocked CostiCatargiu Multi-Scale Knives/Pistols + Staged Tapo & Cup Negatives + WiSE-FT Calibration)
+Checkpoint: best_weapon_detector_twelfth_model.pth (Calibrated WiSE-FT alpha=0.30) and latest_weapon_detector_twelfth_model.pth (Epoch 2 alpha=1.00)
+Dataset: Full Model 11 Corpus + 410 Unlocked Zero-Leakage CostiCatargiu Training Images (270 Knife + 140 Handgun) + 40 Targeted Handheld Cup/Mug/Torso Hard Negative Crops (hard_negatives_v13_cups)
+Train images: 5,203 base scenes + 586 targeted distractor crops (5,789 effective training items: 1,990 Handgun [2,071 boxes], 1,969 Knife [2,118 boxes], 1,244 Full-Frame Hard Negatives + 586 ROI Crops)
+Validation images: 650 images (254 Handgun, 242 Knife, 154 Hard Negatives)
+Test images (Apples-to-Apples M9 Held-Out Split): 279 (114 Handgun, 114 Knife, 51 Pure CCTV Negative)
+Zero-Leakage Audit: 0.0% overlap verified against 279 Internal Test, 350 Unified External Benchmark, and 185 Strictly Unseen CCTV Benchmark
+Batch size: 2
+Epochs: 2 (SGD lr: 4.0e-5 -> 1e-6 cosine annealing; Epoch 1 loss=0.051040 [cls=0.021818, box=0.021812, obj=0.004132, rpn=0.003278]; Epoch 2 loss=0.049346 [cls=0.020836, box=0.021904, obj=0.003428, rpn=0.003178])
+Confidence threshold: 0.50 | IoU threshold: 0.50
+Internal Test Split (279 Images) [Calibrated / Epoch 2]:
+  - Precision: 89.11% / 87.55%
+  - Recall: 96.22% / 97.48%
+  - F1: 92.53% / 92.25%
+  - AP(Handgun): 96.11% / 97.08%
+  - AP(Knife): 94.90% / 95.99%
+  - mAP@0.5: 95.50% / 96.54% (Highest internal mAP in project history!)
+  - TP / FP / FN: 229 / 28 / 9 (Epoch 2: 232 / 33 / 6 — only 6 missed weapons out of 238!)
+  - Negative Image Rejection Rate: 47/51 (92.16%)
+Strictly Unseen Internal CCTV Benchmark (185 Images) [Calibrated / Epoch 2]:
+  - Precision: 94.63% / 94.04%
+  - Recall: 97.24% / 97.93%
+  - F1: 95.92% / 95.95%
+  - AP(Handgun): 96.34% / 97.32%
+  - AP(Knife): 99.60% / 99.09%
+  - mAP@0.5: 97.97% / 98.21% (Highest Unseen CCTV mAP in project history!)
+  - TP / FP / FN: 141 / 8 / 4 (Epoch 2: 142 / 9 / 3)
+  - Negative Image Rejection Rate: 40/40 (100.00%)
+Unified External Benchmark (350 Unseen Images) [Calibrated / Epoch 2]:
+  - Precision: 69.61% / 63.75%
+  - Recall: 72.16% / 77.29%
+  - F1: 70.86% (Highest External F1 in project history!) / 69.87%
+  - AP(Handgun): 82.19% / 82.90%
+  - AP(Knife): 48.85% / 55.93% (+12.76 pp surge over Model 10!)
+  - mAP@0.5: 65.52% / 69.42% (+3.14 pp calibrated / +7.04 pp Epoch 2 surge over Model 10!)
+  - TP / FP / FN: 197 / 86 / 76 (Epoch 2: 211 / 120 / 62)
+  - External Negative Rejection: 82/100 (82.00%) / 77/100 (77.00%)
+Real CCTV Video Ground-Truth Benchmark (16 Streams, 2,538 Evaluated Frames: 221 GT Weapon Frames + 948 Pure Non-Weapon Frames):
+  - Enhanced Weapon Videos + 4 No-Weapon Videos: Precision 99.40%, Recall 75.11% (+38.01 pp over Model 10!), F1 85.57% (+31.44 pp over Model 10!), Video mAP@0.5 78.89% (+23.72 pp over Model 10!), Handgun Video AP 88.13%, Knife Video AP 69.65%, TP 166 / FP 1 (0 No-Weapon FP!) / FN 55, No-Weapon Specificity 100.00% (948/948 clean frames across all 4 Non-Handgun videos!), Mean TP Confidence 87.43%
+  - BasicVSR++ Enhancement Gain on Model 12: Boosted Video Recall from 61.54% -> 75.11% (+13.57 pp, +30 TP recovered), F1 from 75.77% -> 85.57% (+9.80 pp), Video mAP from 73.62% -> 78.89% (+5.27 pp), and Mean Confidence from 86.70% -> 87.43% (+0.73%)
+  - CCTV Intelligence Layer Gain on Model 12: Eliminated 99.88% of raw single-frame false positives (832 FP -> 1 FP; 626 No-Weapon FP -> 0 FP), boosting Video Precision from 19.30% -> 99.40% (+80.10 pp) and No-Weapon Specificity from 38.82% -> 100.00% (948/948 clean frames, +61.18 pp)
 Status: Completed & Integrated as System Default (RTX 5060 Ti GPU, 8 CPU thread limit)

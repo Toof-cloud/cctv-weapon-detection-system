@@ -160,24 +160,40 @@ def resolve_model_path(model_arg: str | None) -> str | Path | None:
     value = str(model_arg).strip().lower()
     if value in {"auto", "default"}:
         return None
-    if value in {"v11", "candidate11", "model11", "ninth", "model9", "nine", "sota", "production"}:
+    if value in {"twelfth", "model12", "twelve", "12", "sota", "production", "final"}:
+        m12_pth = ROOT_DIR / "best_weapon_detector_twelfth_model.pth"
+        if m12_pth.exists():
+            return m12_pth
+    if value in {"eleventh", "model11", "eleven", "11"}:
+        m11_pth = ROOT_DIR / "best_weapon_detector_eleventh_model.pth"
+        if m11_pth.exists():
+            return m11_pth
+    if value in {"tenth", "model10", "ten", "10"}:
+        m10_pth = ROOT_DIR / "best_weapon_detector_tenth_model.pth"
+        if m10_pth.exists():
+            return m10_pth
+    if value in {"v11", "candidate11", "ninth", "model9", "nine", "9"}:
         m9_pth = ROOT_DIR / "best_weapon_detector_ninth_model.pth"
         if m9_pth.exists():
             return m9_pth
         v11_cand = ROOT_DIR / "research" / "model_improvement" / "checkpoints" / "best_candidate_model_v11.pth"
         if v11_cand.exists():
             return v11_cand
-    if value in {"eighth", "model8", "eight"}:
+    if value in {"eighth", "model8", "eight", "8"}:
         return ROOT_DIR / "best_weapon_detector_eighth_model.pth"
-    if value in {"seventh", "model7", "seven"}:
+    if value in {"seventh", "model7", "seven", "7"}:
         return ROOT_DIR / "best_weapon_detector_seventh_model.pth"
-    if value in {"sixth", "model6", "six"}:
+    if value in {"sixth", "model6", "six", "6"}:
         return ROOT_DIR / "best_weapon_detector_sixth_model.pth"
-    if value in {"fifth", "model5", "five"}:
+    if value in {"fifth", "model5", "five", "5"}:
         return ROOT_DIR / "best_weapon_detector_fifth_model.pth"
-    if value in {"retrained", "best_retrained", "new"}:
+    if value in {"fourth", "model4", "four", "4"}:
+        return ROOT_DIR / "best_weapon_detector_fourth_model.pth"
+    if value in {"third", "model3", "three", "3"}:
+        return ROOT_DIR / "best_weapon_detector_third_model.pth"
+    if value in {"retrained", "best_retrained", "new", "second", "model2", "two", "2"}:
         return ROOT_DIR / "best_weapon_detector_retrained.pth"
-    if value in {"original", "baseline", "best"}:
+    if value in {"original", "baseline", "best", "first", "model1", "one", "1"}:
         return ROOT_DIR / "best_weapon_detector.pth"
 
     path = Path(model_arg).expanduser()

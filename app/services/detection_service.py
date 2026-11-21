@@ -14,6 +14,8 @@ if str(ROOT_DIR) not in sys.path:
 from dataset_analysis.build_model import get_model
 
 DEFAULT_MODEL_CANDIDATES = [
+    ROOT_DIR / "best_weapon_detector_thirteenth_model.pth",
+    ROOT_DIR / "best_weapon_detector_twelfth_model.pth",
     ROOT_DIR / "best_weapon_detector_eleventh_model.pth",
     ROOT_DIR / "best_weapon_detector_tenth_model.pth",
     ROOT_DIR / "best_weapon_detector_ninth_model.pth",
@@ -58,12 +60,12 @@ class DetectionService:
             )
 
         model_name = self.model_path.name.lower()
-        if "eleventh" in model_name or "tenth" in model_name or "v11" in model_name or "v10" in model_name:
+        if "thirteenth" in model_name or "twelfth" in model_name or "eleventh" in model_name or "tenth" in model_name or "v11" in model_name or "v10" in model_name:
             checkpoint = torch.load(self.model_path, map_location=self.device, weights_only=False)
             scales = checkpoint.get("anchor_scales", (8, 16, 32, 64, 128) if "v11" in model_name else (16, 32, 64, 128, 256))
             self.model = get_model(num_classes=3, anchor_scales=scales, pretrained=False)
-            rpn_clip = checkpoint.get("rpn_bbox_xform_clip", math.log(1.95) if ("eleventh" in model_name or "tenth" in model_name) else math.log(1.4))
-            roi_clip = checkpoint.get("roi_bbox_xform_clip", math.log(1.95) if ("eleventh" in model_name or "tenth" in model_name) else math.log(1.4))
+            rpn_clip = checkpoint.get("rpn_bbox_xform_clip", math.log(1.95) if ("thirteenth" in model_name or "twelfth" in model_name or "eleventh" in model_name or "tenth" in model_name) else math.log(1.4))
+            roi_clip = checkpoint.get("roi_bbox_xform_clip", math.log(1.95) if ("thirteenth" in model_name or "twelfth" in model_name or "eleventh" in model_name or "tenth" in model_name) else math.log(1.4))
             self.model.rpn.box_coder.bbox_xform_clip = rpn_clip
             self.model.roi_heads.box_coder.bbox_xform_clip = roi_clip
             state_dict = checkpoint["model_state_dict"] if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint else checkpoint
@@ -902,7 +904,7 @@ def process_video(
 
 if __name__ == "__main__":
     process_video(
-        input_path="samples/evaluation_video.mp4",
+        input_path="samples/02_core_test_videos/evaluation_video.mp4",
         output_path=(
             "outputs/videos/"
             "Knife_test_3(newmodel).mp4"

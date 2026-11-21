@@ -1,0 +1,299 @@
+{
+  "model": "Model 13 (Final Production SOTA)",
+  "epochs": [
+    {
+      "epoch": 1,
+      "duration_minutes": 14.78,
+      "train_loss": 0.050766,
+      "loss_components": {
+        "loss_classifier": 0.019581,
+        "loss_box_reg": 0.023395,
+        "loss_objectness": 0.003204,
+        "loss_rpn_box_reg": 0.004587
+      },
+      "m9_test_279": {
+        "Precision": 0.74822695035461,
+        "Recall": 0.8865546218487395,
+        "F1": 0.8115384615384617,
+        "AP_Handgun": 0.8704913620498554,
+        "AP_Knife": 0.8504613537772763,
+        "mAP": 0.8604763579135659,
+        "TP": 211,
+        "FP": 71,
+        "FN": 27,
+        "per_class": {
+          "Handgun": {
+            "TP": 101,
+            "FP": 21,
+            "FN": 13
+          },
+          "Knife": {
+            "TP": 110,
+            "FP": 50,
+            "FN": 14
+          }
+        },
+        "neg_clean": 47,
+        "neg_total": 51,
+        "neg_rate": 0.9215686274509803
+      },
+      "external_350": {
+        "Precision": 0.6033519553072626,
+        "Recall": 0.7912087912087912,
+        "F1": 0.6846275752773376,
+        "AP_Handgun": 0.7620854468379065,
+        "AP_Knife": 0.592574650284129,
+        "mAP": 0.6773300485610178,
+        "TP": 216,
+        "FP": 142,
+        "FN": 57,
+        "per_class": {
+          "Handgun": {
+            "TP": 107,
+            "FP": 21,
+            "FN": 31
+          },
+          "Knife": {
+            "TP": 109,
+            "FP": 121,
+            "FN": 26
+          }
+        },
+        "neg_clean": 81,
+        "neg_total": 100,
+        "neg_rate": 0.81
+      },
+      "unseen_cctv_185": {
+        "Precision": 0.8269230769230769,
+        "Recall": 0.8896551724137931,
+        "F1": 0.8571428571428571,
+        "AP_Handgun": 0.8759898220367462,
+        "AP_Knife": 0.8265209394453876,
+        "mAP": 0.851255380741067,
+        "TP": 129,
+        "FP": 27,
+        "FN": 16,
+        "per_class": {
+          "Handgun": {
+            "TP": 101,
+            "FP": 14,
+            "FN": 13
+          },
+          "Knife": {
+            "TP": 28,
+            "FP": 13,
+            "FN": 3
+          }
+        },
+        "neg_clean": 40,
+        "neg_total": 40,
+        "neg_rate": 1.0
+      },
+      "grid_18_cells": {
+        "total_pure_noweapon_cells": 18,
+        "hallucinated_cells": 5,
+        "clean_cells": 13,
+        "specificity": 0.7222222222222222,
+        "details": [
+          {
+            "grid": 1,
+            "row": 1,
+            "col": 3,
+            "desc": "Man holding glass beer bottle",
+            "detections": [
+              [
+                2,
+                0.7682525515556335
+              ]
+            ]
+          },
+          {
+            "grid": 1,
+            "row": 2,
+            "col": 3,
+            "desc": "Hand holding grey smartphone/card",
+            "detections": [
+              [
+                2,
+                0.9664922952651978
+              ]
+            ]
+          },
+          {
+            "grid": 1,
+            "row": 3,
+            "col": 1,
+            "desc": "Worker holding window squeegee",
+            "detections": [
+              [
+                2,
+                0.5310130715370178
+              ]
+            ]
+          },
+          {
+            "grid": 1,
+            "row": 4,
+            "col": 4,
+            "desc": "Hand holding selfie stick & tripod",
+            "detections": [
+              [
+                2,
+                0.8919251561164856
+              ],
+              [
+                2,
+                0.6154162883758545
+              ],
+              [
+                1,
+                0.5429821014404297
+              ]
+            ]
+          },
+          {
+            "grid": 2,
+            "row": 3,
+            "col": 4,
+            "desc": "Man holding smartphone in both hands",
+            "detections": [
+              [
+                2,
+                0.9296015501022339
+              ]
+            ]
+          }
+        ]
+      },
+      "staged_val_44": {
+        "total_staged_val_frames": 44,
+        "raw_clean_frames": 39,
+        "raw_alarm_frames": 5,
+        "raw_total_false_boxes": 6,
+        "raw_clean_rate": 0.8864,
+        "post_cctv_clean_frames": 44,
+        "post_cctv_alarm_frames": 0,
+        "post_cctv_clean_rate": 1.0
+      }
+    },
+    {
+      "epoch": 2,
+      "duration_minutes": 14.42,
+      "train_loss": 0.04092,
+      "loss_components": {
+        "loss_classifier": 0.014266,
+        "loss_box_reg": 0.021207,
+        "loss_objectness": 0.001716,
+        "loss_rpn_box_reg": 0.003732
+      },
+      "m9_test_279": {
+        "Precision": 0.8393574297188755,
+        "Recall": 0.8781512605042017,
+        "F1": 0.8583162217659137,
+        "AP_Handgun": 0.8768010007508399,
+        "AP_Knife": 0.8514216934614396,
+        "mAP": 0.8641113471061397,
+        "TP": 209,
+        "FP": 40,
+        "FN": 29,
+        "per_class": {
+          "Handgun": {
+            "TP": 101,
+            "FP": 11,
+            "FN": 13
+          },
+          "Knife": {
+            "TP": 108,
+            "FP": 29,
+            "FN": 16
+          }
+        },
+        "neg_clean": 45,
+        "neg_total": 51,
+        "neg_rate": 0.8823529411764706
+      },
+      "external_350": {
+        "Precision": 0.7039473684210527,
+        "Recall": 0.7838827838827839,
+        "F1": 0.7417677642980937,
+        "AP_Handgun": 0.7693798425012696,
+        "AP_Knife": 0.700265355451521,
+        "mAP": 0.7348225989763952,
+        "TP": 214,
+        "FP": 90,
+        "FN": 59,
+        "per_class": {
+          "Handgun": {
+            "TP": 107,
+            "FP": 13,
+            "FN": 31
+          },
+          "Knife": {
+            "TP": 107,
+            "FP": 77,
+            "FN": 28
+          }
+        },
+        "neg_clean": 82,
+        "neg_total": 100,
+        "neg_rate": 0.82
+      },
+      "unseen_cctv_185": {
+        "Precision": 0.916083916083916,
+        "Recall": 0.903448275862069,
+        "F1": 0.9097222222222222,
+        "AP_Handgun": 0.8835160939348116,
+        "AP_Knife": 0.9637096774193548,
+        "mAP": 0.9236128856770831,
+        "TP": 131,
+        "FP": 12,
+        "FN": 14,
+        "per_class": {
+          "Handgun": {
+            "TP": 101,
+            "FP": 5,
+            "FN": 13
+          },
+          "Knife": {
+            "TP": 30,
+            "FP": 7,
+            "FN": 1
+          }
+        },
+        "neg_clean": 40,
+        "neg_total": 40,
+        "neg_rate": 1.0
+      },
+      "grid_18_cells": {
+        "total_pure_noweapon_cells": 18,
+        "hallucinated_cells": 1,
+        "clean_cells": 17,
+        "specificity": 0.9444444444444444,
+        "details": [
+          {
+            "grid": 2,
+            "row": 2,
+            "col": 2,
+            "desc": "Man holding selfie stick",
+            "detections": [
+              [
+                2,
+                0.761254072189331
+              ]
+            ]
+          }
+        ]
+      },
+      "staged_val_44": {
+        "total_staged_val_frames": 44,
+        "raw_clean_frames": 41,
+        "raw_alarm_frames": 3,
+        "raw_total_false_boxes": 3,
+        "raw_clean_rate": 0.9318,
+        "post_cctv_clean_frames": 44,
+        "post_cctv_alarm_frames": 0,
+        "post_cctv_clean_rate": 1.0
+      }
+    }
+  ]
+}

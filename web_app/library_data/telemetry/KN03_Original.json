@@ -1,0 +1,1445 @@
+{
+  "entry": {
+    "video_id": "KN03_Original",
+    "pair_id": "KN03",
+    "title": "Knife CCTV 3 \u2014 Unseen Surveillance Blade Incident (230842) [Original]",
+    "category": "Knife",
+    "version": "Original",
+    "camera_id": "KN03",
+    "source_filename": "Screen Recording 2026-09-07 230842.mp4",
+    "sha256": "563b6e8693eed613984faa3e8b0e36e22a048994002db7667dd206f5c21ce091",
+    "orig_meta": {
+      "width": 1920,
+      "height": 1020,
+      "fps": 30.0,
+      "total_frames": 745,
+      "duration_seconds": 24.83,
+      "file_size_mb": 19.9
+    },
+    "web_meta": {
+      "width": 960,
+      "height": 510,
+      "fps": 30.0,
+      "total_frames": 745,
+      "duration_seconds": 24.83,
+      "file_size_mb": 1.33
+    },
+    "original_video_rel": "videos/KN03_Original_original.mp4",
+    "annotated_video_rel": "videos/KN03_Original_annotated.mp4",
+    "telemetry_rel": "telemetry/KN03_Original.json"
+  },
+  "model_name": "Model 12 (Final Production SOTA)",
+  "model_checkpoint": "best_weapon_detector_twelfth_model.pth",
+  "records_50pct": [
+    {
+      "frame_number": 124,
+      "timestamp_seconds": 4.133,
+      "timestamp_formatted": "00:04.133",
+      "camera_id": "KN03",
+      "object_label": "handgun",
+      "bounding_box": [
+        1847,
+        571,
+        1920,
+        645
+      ],
+      "norm_box": [
+        0.96198,
+        0.5598,
+        1.0,
+        0.63235
+      ],
+      "confidence_score": 0.783,
+      "validation_status": "BARE_HUMAN_LIMB",
+      "rejection_reason": "BARE_HUMAN_LIMB (skin=69.4% >= 55% empty hand/arm)"
+    },
+    {
+      "frame_number": 126,
+      "timestamp_seconds": 4.2,
+      "timestamp_formatted": "00:04.200",
+      "camera_id": "KN03",
+      "object_label": "handgun",
+      "bounding_box": [
+        1846,
+        571,
+        1919,
+        645
+      ],
+      "norm_box": [
+        0.96146,
+        0.5598,
+        0.99948,
+        0.63235
+      ],
+      "confidence_score": 0.8223,
+      "validation_status": "BARE_HUMAN_LIMB",
+      "rejection_reason": "BARE_HUMAN_LIMB (skin=69.8% >= 55% empty hand/arm)"
+    },
+    {
+      "frame_number": 128,
+      "timestamp_seconds": 4.267,
+      "timestamp_formatted": "00:04.267",
+      "camera_id": "KN03",
+      "object_label": "handgun",
+      "bounding_box": [
+        1848,
+        572,
+        1919,
+        637
+      ],
+      "norm_box": [
+        0.9625,
+        0.56078,
+        0.99948,
+        0.62451
+      ],
+      "confidence_score": 0.5878,
+      "validation_status": "BARE_HUMAN_LIMB",
+      "rejection_reason": "BARE_HUMAN_LIMB (skin=73.6% >= 55% empty hand/arm)"
+    },
+    {
+      "frame_number": 130,
+      "timestamp_seconds": 4.333,
+      "timestamp_formatted": "00:04.333",
+      "camera_id": "KN03",
+      "object_label": "handgun",
+      "bounding_box": [
+        1847,
+        572,
+        1919,
+        637
+      ],
+      "norm_box": [
+        0.96198,
+        0.56078,
+        0.99948,
+        0.62451
+      ],
+      "confidence_score": 0.5909,
+      "validation_status": "BARE_HUMAN_LIMB",
+      "rejection_reason": "BARE_HUMAN_LIMB (skin=72.6% >= 55% empty hand/arm)"
+    },
+    {
+      "frame_number": 298,
+      "timestamp_seconds": 9.933,
+      "timestamp_formatted": "00:09.933",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        781,
+        635,
+        1390,
+        882
+      ],
+      "norm_box": [
+        0.40677,
+        0.62255,
+        0.72396,
+        0.86471
+      ],
+      "confidence_score": 0.5211,
+      "validation_status": "NO_PERSON_IN_SCENE",
+      "rejection_reason": "NO_PERSON_IN_SCENE"
+    },
+    {
+      "frame_number": 314,
+      "timestamp_seconds": 10.467,
+      "timestamp_formatted": "00:10.467",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        635,
+        670,
+        1042,
+        830
+      ],
+      "norm_box": [
+        0.33073,
+        0.65686,
+        0.54271,
+        0.81373
+      ],
+      "confidence_score": 0.437,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (43.7% < 50.0%)"
+    },
+    {
+      "frame_number": 316,
+      "timestamp_seconds": 10.533,
+      "timestamp_formatted": "00:10.533",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        786,
+        689,
+        1058,
+        834
+      ],
+      "norm_box": [
+        0.40937,
+        0.67549,
+        0.55104,
+        0.81765
+      ],
+      "confidence_score": 0.9046,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 1-frame transient proposal)"
+    },
+    {
+      "frame_number": 318,
+      "timestamp_seconds": 10.6,
+      "timestamp_formatted": "00:10.600",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        736,
+        646,
+        1400,
+        848
+      ],
+      "norm_box": [
+        0.38333,
+        0.63333,
+        0.72917,
+        0.83137
+      ],
+      "confidence_score": 0.5636,
+      "validation_status": "ANTHROPOMETRIC_SCALE_VIOLATION",
+      "rejection_reason": "ANTHROPOMETRIC_SCALE_VIOLATION (area 29.2% > 20.0% of person)"
+    },
+    {
+      "frame_number": 322,
+      "timestamp_seconds": 10.733,
+      "timestamp_formatted": "00:10.733",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        798,
+        653,
+        1351,
+        844
+      ],
+      "norm_box": [
+        0.41563,
+        0.6402,
+        0.70365,
+        0.82745
+      ],
+      "confidence_score": 0.5913,
+      "validation_status": "ANTHROPOMETRIC_SCALE_VIOLATION",
+      "rejection_reason": "ANTHROPOMETRIC_SCALE_VIOLATION (area 22.2% > 20.0% of person)"
+    },
+    {
+      "frame_number": 324,
+      "timestamp_seconds": 10.8,
+      "timestamp_formatted": "00:10.800",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        730,
+        634,
+        1404,
+        861
+      ],
+      "norm_box": [
+        0.38021,
+        0.62157,
+        0.73125,
+        0.84412
+      ],
+      "confidence_score": 0.5533,
+      "validation_status": "ANTHROPOMETRIC_SCALE_VIOLATION",
+      "rejection_reason": "ANTHROPOMETRIC_SCALE_VIOLATION (area 33.2% > 20.0% of person)"
+    },
+    {
+      "frame_number": 364,
+      "timestamp_seconds": 12.133,
+      "timestamp_formatted": "00:12.133",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        924,
+        673,
+        1328,
+        816
+      ],
+      "norm_box": [
+        0.48125,
+        0.6598,
+        0.69167,
+        0.8
+      ],
+      "confidence_score": 0.6108,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 2-frame transient proposal)"
+    },
+    {
+      "frame_number": 366,
+      "timestamp_seconds": 12.2,
+      "timestamp_formatted": "00:12.200",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        924,
+        672,
+        1328,
+        817
+      ],
+      "norm_box": [
+        0.48125,
+        0.65882,
+        0.69167,
+        0.80098
+      ],
+      "confidence_score": 0.5968,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 2-frame transient proposal)"
+    },
+    {
+      "frame_number": 376,
+      "timestamp_seconds": 12.533,
+      "timestamp_formatted": "00:12.533",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        866,
+        697,
+        1023,
+        891
+      ],
+      "norm_box": [
+        0.45104,
+        0.68333,
+        0.53281,
+        0.87353
+      ],
+      "confidence_score": 0.4593,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (45.9% < 50.0%)"
+    },
+    {
+      "frame_number": 378,
+      "timestamp_seconds": 12.6,
+      "timestamp_formatted": "00:12.600",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        866,
+        696,
+        1023,
+        891
+      ],
+      "norm_box": [
+        0.45104,
+        0.68235,
+        0.53281,
+        0.87353
+      ],
+      "confidence_score": 0.4855,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (48.5% < 50.0%)"
+    },
+    {
+      "frame_number": 386,
+      "timestamp_seconds": 12.867,
+      "timestamp_formatted": "00:12.867",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        958,
+        641,
+        1115,
+        859
+      ],
+      "norm_box": [
+        0.49896,
+        0.62843,
+        0.58073,
+        0.84216
+      ],
+      "confidence_score": 0.3809,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (38.1% < 50.0%)"
+    },
+    {
+      "frame_number": 396,
+      "timestamp_seconds": 13.2,
+      "timestamp_formatted": "00:13.200",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        881,
+        641,
+        1024,
+        830
+      ],
+      "norm_box": [
+        0.45885,
+        0.62843,
+        0.53333,
+        0.81373
+      ],
+      "confidence_score": 0.7571,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 398,
+      "timestamp_seconds": 13.267,
+      "timestamp_formatted": "00:13.267",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        867,
+        642,
+        1020,
+        849
+      ],
+      "norm_box": [
+        0.45156,
+        0.62941,
+        0.53125,
+        0.83235
+      ],
+      "confidence_score": 0.6421,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 400,
+      "timestamp_seconds": 13.333,
+      "timestamp_formatted": "00:13.333",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        858,
+        649,
+        1007,
+        844
+      ],
+      "norm_box": [
+        0.44688,
+        0.63627,
+        0.52448,
+        0.82745
+      ],
+      "confidence_score": 0.9385,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 402,
+      "timestamp_seconds": 13.4,
+      "timestamp_formatted": "00:13.400",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        867,
+        662,
+        1025,
+        860
+      ],
+      "norm_box": [
+        0.45156,
+        0.64902,
+        0.53385,
+        0.84314
+      ],
+      "confidence_score": 0.9271,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 404,
+      "timestamp_seconds": 13.467,
+      "timestamp_formatted": "00:13.467",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        869,
+        664,
+        1051,
+        859
+      ],
+      "norm_box": [
+        0.4526,
+        0.65098,
+        0.5474,
+        0.84216
+      ],
+      "confidence_score": 0.3921,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (39.2% < 50.0%)"
+    },
+    {
+      "frame_number": 426,
+      "timestamp_seconds": 14.2,
+      "timestamp_formatted": "00:14.200",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        758,
+        682,
+        1058,
+        829
+      ],
+      "norm_box": [
+        0.39479,
+        0.66863,
+        0.55104,
+        0.81275
+      ],
+      "confidence_score": 0.4431,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (44.3% < 50.0%)"
+    },
+    {
+      "frame_number": 432,
+      "timestamp_seconds": 14.4,
+      "timestamp_formatted": "00:14.400",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        711,
+        640,
+        1364,
+        870
+      ],
+      "norm_box": [
+        0.37031,
+        0.62745,
+        0.71042,
+        0.85294
+      ],
+      "confidence_score": 0.5659,
+      "validation_status": "ANTHROPOMETRIC_SCALE_VIOLATION",
+      "rejection_reason": "ANTHROPOMETRIC_SCALE_VIOLATION (area 33.0% > 20.0% of person)"
+    },
+    {
+      "frame_number": 500,
+      "timestamp_seconds": 16.667,
+      "timestamp_formatted": "00:16.667",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        696,
+        396,
+        856,
+        548
+      ],
+      "norm_box": [
+        0.3625,
+        0.38824,
+        0.44583,
+        0.53725
+      ],
+      "confidence_score": 0.6332,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 2-frame transient proposal)"
+    },
+    {
+      "frame_number": 502,
+      "timestamp_seconds": 16.733,
+      "timestamp_formatted": "00:16.733",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        694,
+        394,
+        871,
+        557
+      ],
+      "norm_box": [
+        0.36146,
+        0.38627,
+        0.45365,
+        0.54608
+      ],
+      "confidence_score": 0.5677,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 2-frame transient proposal)"
+    },
+    {
+      "frame_number": 526,
+      "timestamp_seconds": 17.533,
+      "timestamp_formatted": "00:17.533",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        872,
+        653,
+        1362,
+        848
+      ],
+      "norm_box": [
+        0.45417,
+        0.6402,
+        0.70937,
+        0.83137
+      ],
+      "confidence_score": 0.8019,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 1-frame transient proposal)"
+    }
+  ],
+  "records_20pct": [
+    {
+      "frame_number": 18,
+      "timestamp_seconds": 0.6,
+      "timestamp_formatted": "00:00.600",
+      "camera_id": "KN03",
+      "object_label": "handgun",
+      "bounding_box": [
+        761,
+        219,
+        928,
+        320
+      ],
+      "norm_box": [
+        0.39635,
+        0.21471,
+        0.48333,
+        0.31373
+      ],
+      "confidence_score": 0.2355,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 1-frame transient proposal)"
+    },
+    {
+      "frame_number": 92,
+      "timestamp_seconds": 3.067,
+      "timestamp_formatted": "00:03.067",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        629,
+        674,
+        844,
+        780
+      ],
+      "norm_box": [
+        0.3276,
+        0.66078,
+        0.43958,
+        0.76471
+      ],
+      "confidence_score": 0.2365,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 1-frame transient proposal)"
+    },
+    {
+      "frame_number": 124,
+      "timestamp_seconds": 4.133,
+      "timestamp_formatted": "00:04.133",
+      "camera_id": "KN03",
+      "object_label": "handgun",
+      "bounding_box": [
+        1847,
+        571,
+        1920,
+        645
+      ],
+      "norm_box": [
+        0.96198,
+        0.5598,
+        1.0,
+        0.63235
+      ],
+      "confidence_score": 0.783,
+      "validation_status": "BARE_HUMAN_LIMB",
+      "rejection_reason": "BARE_HUMAN_LIMB (skin=69.4% >= 55% empty hand/arm)"
+    },
+    {
+      "frame_number": 126,
+      "timestamp_seconds": 4.2,
+      "timestamp_formatted": "00:04.200",
+      "camera_id": "KN03",
+      "object_label": "handgun",
+      "bounding_box": [
+        1846,
+        571,
+        1919,
+        645
+      ],
+      "norm_box": [
+        0.96146,
+        0.5598,
+        0.99948,
+        0.63235
+      ],
+      "confidence_score": 0.8223,
+      "validation_status": "BARE_HUMAN_LIMB",
+      "rejection_reason": "BARE_HUMAN_LIMB (skin=69.8% >= 55% empty hand/arm)"
+    },
+    {
+      "frame_number": 128,
+      "timestamp_seconds": 4.267,
+      "timestamp_formatted": "00:04.267",
+      "camera_id": "KN03",
+      "object_label": "handgun",
+      "bounding_box": [
+        1848,
+        572,
+        1919,
+        637
+      ],
+      "norm_box": [
+        0.9625,
+        0.56078,
+        0.99948,
+        0.62451
+      ],
+      "confidence_score": 0.5878,
+      "validation_status": "BARE_HUMAN_LIMB",
+      "rejection_reason": "BARE_HUMAN_LIMB (skin=73.6% >= 55% empty hand/arm)"
+    },
+    {
+      "frame_number": 130,
+      "timestamp_seconds": 4.333,
+      "timestamp_formatted": "00:04.333",
+      "camera_id": "KN03",
+      "object_label": "handgun",
+      "bounding_box": [
+        1847,
+        572,
+        1919,
+        637
+      ],
+      "norm_box": [
+        0.96198,
+        0.56078,
+        0.99948,
+        0.62451
+      ],
+      "confidence_score": 0.5909,
+      "validation_status": "BARE_HUMAN_LIMB",
+      "rejection_reason": "BARE_HUMAN_LIMB (skin=72.6% >= 55% empty hand/arm)"
+    },
+    {
+      "frame_number": 194,
+      "timestamp_seconds": 6.467,
+      "timestamp_formatted": "00:06.467",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        1002,
+        549,
+        1139,
+        708
+      ],
+      "norm_box": [
+        0.52187,
+        0.53824,
+        0.59323,
+        0.69412
+      ],
+      "confidence_score": 0.2258,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 2-frame transient proposal)"
+    },
+    {
+      "frame_number": 196,
+      "timestamp_seconds": 6.533,
+      "timestamp_formatted": "00:06.533",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        1002,
+        549,
+        1139,
+        708
+      ],
+      "norm_box": [
+        0.52187,
+        0.53824,
+        0.59323,
+        0.69412
+      ],
+      "confidence_score": 0.2468,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 2-frame transient proposal)"
+    },
+    {
+      "frame_number": 298,
+      "timestamp_seconds": 9.933,
+      "timestamp_formatted": "00:09.933",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        781,
+        635,
+        1390,
+        882
+      ],
+      "norm_box": [
+        0.40677,
+        0.62255,
+        0.72396,
+        0.86471
+      ],
+      "confidence_score": 0.5211,
+      "validation_status": "NO_PERSON_IN_SCENE",
+      "rejection_reason": "NO_PERSON_IN_SCENE"
+    },
+    {
+      "frame_number": 300,
+      "timestamp_seconds": 10.0,
+      "timestamp_formatted": "00:10.000",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        793,
+        644,
+        1332,
+        849
+      ],
+      "norm_box": [
+        0.41302,
+        0.63137,
+        0.69375,
+        0.83235
+      ],
+      "confidence_score": 0.3455,
+      "validation_status": "NO_PERSON_IN_SCENE",
+      "rejection_reason": "NO_PERSON_IN_SCENE"
+    },
+    {
+      "frame_number": 304,
+      "timestamp_seconds": 10.133,
+      "timestamp_formatted": "00:10.133",
+      "camera_id": "KN03",
+      "object_label": "handgun",
+      "bounding_box": [
+        1007,
+        804,
+        1128,
+        936
+      ],
+      "norm_box": [
+        0.52448,
+        0.78824,
+        0.5875,
+        0.91765
+      ],
+      "confidence_score": 0.3446,
+      "validation_status": "EMPTY_SILHOUETTE_BACKGROUND_TRAP",
+      "rejection_reason": "EMPTY_SILHOUETTE_BACKGROUND_TRAP (bright_bg=67.4% > 48% on dangling limb)"
+    },
+    {
+      "frame_number": 306,
+      "timestamp_seconds": 10.2,
+      "timestamp_formatted": "00:10.200",
+      "camera_id": "KN03",
+      "object_label": "handgun",
+      "bounding_box": [
+        1007,
+        804,
+        1128,
+        936
+      ],
+      "norm_box": [
+        0.52448,
+        0.78824,
+        0.5875,
+        0.91765
+      ],
+      "confidence_score": 0.3452,
+      "validation_status": "EMPTY_SILHOUETTE_BACKGROUND_TRAP",
+      "rejection_reason": "EMPTY_SILHOUETTE_BACKGROUND_TRAP (bright_bg=67.4% > 48% on dangling limb)"
+    },
+    {
+      "frame_number": 308,
+      "timestamp_seconds": 10.267,
+      "timestamp_formatted": "00:10.267",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        994,
+        788,
+        1153,
+        937
+      ],
+      "norm_box": [
+        0.51771,
+        0.77255,
+        0.60052,
+        0.91863
+      ],
+      "confidence_score": 0.2456,
+      "validation_status": "UNPHYSICAL_PERSON_LOCATION",
+      "rejection_reason": "UNPHYSICAL_PERSON_LOCATION (rel_y=0.95 below feet)"
+    },
+    {
+      "frame_number": 314,
+      "timestamp_seconds": 10.467,
+      "timestamp_formatted": "00:10.467",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        635,
+        670,
+        1042,
+        830
+      ],
+      "norm_box": [
+        0.33073,
+        0.65686,
+        0.54271,
+        0.81373
+      ],
+      "confidence_score": 0.437,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 2-frame transient proposal)"
+    },
+    {
+      "frame_number": 316,
+      "timestamp_seconds": 10.533,
+      "timestamp_formatted": "00:10.533",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        786,
+        689,
+        1058,
+        834
+      ],
+      "norm_box": [
+        0.40937,
+        0.67549,
+        0.55104,
+        0.81765
+      ],
+      "confidence_score": 0.9046,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 2-frame transient proposal)"
+    },
+    {
+      "frame_number": 318,
+      "timestamp_seconds": 10.6,
+      "timestamp_formatted": "00:10.600",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        736,
+        646,
+        1400,
+        848
+      ],
+      "norm_box": [
+        0.38333,
+        0.63333,
+        0.72917,
+        0.83137
+      ],
+      "confidence_score": 0.5636,
+      "validation_status": "ANTHROPOMETRIC_SCALE_VIOLATION",
+      "rejection_reason": "ANTHROPOMETRIC_SCALE_VIOLATION (area 29.2% > 20.0% of person)"
+    },
+    {
+      "frame_number": 320,
+      "timestamp_seconds": 10.667,
+      "timestamp_formatted": "00:10.667",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        764,
+        647,
+        1396,
+        844
+      ],
+      "norm_box": [
+        0.39792,
+        0.63431,
+        0.72708,
+        0.82745
+      ],
+      "confidence_score": 0.284,
+      "validation_status": "ANTHROPOMETRIC_SCALE_VIOLATION",
+      "rejection_reason": "ANTHROPOMETRIC_SCALE_VIOLATION (area 27.6% > 20.0% of person)"
+    },
+    {
+      "frame_number": 322,
+      "timestamp_seconds": 10.733,
+      "timestamp_formatted": "00:10.733",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        798,
+        653,
+        1351,
+        844
+      ],
+      "norm_box": [
+        0.41563,
+        0.6402,
+        0.70365,
+        0.82745
+      ],
+      "confidence_score": 0.5913,
+      "validation_status": "ANTHROPOMETRIC_SCALE_VIOLATION",
+      "rejection_reason": "ANTHROPOMETRIC_SCALE_VIOLATION (area 22.2% > 20.0% of person)"
+    },
+    {
+      "frame_number": 324,
+      "timestamp_seconds": 10.8,
+      "timestamp_formatted": "00:10.800",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        730,
+        634,
+        1404,
+        861
+      ],
+      "norm_box": [
+        0.38021,
+        0.62157,
+        0.73125,
+        0.84412
+      ],
+      "confidence_score": 0.5533,
+      "validation_status": "ANTHROPOMETRIC_SCALE_VIOLATION",
+      "rejection_reason": "ANTHROPOMETRIC_SCALE_VIOLATION (area 33.2% > 20.0% of person)"
+    },
+    {
+      "frame_number": 364,
+      "timestamp_seconds": 12.133,
+      "timestamp_formatted": "00:12.133",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        924,
+        673,
+        1328,
+        816
+      ],
+      "norm_box": [
+        0.48125,
+        0.6598,
+        0.69167,
+        0.8
+      ],
+      "confidence_score": 0.6108,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 2-frame transient proposal)"
+    },
+    {
+      "frame_number": 364,
+      "timestamp_seconds": 12.133,
+      "timestamp_formatted": "00:12.133",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        747,
+        697,
+        1045,
+        814
+      ],
+      "norm_box": [
+        0.38906,
+        0.68333,
+        0.54427,
+        0.79804
+      ],
+      "confidence_score": 0.2093,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 366,
+      "timestamp_seconds": 12.2,
+      "timestamp_formatted": "00:12.200",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        924,
+        672,
+        1328,
+        817
+      ],
+      "norm_box": [
+        0.48125,
+        0.65882,
+        0.69167,
+        0.80098
+      ],
+      "confidence_score": 0.5968,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 2-frame transient proposal)"
+    },
+    {
+      "frame_number": 366,
+      "timestamp_seconds": 12.2,
+      "timestamp_formatted": "00:12.200",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        849,
+        703,
+        1046,
+        870
+      ],
+      "norm_box": [
+        0.44219,
+        0.68922,
+        0.54479,
+        0.85294
+      ],
+      "confidence_score": 0.2213,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 370,
+      "timestamp_seconds": 12.333,
+      "timestamp_formatted": "00:12.333",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        874,
+        718,
+        1037,
+        904
+      ],
+      "norm_box": [
+        0.45521,
+        0.70392,
+        0.5401,
+        0.88627
+      ],
+      "confidence_score": 0.2143,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 376,
+      "timestamp_seconds": 12.533,
+      "timestamp_formatted": "00:12.533",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        866,
+        697,
+        1023,
+        891
+      ],
+      "norm_box": [
+        0.45104,
+        0.68333,
+        0.53281,
+        0.87353
+      ],
+      "confidence_score": 0.4593,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 378,
+      "timestamp_seconds": 12.6,
+      "timestamp_formatted": "00:12.600",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        866,
+        696,
+        1023,
+        891
+      ],
+      "norm_box": [
+        0.45104,
+        0.68235,
+        0.53281,
+        0.87353
+      ],
+      "confidence_score": 0.4855,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 386,
+      "timestamp_seconds": 12.867,
+      "timestamp_formatted": "00:12.867",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        958,
+        641,
+        1115,
+        859
+      ],
+      "norm_box": [
+        0.49896,
+        0.62843,
+        0.58073,
+        0.84216
+      ],
+      "confidence_score": 0.3809,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 396,
+      "timestamp_seconds": 13.2,
+      "timestamp_formatted": "00:13.200",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        881,
+        641,
+        1024,
+        830
+      ],
+      "norm_box": [
+        0.45885,
+        0.62843,
+        0.53333,
+        0.81373
+      ],
+      "confidence_score": 0.7571,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 398,
+      "timestamp_seconds": 13.267,
+      "timestamp_formatted": "00:13.267",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        867,
+        642,
+        1020,
+        849
+      ],
+      "norm_box": [
+        0.45156,
+        0.62941,
+        0.53125,
+        0.83235
+      ],
+      "confidence_score": 0.6421,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 400,
+      "timestamp_seconds": 13.333,
+      "timestamp_formatted": "00:13.333",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        858,
+        649,
+        1007,
+        844
+      ],
+      "norm_box": [
+        0.44688,
+        0.63627,
+        0.52448,
+        0.82745
+      ],
+      "confidence_score": 0.9385,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 402,
+      "timestamp_seconds": 13.4,
+      "timestamp_formatted": "00:13.400",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        867,
+        662,
+        1025,
+        860
+      ],
+      "norm_box": [
+        0.45156,
+        0.64902,
+        0.53385,
+        0.84314
+      ],
+      "confidence_score": 0.9271,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 404,
+      "timestamp_seconds": 13.467,
+      "timestamp_formatted": "00:13.467",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        869,
+        664,
+        1051,
+        859
+      ],
+      "norm_box": [
+        0.4526,
+        0.65098,
+        0.5474,
+        0.84216
+      ],
+      "confidence_score": 0.3921,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 418,
+      "timestamp_seconds": 13.933,
+      "timestamp_formatted": "00:13.933",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        800,
+        617,
+        1371,
+        855
+      ],
+      "norm_box": [
+        0.41667,
+        0.6049,
+        0.71406,
+        0.83824
+      ],
+      "confidence_score": 0.3214,
+      "validation_status": "ANTHROPOMETRIC_SCALE_VIOLATION",
+      "rejection_reason": "ANTHROPOMETRIC_SCALE_VIOLATION (area 29.8% > 20.0% of person)"
+    },
+    {
+      "frame_number": 426,
+      "timestamp_seconds": 14.2,
+      "timestamp_formatted": "00:14.200",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        758,
+        682,
+        1058,
+        829
+      ],
+      "norm_box": [
+        0.39479,
+        0.66863,
+        0.55104,
+        0.81275
+      ],
+      "confidence_score": 0.4431,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 2-frame transient proposal)"
+    },
+    {
+      "frame_number": 428,
+      "timestamp_seconds": 14.267,
+      "timestamp_formatted": "00:14.267",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        684,
+        720,
+        873,
+        887
+      ],
+      "norm_box": [
+        0.35625,
+        0.70588,
+        0.45469,
+        0.86961
+      ],
+      "confidence_score": 0.316,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 2-frame transient proposal)"
+    },
+    {
+      "frame_number": 432,
+      "timestamp_seconds": 14.4,
+      "timestamp_formatted": "00:14.400",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        711,
+        640,
+        1364,
+        870
+      ],
+      "norm_box": [
+        0.37031,
+        0.62745,
+        0.71042,
+        0.85294
+      ],
+      "confidence_score": 0.5659,
+      "validation_status": "ANTHROPOMETRIC_SCALE_VIOLATION",
+      "rejection_reason": "ANTHROPOMETRIC_SCALE_VIOLATION (area 33.0% > 20.0% of person)"
+    },
+    {
+      "frame_number": 500,
+      "timestamp_seconds": 16.667,
+      "timestamp_formatted": "00:16.667",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        696,
+        396,
+        856,
+        548
+      ],
+      "norm_box": [
+        0.3625,
+        0.38824,
+        0.44583,
+        0.53725
+      ],
+      "confidence_score": 0.6332,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 2-frame transient proposal)"
+    },
+    {
+      "frame_number": 502,
+      "timestamp_seconds": 16.733,
+      "timestamp_formatted": "00:16.733",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        694,
+        394,
+        871,
+        557
+      ],
+      "norm_box": [
+        0.36146,
+        0.38627,
+        0.45365,
+        0.54608
+      ],
+      "confidence_score": 0.5677,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 2-frame transient proposal)"
+    },
+    {
+      "frame_number": 526,
+      "timestamp_seconds": 17.533,
+      "timestamp_formatted": "00:17.533",
+      "camera_id": "KN03",
+      "object_label": "knife",
+      "bounding_box": [
+        872,
+        653,
+        1362,
+        848
+      ],
+      "norm_box": [
+        0.45417,
+        0.6402,
+        0.70937,
+        0.83137
+      ],
+      "confidence_score": 0.8019,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 1-frame transient proposal)"
+    }
+  ]
+}

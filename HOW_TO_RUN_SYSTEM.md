@@ -154,7 +154,7 @@ python run_full_pipeline.py `
 | :--- | :---: | :--- |
 | `--video` *(Required)* | None | Path to the source CCTV recording (e.g. `samples/handgun_test-video.mp4`). |
 | `--output` | `outputs/full_pipeline_run` | Directory where videos, CSV logs, keyframe crops, and PDF reports are saved. |
-| `--model` | `auto` | Specifies the model: `auto` (uses Model 10), `tenth`, `ninth`, `eighth`, `seventh`, `sixth`, `fifth`, or direct path to a `.pth` file. |
+| `--model` | `auto` | Specifies the model: `auto` (uses Model 12 Final SOTA), `twelfth`, `eleventh`, `tenth`, `ninth`, `eighth`, `seventh`, `sixth`, `fifth`, or direct path to a `.pth` file. |
 | `--confidence` | `0.50` | Minimum detection confidence threshold (between `0.0` and `1.0`). |
 | `--fps` | `5` | Frames-per-second sampling rate (e.g., `10` for high temporal density, `5` for standard throughput). |
 | `--no-enhancement` | *False* | **Recommended for speed:** Bypasses BasicVSR++ super-resolution and runs directly on the source footage. |

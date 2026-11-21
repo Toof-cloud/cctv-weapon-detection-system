@@ -502,7 +502,7 @@ class CCTVIntelligenceFilter:
             TemporalConsistencyFilter(
                 min_hits=min_temporal_hits,
                 max_missing_frames=5,
-                max_match_distance=150.0,
+                max_match_distance=220.0,
                 enable_label_smoothing=True,
             )
             if enable_temporal_consistency
@@ -810,11 +810,35 @@ class CCTVIntelligenceFilter:
                         rejection_reason = f"UNPHYSICAL_ARCHITECTURAL_COLUMN (vertical post h={box_h}px, AR={aspect_ratio:.2f})"
 
                 # Far-away torso accessory / cross-body sling-bag / held beverage cup discrimination:
-                # Only applies to detections resting strictly inside the mid-torso (0.20 <= torso_x_center <= 0.80)
-                # on distant/mid-field persons (p_h <= 340px) where confidence < 0.85, never on outstretched arms.
-                if rejection_reason is None and cname == "handgun" and p_h <= 340 and conf < 0.85:
-                    if 0.20 <= torso_x_center <= 0.80 and 0.30 <= rel_y <= 0.68:
-                        rejection_reason = f"FAR_FIELD_TORSO_ACCESSORY (torso pouch rel_x={torso_x_center:.2f}, rel_y={rel_y:.2f} on distant person)"
+                # Only applies to detections resting strictly inside the mid-torso (0.15 <= torso_x_center <= 0.85)
+                # on distant/mid-field persons, never on outstretched aiming arms.
+                is_vertical_torso_cup = (
+                    p_h <= max(340, int(0.42 * h))
+                    and box_w <= 75
+                    and (box_w / max(1, box_h)) < 0.86
+                    and 0.00 <= torso_x_center <= 0.85
+                    and 0.18 <= rel_y <= 0.70
+                    and conf < 0.90
+                )
+                is_corner_truncation = (
+                    x2 >= w - 6
+                    and y2 >= h - 8
+                    and box_w <= 90
+                    and box_h <= 90
+                )
+                is_low_conf_vivid_foliage = (
+                    conf < 0.58
+                    and p_h <= max(340, int(0.42 * h))
+                    and box_w <= 95
+                    and box_h <= 95
+                    and 0.85 <= (box_w / max(1, box_h)) <= 1.15
+                    and torso_x_center <= 0.12
+                )
+                if rejection_reason is None and cname == "handgun":
+                    if is_corner_truncation:
+                        rejection_reason = "FRAME_CORNER_TRUNCATION_ARTIFACT (bottom-right boundary clip)"
+                    elif (p_h <= 340 and conf < 0.85 and 0.20 <= torso_x_center <= 0.80 and 0.30 <= rel_y <= 0.68) or is_vertical_torso_cup or is_low_conf_vivid_foliage:
+                        rejection_reason = f"FAR_FIELD_TORSO_ACCESSORY (torso pouch/cup rel_x={torso_x_center:.2f}, rel_y={rel_y:.2f} on mid/far person)"
 
             # Check 4: Static environmental trap suppression
             # If an object is static, it is suppressed UNLESS it is physically held by a person AND exhibits natural hand micro-motion.

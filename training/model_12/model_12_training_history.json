@@ -1,0 +1,450 @@
+{
+  "model_name": "Model 12 (Final Production Model)",
+  "base_checkpoint": "best_weapon_detector_eleventh_model.pth",
+  "hyperparameters": {
+    "anchor_scales": [
+      16,
+      32,
+      64,
+      128,
+      256
+    ],
+    "rpn_bbox_xform_clip": 0.6678293725756554,
+    "roi_bbox_xform_clip": 0.6678293725756554,
+    "batch_size": 2,
+    "epochs": 2,
+    "initial_lr": 4e-05,
+    "min_lr": 1e-06,
+    "optimizer": "SGD(momentum=0.9, weight_decay=0.0005)"
+  },
+  "baseline_model_11": {
+    "m9_test_279": {
+      "Precision": 0.9047619047619048,
+      "Recall": 0.957983193277311,
+      "F1": 0.9306122448979592,
+      "AP_Handgun": 0.9522136505590817,
+      "AP_Knife": 0.9492913576442954,
+      "mAP": 0.9507525041016885,
+      "TP": 228,
+      "FP": 24,
+      "FN": 10,
+      "per_class": {
+        "Handgun": {
+          "TP": 109,
+          "FP": 8,
+          "FN": 5
+        },
+        "Knife": {
+          "TP": 119,
+          "FP": 16,
+          "FN": 5
+        }
+      },
+      "neg_clean": 47,
+      "neg_total": 51,
+      "neg_rate": 0.9215686274509803
+    },
+    "external_350": {
+      "Precision": 0.7121212121212122,
+      "Recall": 0.6886446886446886,
+      "F1": 0.7001862197392924,
+      "AP_Handgun": 0.8151927823714638,
+      "AP_Knife": 0.4560954901187294,
+      "mAP": 0.6356441362450966,
+      "TP": 188,
+      "FP": 76,
+      "FN": 85,
+      "per_class": {
+        "Handgun": {
+          "TP": 113,
+          "FP": 10,
+          "FN": 25
+        },
+        "Knife": {
+          "TP": 75,
+          "FP": 66,
+          "FN": 60
+        }
+      },
+      "neg_clean": 83,
+      "neg_total": 100,
+      "neg_rate": 0.83
+    },
+    "unseen_cctv_185": {
+      "Precision": 0.9523809523809523,
+      "Recall": 0.9655172413793104,
+      "F1": 0.9589041095890412,
+      "AP_Handgun": 0.9547025312353474,
+      "AP_Knife": 0.996975806451613,
+      "mAP": 0.9758391688434802,
+      "TP": 140,
+      "FP": 7,
+      "FN": 5,
+      "per_class": {
+        "Handgun": {
+          "TP": 109,
+          "FP": 4,
+          "FN": 5
+        },
+        "Knife": {
+          "TP": 31,
+          "FP": 3,
+          "FN": 0
+        }
+      },
+      "neg_clean": 40,
+      "neg_total": 40,
+      "neg_rate": 1.0
+    },
+    "grid_18_cells": {
+      "total_pure_noweapon_cells": 18,
+      "hallucinated_cells": 1,
+      "clean_cells": 17,
+      "specificity": 0.9444444444444444,
+      "details": [
+        {
+          "grid": 2,
+          "row": 4,
+          "col": 2,
+          "desc": "Hands holding two metal water bottles",
+          "detections": [
+            [
+              2,
+              0.5589119791984558
+            ]
+          ]
+        }
+      ]
+    },
+    "staged_val_44": {
+      "total_staged_val_frames": 44,
+      "raw_clean_frames": 27,
+      "raw_alarm_frames": 17,
+      "raw_total_false_boxes": 19,
+      "raw_clean_rate": 0.6136,
+      "post_cctv_clean_frames": 37,
+      "post_cctv_alarm_frames": 7,
+      "post_cctv_clean_rate": 0.8409
+    },
+    "composite_score": 0.810359
+  },
+  "epochs": [
+    {
+      "epoch": 1,
+      "learning_rate": 4e-05,
+      "active_items": 5090,
+      "duration_seconds": 670.14,
+      "train_loss": 0.051039,
+      "loss_components": {
+        "loss_classifier": 0.021818,
+        "loss_box_reg": 0.021812,
+        "loss_objectness": 0.004132,
+        "loss_rpn_box_reg": 0.003278
+      },
+      "m9_test_279": {
+        "Precision": 0.8712121212121212,
+        "Recall": 0.9663865546218487,
+        "F1": 0.9163346613545816,
+        "AP_Handgun": 0.9610404381872526,
+        "AP_Knife": 0.9536814192988725,
+        "mAP": 0.9573609287430626,
+        "TP": 230,
+        "FP": 34,
+        "FN": 8,
+        "per_class": {
+          "Handgun": {
+            "TP": 110,
+            "FP": 8,
+            "FN": 4
+          },
+          "Knife": {
+            "TP": 120,
+            "FP": 26,
+            "FN": 4
+          }
+        },
+        "neg_clean": 47,
+        "neg_total": 51,
+        "neg_rate": 0.9215686274509803
+      },
+      "external_350": {
+        "Precision": 0.64375,
+        "Recall": 0.7545787545787546,
+        "F1": 0.6947723440134908,
+        "AP_Handgun": 0.8211472320164305,
+        "AP_Knife": 0.5376868504013083,
+        "mAP": 0.6794170412088694,
+        "TP": 206,
+        "FP": 114,
+        "FN": 67,
+        "per_class": {
+          "Handgun": {
+            "TP": 114,
+            "FP": 18,
+            "FN": 24
+          },
+          "Knife": {
+            "TP": 92,
+            "FP": 96,
+            "FN": 43
+          }
+        },
+        "neg_clean": 76,
+        "neg_total": 100,
+        "neg_rate": 0.76
+      },
+      "unseen_cctv_185": {
+        "Precision": 0.9337748344370861,
+        "Recall": 0.9724137931034482,
+        "F1": 0.9527027027027026,
+        "AP_Handgun": 0.963484290659854,
+        "AP_Knife": 0.9875597068638354,
+        "mAP": 0.9755219987618446,
+        "TP": 141,
+        "FP": 10,
+        "FN": 4,
+        "per_class": {
+          "Handgun": {
+            "TP": 110,
+            "FP": 4,
+            "FN": 4
+          },
+          "Knife": {
+            "TP": 31,
+            "FP": 6,
+            "FN": 0
+          }
+        },
+        "neg_clean": 40,
+        "neg_total": 40,
+        "neg_rate": 1.0
+      },
+      "grid_18_cells": {
+        "total_pure_noweapon_cells": 18,
+        "hallucinated_cells": 3,
+        "clean_cells": 15,
+        "specificity": 0.8333333333333334,
+        "details": [
+          {
+            "grid": 1,
+            "row": 3,
+            "col": 4,
+            "desc": "Hand holding clear water bottle",
+            "detections": [
+              [
+                2,
+                0.7733784317970276
+              ]
+            ]
+          },
+          {
+            "grid": 2,
+            "row": 1,
+            "col": 1,
+            "desc": "Hand gripping umbrella handle",
+            "detections": [
+              [
+                2,
+                0.6457526087760925
+              ]
+            ]
+          },
+          {
+            "grid": 2,
+            "row": 4,
+            "col": 2,
+            "desc": "Hands holding two metal water bottles",
+            "detections": [
+              [
+                2,
+                0.8429864048957825
+              ]
+            ]
+          }
+        ]
+      },
+      "staged_val_44": {
+        "total_staged_val_frames": 44,
+        "raw_clean_frames": 22,
+        "raw_alarm_frames": 22,
+        "raw_total_false_boxes": 25,
+        "raw_clean_rate": 0.5,
+        "post_cctv_clean_frames": 37,
+        "post_cctv_alarm_frames": 7,
+        "post_cctv_clean_rate": 0.8409
+      },
+      "composite_score": 0.819303
+    },
+    {
+      "epoch": 2,
+      "learning_rate": 2.0500000000000004e-05,
+      "active_items": 5090,
+      "duration_seconds": 632.77,
+      "train_loss": 0.049346,
+      "loss_components": {
+        "loss_classifier": 0.020836,
+        "loss_box_reg": 0.021904,
+        "loss_objectness": 0.003428,
+        "loss_rpn_box_reg": 0.003178
+      },
+      "m9_test_279": {
+        "Precision": 0.8754716981132076,
+        "Recall": 0.9747899159663865,
+        "F1": 0.922465208747515,
+        "AP_Handgun": 0.9708235172288813,
+        "AP_Knife": 0.9599031600973812,
+        "mAP": 0.9653633386631313,
+        "TP": 232,
+        "FP": 33,
+        "FN": 6,
+        "per_class": {
+          "Handgun": {
+            "TP": 111,
+            "FP": 7,
+            "FN": 3
+          },
+          "Knife": {
+            "TP": 121,
+            "FP": 26,
+            "FN": 3
+          }
+        },
+        "neg_clean": 47,
+        "neg_total": 51,
+        "neg_rate": 0.9215686274509803
+      },
+      "external_350": {
+        "Precision": 0.6374622356495468,
+        "Recall": 0.7728937728937729,
+        "F1": 0.6986754966887417,
+        "AP_Handgun": 0.8290280009397136,
+        "AP_Knife": 0.5592887432398808,
+        "mAP": 0.6941583720897972,
+        "TP": 211,
+        "FP": 120,
+        "FN": 62,
+        "per_class": {
+          "Handgun": {
+            "TP": 115,
+            "FP": 17,
+            "FN": 23
+          },
+          "Knife": {
+            "TP": 96,
+            "FP": 103,
+            "FN": 39
+          }
+        },
+        "neg_clean": 77,
+        "neg_total": 100,
+        "neg_rate": 0.77
+      },
+      "unseen_cctv_185": {
+        "Precision": 0.9403973509933775,
+        "Recall": 0.9793103448275862,
+        "F1": 0.9594594594594594,
+        "AP_Handgun": 0.9732142857142857,
+        "AP_Knife": 0.990927419354839,
+        "mAP": 0.9820708525345623,
+        "TP": 142,
+        "FP": 9,
+        "FN": 3,
+        "per_class": {
+          "Handgun": {
+            "TP": 111,
+            "FP": 3,
+            "FN": 3
+          },
+          "Knife": {
+            "TP": 31,
+            "FP": 6,
+            "FN": 0
+          }
+        },
+        "neg_clean": 40,
+        "neg_total": 40,
+        "neg_rate": 1.0
+      },
+      "grid_18_cells": {
+        "total_pure_noweapon_cells": 18,
+        "hallucinated_cells": 5,
+        "clean_cells": 13,
+        "specificity": 0.7222222222222222,
+        "details": [
+          {
+            "grid": 1,
+            "row": 1,
+            "col": 3,
+            "desc": "Man holding glass beer bottle",
+            "detections": [
+              [
+                2,
+                0.5808101296424866
+              ]
+            ]
+          },
+          {
+            "grid": 1,
+            "row": 3,
+            "col": 4,
+            "desc": "Hand holding clear water bottle",
+            "detections": [
+              [
+                2,
+                0.8167598247528076
+              ]
+            ]
+          },
+          {
+            "grid": 1,
+            "row": 4,
+            "col": 4,
+            "desc": "Hand holding selfie stick & tripod",
+            "detections": [
+              [
+                1,
+                0.5525581240653992
+              ]
+            ]
+          },
+          {
+            "grid": 2,
+            "row": 1,
+            "col": 1,
+            "desc": "Hand gripping umbrella handle",
+            "detections": [
+              [
+                2,
+                0.6574698686599731
+              ]
+            ]
+          },
+          {
+            "grid": 2,
+            "row": 4,
+            "col": 2,
+            "desc": "Hands holding two metal water bottles",
+            "detections": [
+              [
+                2,
+                0.867274284362793
+              ]
+            ]
+          }
+        ]
+      },
+      "staged_val_44": {
+        "total_staged_val_frames": 44,
+        "raw_clean_frames": 22,
+        "raw_alarm_frames": 22,
+        "raw_total_false_boxes": 27,
+        "raw_clean_rate": 0.5,
+        "post_cctv_clean_frames": 34,
+        "post_cctv_alarm_frames": 10,
+        "post_cctv_clean_rate": 0.7727
+      },
+      "composite_score": 0.830083
+    }
+  ],
+  "total_training_minutes": 24.25
+}

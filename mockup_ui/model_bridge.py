@@ -61,6 +61,12 @@ def discover_available_models() -> list[tuple[str, Path]]:
             seen.add(resolved)
             seen_names.add(resolved.name)
 
+    # -2. Model 12 (Final Production SOTA - Full Surveillance-POV & Staged Hard-Negative Immunity) -> best_weapon_detector_twelfth_model.pth
+    if (ROOT_DIR / "best_weapon_detector_twelfth_model.pth").is_file():
+        add_if_exists("Model 12 (Final Production SOTA - Full Surveillance & Hard-Negative Immunity)", ROOT_DIR / "best_weapon_detector_twelfth_model.pth")
+    elif (MOCKUP_DIR / "models" / "best_weapon_detector_twelfth_model.pth").is_file():
+        add_if_exists("Model 12 (Final Production SOTA - Full Surveillance & Hard-Negative Immunity)", MOCKUP_DIR / "models" / "best_weapon_detector_twelfth_model.pth")
+
     # -1. Model 11 (Surveillance-POV Expansion & Staged Tapo Hard-Negative Immunity SOTA) -> best_weapon_detector_eleventh_model.pth
     if (ROOT_DIR / "best_weapon_detector_eleventh_model.pth").is_file():
         add_if_exists("Model 11 (Surveillance-POV Expansion & Staged Hard-Negative Immunity)", ROOT_DIR / "best_weapon_detector_eleventh_model.pth")
@@ -112,7 +118,13 @@ def discover_available_models() -> list[tuple[str, Path]]:
 
 
 def default_model_path() -> Path | None:
-    """Default to Model 11 / Model 10 (Thesis 2 SOTA) if available, otherwise Model 9 (Production SOTA)."""
+    """Default to Model 12 / Model 11 / Model 10 (Thesis 2 SOTA) if available, otherwise Model 9 (Production SOTA)."""
+    m12_root = ROOT_DIR / "best_weapon_detector_twelfth_model.pth"
+    m12_mock = MOCKUP_DIR / "models" / "best_weapon_detector_twelfth_model.pth"
+    if m12_root.is_file():
+        return m12_root
+    if m12_mock.is_file():
+        return m12_mock
     m11_root = ROOT_DIR / "best_weapon_detector_eleventh_model.pth"
     m11_mock = MOCKUP_DIR / "models" / "best_weapon_detector_eleventh_model.pth"
     if m11_root.is_file():
@@ -144,6 +156,8 @@ def get_model_display_name(path: Path | str | None) -> str:
                 return label.split(" - ")[0] + ")"
             return label
     name = Path(path).name.lower()
+    if "twelfth" in name:
+        return "Model 12 (Final Production SOTA - Full Surveillance & Hard-Negative Immunity)"
     if "eleventh" in name:
         return "Model 11 (Surveillance-POV Expansion & Staged Hard-Negative Immunity)"
     if "tenth" in name:
