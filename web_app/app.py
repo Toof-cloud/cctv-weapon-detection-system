@@ -86,13 +86,15 @@ def init_state(single_videos: list[dict], mc_scenes: list[dict]) -> None:
     ss = st.session_state
     ss.setdefault("theme", "light")
     ss.setdefault("active_mode", "Single video")
-    ss.setdefault("view_mode", "Detected")
+    ss.setdefault("view_mode", "Original")
     ss.setdefault("conf_pct", 50)
     ss.setdefault("cctv_intel", True)
     ss.setdefault("reviews", {})
     ss.setdefault("selected_obs_idx", 0)
     ss.setdefault("custom_result", None)
-    ss.setdefault("active_video_id", single_videos[0]["video_id"] if single_videos else None)
+    ss.setdefault("active_video_id", None)
+    ss.setdefault("analysis_ready", False)
+    ss.setdefault("splash_shown", False)
     ss.setdefault("active_mc_key", mc_scenes[0]["scene_key"] if mc_scenes else None)
     ss.setdefault("mc_view_mode", "Detected")
     ss.setdefault("mc_conf_pct", 50)
@@ -225,6 +227,11 @@ def run_live_custom_upload(uploaded_file, threshold: float, cctv_intel_enabled: 
 
 def inject_exact_desktop_css(dark_mode: bool) -> None:
     if not dark_mode:
+        color_scheme = "light"
+        brand_accent = "#22396f"
+        focus_ring = "#22396f"
+        scrollbar_thumb = "#50648b"
+        scrollbar_track = "#edf2fa"
         bg_shell = "#f4f7fc"
         bg_panel = "#ffffff"
         bg_card = "#f5f8fc"
@@ -240,6 +247,11 @@ def inject_exact_desktop_css(dark_mode: bool) -> None:
         btn_border = "#d7e0ed"
         empty_bg = "#0d1c42"
     else:
+        color_scheme = "dark"
+        brand_accent = "#9db9ee"
+        focus_ring = "#9db9ee"
+        scrollbar_thumb = "#8ba4cc"
+        scrollbar_track = "#13223b"
         bg_shell = "#101b32"
         bg_panel = "#13223b"
         bg_card = "#1b2d49"
@@ -260,6 +272,49 @@ def inject_exact_desktop_css(dark_mode: bool) -> None:
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+        /* Modern Web Guidance: Root color-scheme, brand accent-color, and accessible scrollbars */
+        :root {{
+            color-scheme: {color_scheme};
+            accent-color: {brand_accent};
+            --fk-scrollbar-thumb: {scrollbar_thumb};
+            --fk-scrollbar-track: {scrollbar_track};
+            scrollbar-color: var(--fk-scrollbar-thumb) var(--fk-scrollbar-track);
+            scrollbar-width: thin;
+        }}
+        @supports not (scrollbar-color: auto) {{
+            :root, .stApp, .st-key-fk_side_panel, .st-key-fk_workspace_panel, .st-key-fk_summary_panel {{
+                scrollbar-width: auto;
+            }}
+            ::-webkit-scrollbar {{
+                width: 8px;
+                height: 8px;
+            }}
+            ::-webkit-scrollbar-thumb {{
+                background: var(--fk-scrollbar-thumb);
+                border-radius: 4px;
+            }}
+            ::-webkit-scrollbar-track {{
+                background: var(--fk-scrollbar-track);
+            }}
+        }}
+
+        /* Modern Web Guidance: Natural interactions & accessible :focus-visible rings */
+        :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {{
+            outline: 2px solid {focus_ring} !important;
+            outline-offset: 2px !important;
+        }}
+        .st-key-fk_header_bar :where(a, button, [tabindex]):focus-visible {{
+            outline-color: #9db9ee !important;
+        }}
+        @media (prefers-reduced-motion: no-preference) {{
+            div.stButton > button, div.stDownloadButton > button {{
+                transition: background-color 150ms ease-out, border-color 150ms ease-out, box-shadow 150ms ease-out, scale 150ms ease-out;
+            }}
+            div.stButton > button:not(:disabled):active, div.stDownloadButton > button:not(:disabled):active {{
+                scale: 0.98;
+            }}
+        }}
+
         /* Remove Streamlit chrome and default spacing */
         header[data-testid="stHeader"], #MainMenu, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {{
             display: none !important;
@@ -276,6 +331,7 @@ def inject_exact_desktop_css(dark_mode: bool) -> None:
 
         /* ===== EXACT DESKTOP TOP HEADER BAR (#header) ===== */
         .st-key-fk_header_bar {{
+            color-scheme: dark;
             background: #0d1c42 !important;
             border-bottom: 1px solid #22396f !important;
             padding: 9px 20px !important;
@@ -652,6 +708,7 @@ def inject_exact_desktop_css(dark_mode: bool) -> None:
             fill: {text_main} !important;
         }}
         div[data-testid="stVideo"] {{
+            color-scheme: dark;
             background: #0d1c42;
             border: 1px solid #22396f;
             border-radius: 6px;
@@ -662,6 +719,74 @@ def inject_exact_desktop_css(dark_mode: bool) -> None:
             color: {text_muted} !important;
             padding: 0 !important;
             font-size: 11px !important;
+        }}
+
+        /* ===== BRANDED SPLASH / LOADING OVERLAY ON OPEN & REFRESH ===== */
+        .fk-splash-overlay {{
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: #0d1c42;
+            color-scheme: dark;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            pointer-events: all;
+            animation: fk-splash-fade 0.45s ease-out 1.15s forwards;
+        }}
+        .fk-splash-logo {{
+            height: 76px;
+            width: auto;
+            object-fit: contain;
+            animation: fk-splash-pop 0.45s ease-out both;
+        }}
+        .fk-splash-title {{
+            color: #ffffff;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            line-height: 1.1;
+        }}
+        .fk-splash-sub {{
+            color: #9db9ee;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }}
+        .fk-splash-track {{
+            width: 210px;
+            height: 4px;
+            background: rgba(157, 185, 238, 0.22);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 6px;
+        }}
+        .fk-splash-bar {{
+            width: 100%;
+            height: 100%;
+            background: #9db9ee;
+            border-radius: 999px;
+            transform-origin: left center;
+            animation: fk-splash-load 1.05s ease-in-out forwards;
+        }}
+        @keyframes fk-splash-pop {{
+            from {{ opacity: 0; transform: scale(0.92); }}
+            to {{ opacity: 1; transform: scale(1); }}
+        }}
+        @keyframes fk-splash-load {{
+            from {{ transform: scaleX(0.08); }}
+            to {{ transform: scaleX(1); }}
+        }}
+        @keyframes fk-splash-fade {{
+            from {{ opacity: 1; visibility: visible; }}
+            to {{ opacity: 0; visibility: hidden; pointer-events: none; }}
+        }}
+        @media (prefers-reduced-motion: reduce) {{
+            .fk-splash-overlay {{ animation-duration: 0.15s; animation-delay: 0.4s; }}
+            .fk-splash-logo, .fk-splash-bar {{ animation: none; }}
         }}
         </style>
         """,
@@ -682,10 +807,11 @@ def get_active_single_context(single_videos: list[dict]):
     ss = st.session_state
     threshold = ss["conf_pct"] / 100.0
     cctv_intel = ss["cctv_intel"]
+    analysis_ready = bool(ss.get("analysis_ready", False))
 
     if ss.get("custom_result") is not None:
         cr = ss["custom_result"]
-        return cr["entry"], cr["orig_mp4"], cr["annot_mp4"], cr["records"], None
+        return cr["entry"], cr["orig_mp4"], cr["annot_mp4"], (cr["records"] if analysis_ready else []), None
 
     vid_id = ss.get("active_video_id")
     if not vid_id:
@@ -697,8 +823,11 @@ def get_active_single_context(single_videos: list[dict]):
 
     orig_mp4 = WEB_DATA_DIR / entry["original_video_rel"]
     annot_mp4 = WEB_DATA_DIR / entry["annotated_video_rel"]
-    telem = load_telemetry(entry["telemetry_rel"])
-    recs = filter_records(telem, threshold, cctv_intel)
+    if analysis_ready:
+        telem = load_telemetry(entry["telemetry_rel"])
+        recs = filter_records(telem, threshold, cctv_intel)
+    else:
+        recs = []
 
     # Check if there is a paired Original <-> Enhanced version in the library
     pair_id = entry.get("pair_id")
@@ -739,7 +868,8 @@ def dialog_import_videos(single_videos: list[dict], mc_scenes: list[dict]) -> No
                 st.session_state["custom_result"] = None
                 st.session_state["active_video_id"] = chosen["video_id"]
                 st.session_state["active_mode"] = "Single video"
-                st.session_state["view_mode"] = "Detected"
+                st.session_state["view_mode"] = "Original"
+                st.session_state["analysis_ready"] = False
                 st.session_state["selected_obs_idx"] = 0
                 st.rerun()
 
@@ -770,6 +900,7 @@ def dialog_import_videos(single_videos: list[dict], mc_scenes: list[dict]) -> No
                     st.session_state["active_video_id"] = res["entry"]["video_id"]
                     st.session_state["active_mode"] = "Single video"
                     st.session_state["view_mode"] = "Detected"
+                    st.session_state["analysis_ready"] = True
                     st.session_state["selected_obs_idx"] = 0
                     st.rerun()
 
@@ -942,19 +1073,29 @@ def render_single_video_page(single_videos: list[dict], mc_scenes: list[dict], e
                     )
 
                 # Quick Library Dropdown right below Evidence Source for 1-click evaluator switching
+                analysis_ready = bool(ss.get("analysis_ready", False))
                 if single_videos:
                     lib_ids = [v["video_id"] for v in single_videos]
-                    cur_i = lib_ids.index(entry["video_id"]) if (entry and entry["video_id"] in lib_ids) else 0
-                    picked_i = st.selectbox(
+                    options_idx = [-1] + list(range(len(single_videos)))
+                    cur_sel = (lib_ids.index(entry["video_id"]) + 1) if (entry and entry["video_id"] in lib_ids) else 0
+                    picked_opt = st.selectbox(
                         "Quick Switch Library Clip",
-                        range(len(single_videos)),
-                        index=cur_i,
-                        format_func=lambda i: single_videos[i]["title"],
+                        options_idx,
+                        index=cur_sel,
+                        format_func=lambda idx: "— Choose a CCTV recording —" if idx == -1 else single_videos[idx]["title"],
                         label_visibility="collapsed",
                         key="side_quick_pick",
                     )
-                    if entry is not None and single_videos[picked_i]["video_id"] != entry["video_id"] and ss.get("custom_result") is None:
-                        ss["active_video_id"] = single_videos[picked_i]["video_id"]
+                    if picked_opt != -1 and (entry is None or single_videos[picked_opt]["video_id"] != entry["video_id"]) and ss.get("custom_result") is None:
+                        ss["active_video_id"] = single_videos[picked_opt]["video_id"]
+                        ss["view_mode"] = "Original"
+                        ss["analysis_ready"] = False
+                        ss["selected_obs_idx"] = 0
+                        st.rerun()
+                    elif picked_opt == -1 and entry is not None and ss.get("custom_result") is None:
+                        ss["active_video_id"] = None
+                        ss["view_mode"] = "Original"
+                        ss["analysis_ready"] = False
                         ss["selected_obs_idx"] = 0
                         st.rerun()
 
@@ -990,7 +1131,7 @@ def render_single_video_page(single_videos: list[dict], mc_scenes: list[dict], e
                     if vt1.button("Original", type=("primary" if ss["view_mode"] == "Original" else "secondary"), width="stretch", disabled=(entry is None), key="vm_orig"):
                         ss["view_mode"] = "Original"
                         st.rerun()
-                    if vt2.button("Detected", type=("primary" if ss["view_mode"] == "Detected" else "secondary"), width="stretch", disabled=(entry is None), key="vm_det"):
+                    if vt2.button("Detected", type=("primary" if (ss["view_mode"] == "Detected" and analysis_ready) else "secondary"), width="stretch", disabled=(entry is None or not analysis_ready), key="vm_det"):
                         ss["view_mode"] = "Detected"
                         st.rerun()
 
@@ -1019,9 +1160,15 @@ def render_single_video_page(single_videos: list[dict], mc_scenes: list[dict], e
                     st.rerun()
 
                 # Desktop action stack under slider
-                if st.button("Analyze video", width="stretch", disabled=(entry is None), key="btn_analyze_side"):
-                    dialog_import_videos(single_videos, mc_scenes)
-                if st.button("Observation review", width="stretch", disabled=(entry is None), key="btn_obs_rev_side"):
+                analyze_btn_type = "primary" if (entry is not None and not analysis_ready) else "secondary"
+                if st.button("Analyze video", type=analyze_btn_type, width="stretch", disabled=(entry is None), key="btn_analyze_side"):
+                    with st.spinner(f"Analyzing video at {ss['conf_pct']}% threshold..."):
+                        time.sleep(0.65)
+                    ss["analysis_ready"] = True
+                    ss["view_mode"] = "Detected"
+                    ss["selected_obs_idx"] = 0
+                    st.rerun()
+                if st.button("Observation review", width="stretch", disabled=(entry is None or not analysis_ready), key="btn_obs_rev_side"):
                     dialog_observation_review(entry, orig_mp4, filtered_records)
 
                 new_intel = st.toggle("CCTV Intelligence Layer", value=ss["cctv_intel"], key="side_intel_toggle")
@@ -1032,12 +1179,15 @@ def render_single_video_page(single_videos: list[dict], mc_scenes: list[dict], e
 
                 # ANALYSIS STATUS
                 st.markdown("<div class='fk-sec'>ANALYSIS STATUS</div>", unsafe_allow_html=True)
-                st_title = "Analysis complete" if entry is not None else "Ready for detection"
-                st_detail = (
-                    f"{len(filtered_records)} observation(s) at {ss['conf_pct']}% · {'CCTV Intel ON' if ss['cctv_intel'] else 'Raw Detector'}"
-                    if entry is not None
-                    else "Import a CCTV video to begin."
-                )
+                if entry is None:
+                    st_title = "Ready for detection"
+                    st_detail = "Choose or import a CCTV video to begin."
+                elif not analysis_ready:
+                    st_title = "Video loaded"
+                    st_detail = f"Set threshold ({ss['conf_pct']}%), then click Analyze video."
+                else:
+                    st_title = "Analysis complete"
+                    st_detail = f"{len(filtered_records)} observation(s) at {ss['conf_pct']}% · {'CCTV Intel ON' if ss['cctv_intel'] else 'Raw Detector'}"
                 st.markdown(
                     f"""
                     <div class='fk-status-card'>
@@ -1138,11 +1288,12 @@ def render_single_video_page(single_videos: list[dict], mc_scenes: list[dict], e
         with col_sum:
             with st.container(key="fk_summary_panel"):
                 st.markdown("<div class='fk-sec fk-sec-first'>DETECTION SUMMARY</div>", unsafe_allow_html=True)
+                has_results = (entry is not None) and bool(ss.get("analysis_ready", False))
                 hg_cnt = sum(1 for r in filtered_records if r["object_label"] == "handgun")
                 kn_cnt = sum(1 for r in filtered_records if r["object_label"] == "knife")
-                tot_txt = str(len(filtered_records)) if entry is not None else "—"
-                hg_txt = str(hg_cnt) if entry is not None else "—"
-                kn_txt = str(kn_cnt) if entry is not None else "—"
+                tot_txt = str(len(filtered_records)) if has_results else "—"
+                hg_txt = str(hg_cnt) if has_results else "—"
+                kn_txt = str(kn_cnt) if has_results else "—"
 
                 st.markdown(
                     f"""
@@ -1156,9 +1307,13 @@ def render_single_video_page(single_videos: list[dict], mc_scenes: list[dict], e
                 )
 
                 if entry is None:
-                    st.markdown("<div class='fk-muted' style='margin-bottom:14px;'>Import a video, review the confidence threshold, then start detection.</div>", unsafe_allow_html=True)
+                    st.markdown("<div class='fk-muted' style='margin-bottom:14px;'>Import or select a video, choose a confidence threshold, then click Analyze video.</div>", unsafe_allow_html=True)
                     st.markdown("<div class='fk-sec'>CURRENT FRAME</div>", unsafe_allow_html=True)
-                    st.markdown("<div class='fk-muted'>No video analyzed yet.</div>", unsafe_allow_html=True)
+                    st.markdown("<div class='fk-muted'>No video selected yet.</div>", unsafe_allow_html=True)
+                elif not has_results:
+                    st.markdown(f"<div class='fk-muted' style='margin-bottom:14px;'>Video loaded. Adjust the confidence threshold (<b>{ss['conf_pct']}%</b>) and click <b>Analyze video</b> to load detections.</div>", unsafe_allow_html=True)
+                    st.markdown("<div class='fk-sec'>CURRENT FRAME</div>", unsafe_allow_html=True)
+                    st.markdown("<div class='fk-muted'>No detections loaded yet.</div>", unsafe_allow_html=True)
                 else:
                     vid_id = entry["video_id"]
                     vid_reviews = ss["reviews"].setdefault(vid_id, {})
@@ -1417,7 +1572,25 @@ def main() -> None:
     ss = st.session_state
     inject_exact_desktop_css(dark_mode=(ss["theme"] == "dark"))
 
+    # Branded Forensikada splash / loading screen on initial open or browser refresh
+    if not ss.get("splash_shown", False):
+        splash_logo = _logo_data_uri()
+        splash_img = f"<img class='fk-splash-logo' src='{splash_logo}' alt='Forensikada' />" if splash_logo else ""
+        st.markdown(
+            f"""
+            <div class='fk-splash-overlay' role='status' aria-label='Loading Forensikada'>
+                {splash_img}
+                <div class='fk-splash-title'>Forensikada</div>
+                <div class='fk-splash-sub'>CCTV FORENSIC VIDEO ANALYSIS</div>
+                <div class='fk-splash-track'><div class='fk-splash-bar'></div></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        ss["splash_shown"] = True
+
     entry, orig_mp4, annot_mp4, filtered_records, paired_entry = get_active_single_context(single_videos)
+    analysis_ready = bool(ss.get("analysis_ready", False))
 
     # ===== 1. EXACT DESKTOP TOP HEADER BAR =====
     with st.container(key="fk_header_bar"):
@@ -1444,13 +1617,15 @@ def main() -> None:
             if st.button("Close videos", width="stretch", disabled=(entry is None), key="hdr_close"):
                 ss["active_video_id"] = None
                 ss["custom_result"] = None
+                ss["analysis_ready"] = False
+                ss["view_mode"] = "Original"
                 ss["selected_obs_idx"] = 0
                 st.rerun()
         with hc_rep:
-            if st.button("Forensic report", width="stretch", disabled=(entry is None), key="hdr_report"):
+            if st.button("Forensic report", width="stretch", disabled=(entry is None or not analysis_ready), key="hdr_report"):
                 dialog_forensic_report(entry, filtered_records, ss["conf_pct"] / 100.0, ss["cctv_intel"])
         with hc_sav:
-            if entry is not None:
+            if entry is not None and analysis_ready:
                 vid_reviews = ss["reviews"].setdefault(entry["video_id"], {})
                 pdf_b = build_single_video_pdf_bytes(entry, filtered_records, ss["conf_pct"] / 100.0, ss["cctv_intel"], vid_reviews)
                 st.download_button(

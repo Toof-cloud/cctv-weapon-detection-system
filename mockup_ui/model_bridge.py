@@ -61,6 +61,12 @@ def discover_available_models() -> list[tuple[str, Path]]:
             seen.add(resolved)
             seen_names.add(resolved.name)
 
+    # -3. Model 13 (Final Production SOTA - WiSE-FT alpha=0.50 & Household Look-Alike Immunity) -> best_weapon_detector_thirteenth_model.pth
+    if (ROOT_DIR / "best_weapon_detector_thirteenth_model.pth").is_file():
+        add_if_exists("Model 13 (Final Production SOTA - WiSE-FT & Household Immunity)", ROOT_DIR / "best_weapon_detector_thirteenth_model.pth")
+    elif (MOCKUP_DIR / "models" / "best_weapon_detector_thirteenth_model.pth").is_file():
+        add_if_exists("Model 13 (Final Production SOTA - WiSE-FT & Household Immunity)", MOCKUP_DIR / "models" / "best_weapon_detector_thirteenth_model.pth")
+
     # -2. Model 12 (Final Production SOTA - Full Surveillance-POV & Staged Hard-Negative Immunity) -> best_weapon_detector_twelfth_model.pth
     if (ROOT_DIR / "best_weapon_detector_twelfth_model.pth").is_file():
         add_if_exists("Model 12 (Final Production SOTA - Full Surveillance & Hard-Negative Immunity)", ROOT_DIR / "best_weapon_detector_twelfth_model.pth")
