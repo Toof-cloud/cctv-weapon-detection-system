@@ -845,7 +845,7 @@ def get_active_single_context(single_videos: list[dict]):
 @st.dialog("Import CCTV Videos", width="large")
 def dialog_import_videos(single_videos: list[dict], mc_scenes: list[dict]) -> None:
     st.markdown(
-        "<div class='fk-muted' style='margin-bottom:10px;'>Choose a pre-indexed CCTV recording from the Thesis Evaluation Library for instant playback, or upload your own short CCTV clip (≤25 MB, ≤15s) for live Model 12 inference.</div>",
+        "<div class='fk-muted' style='margin-bottom:10px;'>Choose a pre-indexed CCTV recording from the Thesis Evaluation Library for instant playback, or upload your own short CCTV clip (≤25 MB, ≤15s) for live Model 12 (Video SOTA) inference.</div>",
         unsafe_allow_html=True,
     )
     t_lib, t_mc, t_up = st.tabs(["Prepared CCTV Library (15 videos)", "Multi-Camera Pairs (6 scenes)", "Upload Custom Clip (≤25 MB)"])
@@ -972,7 +972,7 @@ def dialog_forensic_report(entry: dict, filtered_records: list[dict], threshold:
 
     st.markdown(f"**Evidence File:** `{entry.get('source_filename', '')}`")
     st.markdown(f"**SHA-256 Chain-of-Custody Hash:** `{entry.get('sha256', '')}`")
-    st.caption(f"Resolution: {om.get('width', 0)}×{om.get('height', 0)} · {om.get('fps', 0)} fps · {om.get('duration_seconds', 0)}s | Model 12 | Threshold: {int(threshold*100)}% | CCTV Intelligence: {'ON' if cctv_intel else 'OFF'}")
+    st.caption(f"Resolution: {om.get('width', 0)}×{om.get('height', 0)} · {om.get('fps', 0)} fps · {om.get('duration_seconds', 0)}s | Model 12 (Video SOTA) | Threshold: {int(threshold*100)}% | CCTV Intelligence: {'ON' if cctv_intel else 'OFF'}")
 
     hg_cnt = sum(1 for r in filtered_records if r["object_label"] == "handgun")
     kn_cnt = sum(1 for r in filtered_records if r["object_label"] == "knife")
@@ -1201,7 +1201,7 @@ def render_single_video_page(single_videos: list[dict], mc_scenes: list[dict], e
                 # TRAINED MODEL footer
                 st.markdown("<div class='fk-sec' style='margin-top:20px;'>TRAINED MODEL</div>", unsafe_allow_html=True)
                 st.markdown(
-                    "<div class='fk-muted'>Model 12 (Final Production SOTA)<br/>Faster R-CNN · Handgun / Knife<br/>best_weapon_detector_twelfth_model.pth</div>",
+                    "<div class='fk-muted'>Model 12 (Production Video SOTA)<br/>Faster R-CNN · Handgun / Knife<br/>best_weapon_detector_twelfth_model.pth</div>",
                     unsafe_allow_html=True,
                 )
 
@@ -1442,7 +1442,7 @@ def render_multicam_page(mc_scenes: list[dict]) -> None:
                     st.rerun()
 
                 st.markdown("<div class='fk-sec' style='margin-top:16px;'>TRAINED MODEL</div>", unsafe_allow_html=True)
-                st.markdown("<div class='fk-muted'>Model 12 (Final Production SOTA)<br/>Multi-Camera Corroboration</div>", unsafe_allow_html=True)
+                st.markdown("<div class='fk-muted'>Model 12 (Production Video SOTA)<br/>Multi-Camera Corroboration</div>", unsafe_allow_html=True)
 
         with col_work:
             with st.container(key="fk_workspace_panel"):
@@ -1538,7 +1538,7 @@ def render_evaluator_guide_page() -> None:
                 st.link_button("Open Expert Evaluation Form", GOOGLE_FORM_URL, width="stretch")
     with c2:
         with st.container(border=True):
-            st.markdown("<div class='fk-sec fk-sec-first'>MODEL 12 VERIFIED VIDEO GROUND-TRUTH BENCHMARKS</div>", unsafe_allow_html=True)
+            st.markdown("<div class='fk-sec fk-sec-first'>VERIFIED PRODUCTION VIDEO & STATIC SOTA BENCHMARKS (MODELS 12 & 13)</div>", unsafe_allow_html=True)
             st.markdown(
                 """
                 <div class='fk-metrics-row'>
@@ -1551,13 +1551,16 @@ def render_evaluator_guide_page() -> None:
             )
             st.markdown(
                 """
-                | Benchmark | Model 10 | Model 12 (Final SOTA) | Gain |
+                | Benchmark (Zero Leakage) | Model 10 | **Model 12 (Video SOTA)** | **Model 13 (Static/HN SOTA)** |
                 | :--- | :---: | :---: | :---: |
-                | **Real CCTV Video Precision** | 95.35% | **99.40%** | +4.05 pp |
-                | **Real CCTV Video Recall** | 37.10% | **75.11%** | **+38.01 pp** |
-                | **Real CCTV Video F1** | 54.13% | **85.57%** | **+31.44 pp** |
-                | **Real CCTV Video mAP@0.5** | 55.17% | **78.89%** | **+23.72 pp** |
-                | **No-Weapon Specificity (948 frames)** | 99.68% | **100.00% (0 FP)** | +0.32 pp |
+                | **Real CCTV Video Precision** | 100.00% | **99.40%** | 68.48% |
+                | **Real CCTV Video Recall** | 37.10% | **75.11% (+38.01 pp)** | 51.13% |
+                | **Real CCTV Video F1 Score** | 54.13% | **85.57% (+31.44 pp)** | 58.55% |
+                | **Real CCTV Video mAP@0.5** | 55.17% | **78.89% (+23.72 pp)** | 37.41% |
+                | **No-Weapon Video Spec. (948 frames)** | 100.00% | **100.00% (0 FP)** | 98.10% |
+                | **External 350 Static mAP@0.5** | 62.38% | 65.52% | **74.82% (+9.30 pp)** |
+                | **External 350 Static F1 Score** | 69.66% | 70.86% | **74.92% (Record)** |
+                | **Staged Tapo Val 44 (Post-CCTV)** | — | 37/44 | **44/44 (100.0%)** |
                 """
             )
     st.markdown("</div>", unsafe_allow_html=True)

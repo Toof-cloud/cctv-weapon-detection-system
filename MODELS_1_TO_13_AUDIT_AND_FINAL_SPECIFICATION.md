@@ -172,7 +172,10 @@ All 13 model checkpoints were evaluated under identical standardized conditions 
 | **Model 9 (Legacy)** | 56.13% | 53.85% | 54.97% | 68.26% | 60.22% | 64.24% | 119 / 93 / 102 | 97.15% (921/948, 27 FP) | 91.62% |
 | **Model 10 (Before Expansion)** | **100.00%** | 37.10% | 54.13% | 69.73% | 40.61% | 55.17% | 82 / **0** / 139 | **100.00% (948/948, 0 FP)** | 87.37% |
 | **Model 11 (Partial Expansion)** | **100.00%** | 61.09% | 75.84% | 81.58% | 62.99% | 72.28% | 135 / **0** / 86 | **100.00% (948/948, 0 FP)** | 86.55% |
-| **Model 12 (Full Expansion)** | **99.40%** | **75.11%** | **85.57%** | **88.13%** | **69.65%** | **78.89%** | **166 / 1 / 55** | **100.00% (948/948, 0 FP)** | **87.43%** |
+| **Model 12 (Full Expansion — Video SOTA)** | **99.40%** | **75.11%** | **85.57%** | **88.13%** | **69.65%** | **78.89%** | **166 / 1 / 55** | **100.00% (948/948, 0 FP)** | **87.43%** |
+| **Model 13 (Household HN Ablation, $\alpha=0.50$)** | 68.48% | 51.13% | 58.55% | 62.86% | 11.95% | 37.41% | 113 / 52 / 108 | 98.10% (930/948, 18 FP) | 88.24% |
+
+> **Critical Video-GT Finding (Model 12 vs. Model 13 Tradeoff):** While Model 13 achieved all-time record static External 350 generalization (`74.82%` mAP, `74.92%` F1) and `100%` immunity on indoor household look-alikes (`Staged 44` & `Nov 20` sampled frames), its $2\times$ oversampling of metallic kitchen ladles, rolled white rags, and remotes caused over-suppression of real overhead CCTV knife blades (`KN01–KN03` Video Knife AP dropped from `69.65%` to `11.95%`) and introduced `18` false positives on `NW02`/`NW04`. Therefore, **Model 12 (`best_weapon_detector_twelfth_model.pth`) remains the verified Production Video CCTV SOTA (`99.40%` Precision, `85.57%` F1, `78.89%` Video mAP, `100.00%` No-Weapon Specificity)**, while **Model 13** is preserved as the **Static External & Household Hard-Negative Ablation SOTA**.
 
 ### Table 9: Controlled Video Ablation Studies (BasicVSR++ Enhancement & CCTV Intelligence Layer)
 

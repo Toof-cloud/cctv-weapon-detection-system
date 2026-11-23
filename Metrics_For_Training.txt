@@ -284,3 +284,34 @@ Real CCTV Video Ground-Truth Benchmark (16 Streams, 2,538 Evaluated Frames: 221 
   - BasicVSR++ Enhancement Gain on Model 12: Boosted Video Recall from 61.54% -> 75.11% (+13.57 pp, +30 TP recovered), F1 from 75.77% -> 85.57% (+9.80 pp), Video mAP from 73.62% -> 78.89% (+5.27 pp), and Mean Confidence from 86.70% -> 87.43% (+0.73%)
   - CCTV Intelligence Layer Gain on Model 12: Eliminated 99.88% of raw single-frame false positives (832 FP -> 1 FP; 626 No-Weapon FP -> 0 FP), boosting Video Precision from 19.30% -> 99.40% (+80.10 pp) and No-Weapon Specificity from 38.82% -> 100.00% (948/948 clean frames, +61.18 pp)
 Status: Completed & Integrated as System Default (RTX 5060 Ti GPU, 8 CPU thread limit)
+
+* Model 13 Metrics (Static External & Household Hard-Negative Ablation SOTA: Nov 20 Household Look-Alike Mining + WiSE-FT Calibration)
+Checkpoint: best_weapon_detector_thirteenth_model.pth (Calibrated WiSE-FT alpha=0.50) and latest_weapon_detector_thirteenth_model.pth (Epoch 2 alpha=1.00)
+Dataset: Full Model 12 Corpus + 240 Full-Frame Hard Negatives (Nov20_Staged_Hard_Negatives, 2x oversampled) + 240 Targeted FP ROI Crops (hard_negatives_v14_nov20_household) mined strictly from Nov 20 Non-Weapon Scenes #01-#06 (Black/Long TV Remotes, Metallic Kitchen Ladle, Rolled White Rag, Smartphone, Wallet; Weapon Prop Scenes #07-#11 100% excluded)
+Train images: 5,443 base scenes + 826 targeted distractor crops (6,269 effective training pool; 5,810 items sampled per epoch)
+Validation images: 650 images (254 Handgun, 242 Knife, 154 Hard Negatives)
+Test images (Apples-to-Apples M9 Held-Out Split): 279 (114 Handgun, 114 Knife, 51 Pure CCTV Negative)
+Batch size: 2
+Epochs: 2 (AdamW lr: 3.5e-5 -> 1.0e-5 cosine annealing, weight_decay=0.0005; Epoch 1 [14.78 min] loss=0.050766 [cls=0.019581, box=0.023395, obj=0.003204, rpn=0.004587]; Epoch 2 [14.42 min] loss=0.040920 [cls=0.014266, box=0.021207, obj=0.001716, rpn=0.003732])
+Confidence threshold: 0.50 | IoU threshold: 0.50
+Unified External Benchmark (350 Unseen Images, 0% Leakage) [Calibrated alpha=0.50 / Epoch 2 alpha=1.00]:
+  - Precision: 69.72% / 70.39%
+  - Recall: 80.95% (First model in project history to break 80% external recall!) / 78.39%
+  - F1: 74.92% (All-time project record!) / 74.18%
+  - AP(Handgun): 83.48% (All-time project record!) / 76.94%
+  - AP(Knife): 66.16% (+17.31 pp over M12 Calibrated!) / 70.03%
+  - mAP@0.5: 74.82% (+9.30 pp over M12 Calibrated!) / 73.48%
+  - TP / FP / FN: 221 / 96 / 52 (Epoch 2: 214 / 90 / 59)
+  - External Negative Rejection: 81/100 (81.00%) / 82/100 (82.00%)
+Strictly Unseen Internal CCTV Benchmark (185 Images, 0% Leakage) [Calibrated / Epoch 2]:
+  - Precision: 92.67% / 91.61% | Recall: 95.86% / 90.34% | F1: 94.24% / 90.97% | mAP@0.5: 96.82% / 92.36% | Neg: 39/40 (97.50%) / 40/40 (100.00%)
+Internal Test Split (279 Images, 0% Leakage) [Calibrated / Epoch 2]:
+  - Precision: 85.50% / 83.94% | Recall: 94.12% / 87.82% | F1: 89.60% / 85.83% | mAP@0.5: 92.87% / 86.41% | Neg: 45/51 (88.24%)
+Everyday Distractor & Household Look-Alike Specificity:
+  - Held Non-Weapon Grid (18 Cells): 17/18 (94.44%)
+  - Staged Tapo Val (44 Frames): Raw Detector 37/44 (84.09%), Post-CCTV Intelligence 44/44 (100.00%, 0 FP)
+  - Nov 20 Household Look-Alikes (40 Sampled Frames): 40/40 (100.00%, 0 FP; 9/12 full clips 0 FP at 50%, -76.9% FPs vs M12)
+16-Stream Real CCTV Video Ground-Truth Benchmark (Tradeoff Analysis):
+  - Precision 68.48%, Recall 51.13%, F1 58.55%, Video mAP@0.5 37.41% (Handgun AP 62.86%, Knife AP 11.95%), TP 113 / FP 52 / FN 108, No-Weapon Specificity 98.10% (930/948)
+  - Finding: 2x oversampling of metallic kitchen ladles and rolled white rags boosted static/household specificity but over-suppressed overhead CCTV knife blades, confirming Model 12 as the Production Video CCTV SOTA and Model 13 as the Static External & Household Hard-Negative Ablation SOTA.
+Status: Completed & Documented in Chapter 4 Ablation Suite (RTX 5060 Ti GPU)

@@ -16,8 +16,8 @@ if str(ROOT_DIR) not in sys.path:
 from dataset_analysis.build_model import get_model
 
 DEFAULT_MODEL_CANDIDATES = [
-    ROOT_DIR / "best_weapon_detector_thirteenth_model.pth",
     ROOT_DIR / "best_weapon_detector_twelfth_model.pth",
+    ROOT_DIR / "best_weapon_detector_thirteenth_model.pth",
     ROOT_DIR / "best_weapon_detector_eleventh_model.pth",
     ROOT_DIR / "best_weapon_detector_tenth_model.pth",
     ROOT_DIR / "best_weapon_detector_ninth_model.pth",

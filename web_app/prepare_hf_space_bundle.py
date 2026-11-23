@@ -23,10 +23,10 @@ app_port: 7860
 pinned: false
 ---
 
-# FORENSIKADA — Multi-Camera CCTV Weapon Detection System (Model 12)
+# FORENSIKADA — Multi-Camera CCTV Weapon Detection System (Model 12 Video SOTA)
 
 Open-access forensic evaluation platform for the **FORENSIKADA** thesis system:
-- **Model 12 (Final Production SOTA):** Faster R-CNN ResNet-50 FPN v2 + WiSE-FT (`alpha=0.30`) + CCTV Intelligence Layer
+- **Model 12 (Production Video SOTA):** Faster R-CNN ResNet-50 FPN v2 + WiSE-FT (`alpha=0.30`) + CCTV Intelligence Layer (`99.40%` Video Precision, `85.57%` F1, `100.00%` No-Weapon Specificity)
 - **Prepared Evaluation Library:** Instant H.264 playback across Handgun, Knife, Non-Weapon, and Multi-Camera (`CAM-01` & `CAM-02`) CCTV footage with dynamic confidence threshold slider, CCTV Intelligence toggle, Observation Review, and live Forensic PDF + CSV export
 - **Live Custom Upload:** Test your own short CCTV clip (`<= 25 MB`, `<= 15 seconds`) directly against Model 12
 """

@@ -229,7 +229,7 @@ def process_single_entry(
 
     telem_payload = {
         "entry": entry,
-        "model_name": "Model 12 (Final Production SOTA)",
+        "model_name": "Model 12 (Production Video SOTA)",
         "model_checkpoint": MODEL_12_PATH.name,
         "records_50pct": recs_50,
         "records_20pct": recs_20,
@@ -344,7 +344,7 @@ def main():
 
     index_payload = {
         "system_name": "FORENSIKADA",
-        "default_model": "Model 12 (Final Production SOTA)",
+        "default_model": "Model 12 (Production Video SOTA)",
         "single_videos": single_entries,
         "multicam_scenes": multicam_scenes,
     }

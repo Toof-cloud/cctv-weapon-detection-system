@@ -52,7 +52,7 @@ def build_single_video_pdf_bytes(
     threshold: float,
     cctv_intel_enabled: bool,
     reviews: dict[str, dict],
-    model_name: str = "Model 12 (Final Production SOTA)",
+    model_name: str = "Model 12 (Production Video SOTA)",
 ) -> bytes:
     buf = io.BytesIO()
     doc = SimpleDocTemplate(buf, pagesize=letter, leftMargin=0.6 * inch, rightMargin=0.6 * inch, topMargin=0.6 * inch, bottomMargin=0.6 * inch)
