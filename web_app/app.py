@@ -338,19 +338,28 @@ def inject_exact_desktop_css(dark_mode: bool) -> None:
             margin: 0 !important;
             max-width: 100% !important;
         }}
-        /* Collapse invisible <style> markdown wrapper and top-level vertical gap so header sits flush at y=0 */
+        /* Collapse invisible <style> markdown wrapper, splash wrapper, and top-level vertical gap so header sits flush at y=0 */
+        [data-testid="stMainBlockContainer"] > [data-testid="stVerticalBlock"],
         [data-testid="stMainBlockContainer"] > div > [data-testid="stVerticalBlock"],
+        .block-container > [data-testid="stVerticalBlock"],
         .block-container > div > [data-testid="stVerticalBlock"] {{
             gap: 0 !important;
+            row-gap: 0 !important;
             padding-top: 0 !important;
             margin-top: 0 !important;
         }}
         [data-testid="stElementContainer"]:has(style),
-        .element-container:has(style) {{
+        .element-container:has(style),
+        [data-testid="stElementContainer"]:has(.fk-splash-overlay),
+        .element-container:has(.fk-splash-overlay),
+        [data-testid="stMarkdownContainer"]:has(style),
+        [data-testid="stMarkdown"]:has(style) {{
             display: none !important;
             height: 0 !important;
+            min-height: 0 !important;
             margin: 0 !important;
             padding: 0 !important;
+            overflow: hidden !important;
         }}
 
         /* ===== EXACT DESKTOP TOP HEADER BAR (#header) ===== */
@@ -360,6 +369,7 @@ def inject_exact_desktop_css(dark_mode: bool) -> None:
             border-bottom: 1px solid #22396f !important;
             padding: 9px 20px !important;
             margin: 0 !important;
+            width: 100% !important;
         }}
         .st-key-fk_header_bar [data-testid="stHorizontalBlock"] {{
             align-items: center !important;
@@ -389,7 +399,10 @@ def inject_exact_desktop_css(dark_mode: bool) -> None:
             text-transform: uppercase;
             margin-top: 2px;
         }}
-        /* Header buttons match QPushButton#headerButton and #primaryButton */
+        /* Style all buttons inside header (including stPopover / stTooltipHoverTarget wrappers for the gear button) */
+        .st-key-fk_header_bar button,
+        .st-key-fk_header_bar [data-testid="stBaseButton-secondary"],
+        .st-key-fk_header_bar [data-testid="stBaseButton-primary"],
         .st-key-fk_header_bar div.stButton > button,
         .st-key-fk_header_bar div.stDownloadButton > button {{
             background-color: #172950 !important;
@@ -402,22 +415,30 @@ def inject_exact_desktop_css(dark_mode: bool) -> None:
             padding: 4px 12px !important;
             white-space: nowrap !important;
         }}
+        .st-key-fk_header_bar button:hover,
+        .st-key-fk_header_bar [data-testid="stBaseButton-secondary"]:hover,
         .st-key-fk_header_bar div.stButton > button:hover,
         .st-key-fk_header_bar div.stDownloadButton > button:hover {{
             background-color: #22396f !important;
             border-color: #9db9ee !important;
             color: #ffffff !important;
         }}
+        .st-key-fk_header_bar button[kind="primary"],
+        .st-key-fk_header_bar [data-testid="stBaseButton-primary"],
         .st-key-fk_header_bar div.stButton > button[kind="primary"] {{
             background-color: #22396f !important;
             border: 1px solid #506b9e !important;
             color: #ffffff !important;
             font-weight: 600 !important;
         }}
+        .st-key-fk_header_bar button[kind="primary"]:hover,
+        .st-key-fk_header_bar [data-testid="stBaseButton-primary"]:hover,
         .st-key-fk_header_bar div.stButton > button[kind="primary"]:hover {{
             background-color: #304d85 !important;
             border-color: #9db9ee !important;
         }}
+        .st-key-fk_header_bar button:disabled,
+        .st-key-fk_header_bar [data-testid="stBaseButton-secondary"]:disabled,
         .st-key-fk_header_bar div.stButton > button:disabled,
         .st-key-fk_header_bar div.stDownloadButton > button:disabled {{
             background-color: #0d1c42 !important;
