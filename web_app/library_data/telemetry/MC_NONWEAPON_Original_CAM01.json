@@ -1,0 +1,697 @@
+{
+  "entry": {
+    "video_id": "MC_NONWEAPON_Original_CAM01",
+    "pair_id": "MC_NONWEAPON",
+    "title": "Multi-Camera Non-Weapon Pair \u2014 Staged Smartphone Distractor (CAM 01 & CAM 02) [0 FP] \u2014 CAM-01",
+    "category": "Multi-Camera No-Weapon",
+    "version": "Original",
+    "camera_id": "CAM-01",
+    "source_filename": "1869451F17C5_20261120124918870_cam0.mp4",
+    "sha256": "f6af0607f93d0abdc5cf20885ff2c5668d49904797af7d6f1a4280eed63da301",
+    "orig_meta": {
+      "width": 1280,
+      "height": 720,
+      "fps": 17.932,
+      "total_frames": 170,
+      "duration_seconds": 9.48,
+      "file_size_mb": 0.25
+    },
+    "web_meta": {
+      "width": 960,
+      "height": 540,
+      "fps": 17.903,
+      "total_frames": 169,
+      "duration_seconds": 9.44,
+      "file_size_mb": 0.55
+    },
+    "original_video_rel": "videos/MC_NONWEAPON_Original_CAM01_original.mp4",
+    "annotated_video_rel": "videos/MC_NONWEAPON_Original_CAM01_annotated.mp4",
+    "telemetry_rel": "telemetry/MC_NONWEAPON_Original_CAM01.json"
+  },
+  "model_name": "Model 12 (Final Production SOTA)",
+  "model_checkpoint": "best_weapon_detector_twelfth_model.pth",
+  "records_50pct": [
+    {
+      "frame_number": 41,
+      "timestamp_seconds": 2.286,
+      "timestamp_formatted": "00:02.286",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        1153,
+        475,
+        1210,
+        554
+      ],
+      "norm_box": [
+        0.90078,
+        0.65972,
+        0.94531,
+        0.76944
+      ],
+      "confidence_score": 0.5044,
+      "validation_status": "BARE_HUMAN_LIMB",
+      "rejection_reason": "BARE_HUMAN_LIMB (skin=74.2% >= 55% empty hand/arm)"
+    },
+    {
+      "frame_number": 50,
+      "timestamp_seconds": 2.788,
+      "timestamp_formatted": "00:02.788",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        1136,
+        486,
+        1192,
+        550
+      ],
+      "norm_box": [
+        0.8875,
+        0.675,
+        0.93125,
+        0.76389
+      ],
+      "confidence_score": 0.5312,
+      "validation_status": "BARE_HUMAN_LIMB",
+      "rejection_reason": "BARE_HUMAN_LIMB (skin=57.1% >= 55% empty hand/arm)"
+    },
+    {
+      "frame_number": 51,
+      "timestamp_seconds": 2.844,
+      "timestamp_formatted": "00:02.844",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        1134,
+        486,
+        1193,
+        551
+      ],
+      "norm_box": [
+        0.88594,
+        0.675,
+        0.93203,
+        0.76528
+      ],
+      "confidence_score": 0.595,
+      "validation_status": "BARE_HUMAN_LIMB",
+      "rejection_reason": "BARE_HUMAN_LIMB (skin=56.2% >= 55% empty hand/arm)"
+    },
+    {
+      "frame_number": 52,
+      "timestamp_seconds": 2.9,
+      "timestamp_formatted": "00:02.900",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        1133,
+        486,
+        1193,
+        551
+      ],
+      "norm_box": [
+        0.88516,
+        0.675,
+        0.93203,
+        0.76528
+      ],
+      "confidence_score": 0.6903,
+      "validation_status": "BARE_HUMAN_LIMB",
+      "rejection_reason": "BARE_HUMAN_LIMB (skin=55.3% >= 55% empty hand/arm)"
+    },
+    {
+      "frame_number": 53,
+      "timestamp_seconds": 2.956,
+      "timestamp_formatted": "00:02.956",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        1136,
+        488,
+        1194,
+        550
+      ],
+      "norm_box": [
+        0.8875,
+        0.67778,
+        0.93281,
+        0.76389
+      ],
+      "confidence_score": 0.4271,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (42.7% < 50.0%)"
+    },
+    {
+      "frame_number": 54,
+      "timestamp_seconds": 3.011,
+      "timestamp_formatted": "00:03.011",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        1136,
+        488,
+        1194,
+        550
+      ],
+      "norm_box": [
+        0.8875,
+        0.67778,
+        0.93281,
+        0.76389
+      ],
+      "confidence_score": 0.4788,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (47.9% < 50.0%)"
+    },
+    {
+      "frame_number": 55,
+      "timestamp_seconds": 3.067,
+      "timestamp_formatted": "00:03.067",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        1136,
+        488,
+        1194,
+        549
+      ],
+      "norm_box": [
+        0.8875,
+        0.67778,
+        0.93281,
+        0.7625
+      ],
+      "confidence_score": 0.4562,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (45.6% < 50.0%)"
+    },
+    {
+      "frame_number": 56,
+      "timestamp_seconds": 3.123,
+      "timestamp_formatted": "00:03.123",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        1136,
+        488,
+        1194,
+        549
+      ],
+      "norm_box": [
+        0.8875,
+        0.67778,
+        0.93281,
+        0.7625
+      ],
+      "confidence_score": 0.4691,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (46.9% < 50.0%)"
+    },
+    {
+      "frame_number": 71,
+      "timestamp_seconds": 3.959,
+      "timestamp_formatted": "00:03.959",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        562,
+        395,
+        628,
+        471
+      ],
+      "norm_box": [
+        0.43906,
+        0.54861,
+        0.49062,
+        0.65417
+      ],
+      "confidence_score": 0.3886,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (38.9% < 50.0%)"
+    },
+    {
+      "frame_number": 88,
+      "timestamp_seconds": 4.907,
+      "timestamp_formatted": "00:04.907",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "knife",
+      "bounding_box": [
+        432,
+        462,
+        515,
+        570
+      ],
+      "norm_box": [
+        0.3375,
+        0.64167,
+        0.40234,
+        0.79167
+      ],
+      "confidence_score": 0.6615,
+      "validation_status": "UNPHYSICAL_PERSON_LOCATION",
+      "rejection_reason": "UNPHYSICAL_PERSON_LOCATION (rel_y=0.96 below feet)"
+    },
+    {
+      "frame_number": 105,
+      "timestamp_seconds": 5.855,
+      "timestamp_formatted": "00:05.855",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        297,
+        358,
+        352,
+        421
+      ],
+      "norm_box": [
+        0.23203,
+        0.49722,
+        0.275,
+        0.58472
+      ],
+      "confidence_score": 0.8889,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 1-frame transient proposal)"
+    },
+    {
+      "frame_number": 114,
+      "timestamp_seconds": 6.357,
+      "timestamp_formatted": "00:06.357",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "knife",
+      "bounding_box": [
+        302,
+        375,
+        390,
+        430
+      ],
+      "norm_box": [
+        0.23594,
+        0.52083,
+        0.30469,
+        0.59722
+      ],
+      "confidence_score": 0.5929,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 1-frame transient proposal)"
+    },
+    {
+      "frame_number": 115,
+      "timestamp_seconds": 6.413,
+      "timestamp_formatted": "00:06.413",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "knife",
+      "bounding_box": [
+        298,
+        374,
+        395,
+        429
+      ],
+      "norm_box": [
+        0.23281,
+        0.51944,
+        0.30859,
+        0.59583
+      ],
+      "confidence_score": 0.4032,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (40.3% < 50.0%)"
+    },
+    {
+      "frame_number": 138,
+      "timestamp_seconds": 7.696,
+      "timestamp_formatted": "00:07.696",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "knife",
+      "bounding_box": [
+        411,
+        143,
+        548,
+        239
+      ],
+      "norm_box": [
+        0.32109,
+        0.19861,
+        0.42812,
+        0.33194
+      ],
+      "confidence_score": 0.4512,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (45.1% < 50.0%)"
+    },
+    {
+      "frame_number": 140,
+      "timestamp_seconds": 7.807,
+      "timestamp_formatted": "00:07.807",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        386,
+        82,
+        519,
+        181
+      ],
+      "norm_box": [
+        0.30156,
+        0.11389,
+        0.40547,
+        0.25139
+      ],
+      "confidence_score": 0.4132,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (41.3% < 50.0%)"
+    }
+  ],
+  "records_20pct": [
+    {
+      "frame_number": 41,
+      "timestamp_seconds": 2.286,
+      "timestamp_formatted": "00:02.286",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        1153,
+        475,
+        1210,
+        554
+      ],
+      "norm_box": [
+        0.90078,
+        0.65972,
+        0.94531,
+        0.76944
+      ],
+      "confidence_score": 0.5044,
+      "validation_status": "BARE_HUMAN_LIMB",
+      "rejection_reason": "BARE_HUMAN_LIMB (skin=74.2% >= 55% empty hand/arm)"
+    },
+    {
+      "frame_number": 50,
+      "timestamp_seconds": 2.788,
+      "timestamp_formatted": "00:02.788",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        1136,
+        486,
+        1192,
+        550
+      ],
+      "norm_box": [
+        0.8875,
+        0.675,
+        0.93125,
+        0.76389
+      ],
+      "confidence_score": 0.5312,
+      "validation_status": "BARE_HUMAN_LIMB",
+      "rejection_reason": "BARE_HUMAN_LIMB (skin=57.1% >= 55% empty hand/arm)"
+    },
+    {
+      "frame_number": 51,
+      "timestamp_seconds": 2.844,
+      "timestamp_formatted": "00:02.844",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        1134,
+        486,
+        1193,
+        551
+      ],
+      "norm_box": [
+        0.88594,
+        0.675,
+        0.93203,
+        0.76528
+      ],
+      "confidence_score": 0.595,
+      "validation_status": "BARE_HUMAN_LIMB",
+      "rejection_reason": "BARE_HUMAN_LIMB (skin=56.2% >= 55% empty hand/arm)"
+    },
+    {
+      "frame_number": 52,
+      "timestamp_seconds": 2.9,
+      "timestamp_formatted": "00:02.900",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        1133,
+        486,
+        1193,
+        551
+      ],
+      "norm_box": [
+        0.88516,
+        0.675,
+        0.93203,
+        0.76528
+      ],
+      "confidence_score": 0.6903,
+      "validation_status": "BARE_HUMAN_LIMB",
+      "rejection_reason": "BARE_HUMAN_LIMB (skin=55.3% >= 55% empty hand/arm)"
+    },
+    {
+      "frame_number": 53,
+      "timestamp_seconds": 2.956,
+      "timestamp_formatted": "00:02.956",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        1136,
+        488,
+        1194,
+        550
+      ],
+      "norm_box": [
+        0.8875,
+        0.67778,
+        0.93281,
+        0.76389
+      ],
+      "confidence_score": 0.4271,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (42.7% < 50.0%)"
+    },
+    {
+      "frame_number": 54,
+      "timestamp_seconds": 3.011,
+      "timestamp_formatted": "00:03.011",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        1136,
+        488,
+        1194,
+        550
+      ],
+      "norm_box": [
+        0.8875,
+        0.67778,
+        0.93281,
+        0.76389
+      ],
+      "confidence_score": 0.4788,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (47.9% < 50.0%)"
+    },
+    {
+      "frame_number": 55,
+      "timestamp_seconds": 3.067,
+      "timestamp_formatted": "00:03.067",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        1136,
+        488,
+        1194,
+        549
+      ],
+      "norm_box": [
+        0.8875,
+        0.67778,
+        0.93281,
+        0.7625
+      ],
+      "confidence_score": 0.4562,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (45.6% < 50.0%)"
+    },
+    {
+      "frame_number": 56,
+      "timestamp_seconds": 3.123,
+      "timestamp_formatted": "00:03.123",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        1136,
+        488,
+        1194,
+        549
+      ],
+      "norm_box": [
+        0.8875,
+        0.67778,
+        0.93281,
+        0.7625
+      ],
+      "confidence_score": 0.4691,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (46.9% < 50.0%)"
+    },
+    {
+      "frame_number": 71,
+      "timestamp_seconds": 3.959,
+      "timestamp_formatted": "00:03.959",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        562,
+        395,
+        628,
+        471
+      ],
+      "norm_box": [
+        0.43906,
+        0.54861,
+        0.49062,
+        0.65417
+      ],
+      "confidence_score": 0.3886,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (38.9% < 50.0%)"
+    },
+    {
+      "frame_number": 88,
+      "timestamp_seconds": 4.907,
+      "timestamp_formatted": "00:04.907",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "knife",
+      "bounding_box": [
+        432,
+        462,
+        515,
+        570
+      ],
+      "norm_box": [
+        0.3375,
+        0.64167,
+        0.40234,
+        0.79167
+      ],
+      "confidence_score": 0.6615,
+      "validation_status": "UNPHYSICAL_PERSON_LOCATION",
+      "rejection_reason": "UNPHYSICAL_PERSON_LOCATION (rel_y=0.96 below feet)"
+    },
+    {
+      "frame_number": 105,
+      "timestamp_seconds": 5.855,
+      "timestamp_formatted": "00:05.855",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        297,
+        358,
+        352,
+        421
+      ],
+      "norm_box": [
+        0.23203,
+        0.49722,
+        0.275,
+        0.58472
+      ],
+      "confidence_score": 0.8889,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 1-frame transient proposal)"
+    },
+    {
+      "frame_number": 114,
+      "timestamp_seconds": 6.357,
+      "timestamp_formatted": "00:06.357",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "knife",
+      "bounding_box": [
+        302,
+        375,
+        390,
+        430
+      ],
+      "norm_box": [
+        0.23594,
+        0.52083,
+        0.30469,
+        0.59722
+      ],
+      "confidence_score": 0.5929,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 1-frame transient proposal)"
+    },
+    {
+      "frame_number": 115,
+      "timestamp_seconds": 6.413,
+      "timestamp_formatted": "00:06.413",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "knife",
+      "bounding_box": [
+        298,
+        374,
+        395,
+        429
+      ],
+      "norm_box": [
+        0.23281,
+        0.51944,
+        0.30859,
+        0.59583
+      ],
+      "confidence_score": 0.4032,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (40.3% < 50.0%)"
+    },
+    {
+      "frame_number": 138,
+      "timestamp_seconds": 7.696,
+      "timestamp_formatted": "00:07.696",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "knife",
+      "bounding_box": [
+        411,
+        143,
+        548,
+        239
+      ],
+      "norm_box": [
+        0.32109,
+        0.19861,
+        0.42812,
+        0.33194
+      ],
+      "confidence_score": 0.4512,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (45.1% < 50.0%)"
+    },
+    {
+      "frame_number": 140,
+      "timestamp_seconds": 7.807,
+      "timestamp_formatted": "00:07.807",
+      "camera_id": "NOV20_Pair05_Smartphon",
+      "object_label": "handgun",
+      "bounding_box": [
+        386,
+        82,
+        519,
+        181
+      ],
+      "norm_box": [
+        0.30156,
+        0.11389,
+        0.40547,
+        0.25139
+      ],
+      "confidence_score": 0.4132,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (41.3% < 50.0%)"
+    }
+  ]
+}

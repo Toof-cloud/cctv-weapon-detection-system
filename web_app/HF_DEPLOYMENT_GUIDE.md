@@ -1,32 +1,41 @@
-# Deploying FORENSIKADA Web App to Hugging Face Spaces (Free 24/7 Public URL)
+# Deploying FORENSIKADA Web App (Free 24/7 Public URL on Streamlit Community Cloud)
 
-## Step 1: Build / Update the Pre-Indexed Web Video Library
-Whenever you add new videos (such as your groupmates' new staged non-handgun videos into `expert_evaluation_videos/NO_WEAPON/`), run:
-```powershell
-.\.venv\Scripts\python.exe web_app/build_web_library.py
-```
-This automatically runs **Model 12**, transcodes every video to browser-compatible H.264 MP4, computes SHA-256 hashes, and updates `web_app/library_data/library_index.json`.
+## 1. Deploy 24/7 on Streamlit Community Cloud (100% Free, Auto-Updates from GitHub)
+1. Open **[https://share.streamlit.io](https://share.streamlit.io)** and sign in with your **GitHub** account.
+2. Click **Create app** (top right) -> **Deploy a public app from GitHub**.
+3. Fill in the deployment form:
+   - **Repository:** `Toof-cloud/cctv-weapon-detection-system` (or your forked repository)
+   - **Branch:** `integrate-haawaard-final-ui`
+   - **Main file path:** `web_app/app.py`
+   - **App URL (optional):** `forensikada-cctv` -> gives you `https://forensikada-cctv.streamlit.app`
+4. Click **Deploy!** — within ~2 minutes your permanent 24/7 public URL is live.
 
-## Step 2: Test Locally in Your Browser
+---
+
+## 2. How to Change or Swap Any of the 17 Videos Anytime
+All 87 Model 12 annotated candidate videos live in:
+`outputs/00_GOOGLE_DRIVE_MODEL12_ANNOTATED_VIDEOS_FOR_SELECTION/`
+
+If your groupmates decide to swap any video later:
+1. Open [`web_app/update_selected_17_library.py`](file:///c:/Users/pc/Documents/THESIS%201/cctv-weapon-detection-system/web_app/update_selected_17_library.py) and change the `candidate_name` in `SELECTED_SINGLE_VIDEOS` or `SELECTED_MULTICAM_SCENES` to any candidate from `ALL_CANDIDATES_MODEL12_LEADERBOARD.csv`.
+2. Run:
+   ```powershell
+   .\.venv\Scripts\python.exe web_app/update_selected_17_library.py
+   ```
+3. Commit and push to GitHub:
+   ```powershell
+   git add web_app/library_data web_app/update_selected_17_library.py
+   git commit -m "Update selected evaluation videos"
+   git push origin integrate-haawaard-final-ui
+   ```
+   **Streamlit Community Cloud automatically detects the GitHub push and updates the live 24/7 web app within seconds!**
+
+---
+
+## 3. Test Locally in Your Browser
 ```powershell
 .\.venv\Scripts\streamlit.exe run web_app/app.py
 ```
-Open `http://localhost:8501` in Chrome or Edge and verify Single-Video, Multi-Camera, Observation Review, Custom Upload, and Forensic PDF Report downloads.
+Open `http://localhost:8501` in Chrome or Edge to test Single-Video, Multi-Camera, Observation Review, and Forensic PDF Report downloads locally.
 
-## Step 3: Package & Deploy 24/7 to Hugging Face Spaces (Free Tier: 16 GB RAM, Open Access)
-1. Run the one-command packager to build a clean, self-contained `hf_space_bundle/` folder (with root `Dockerfile`, HF Spaces `README.md`, `.gitattributes` for Git LFS, Model 12 weights, and the pre-indexed H.264 video library):
-   ```powershell
-   .\.venv\Scripts\python.exe web_app/prepare_hf_space_bundle.py
-   ```
-2. Go to **https://huggingface.co/spaces** and click **Create new Space**.
-3. Name it **`forensikada-cctv`**, select **Docker** as the Space SDK, choose **CPU basic (2 vCPU, 16 GB RAM — Free)**, and set Visibility to **Public** (open access, no password).
-4. Clone your new Space repo locally, copy everything inside `hf_space_bundle/` into your cloned Space folder, and push:
-   ```powershell
-   git lfs install
-   git add .
-   git commit -m "Deploy FORENSIKADA Web App with Model 12"
-   git push
-   ```
-5. Within ~3–5 minutes, Hugging Face builds the Docker container and your permanent 24/7 public link is live at:  
-   `https://huggingface.co/spaces/<your-username>/forensikada-cctv`
 

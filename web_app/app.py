@@ -135,6 +135,12 @@ def extract_annotated_frame_rgb(video_path: Path, frame_number: int, norm_box: l
 
 
 def run_live_custom_upload(uploaded_file, threshold: float, cctv_intel_enabled: bool):
+    if not MODEL_12_PATH.exists():
+        st.info(
+            "This 24/7 Cloud Evaluation instance runs in Pre-Indexed Library Mode. "
+            "Please select any of the 17 pre-indexed CCTV & Multi-Camera recordings from the Prepared CCTV Library tabs."
+        )
+        return None
     from run_full_pipeline import detect_video_with_model
     import torch
 
@@ -315,18 +321,36 @@ def inject_exact_desktop_css(dark_mode: bool) -> None:
             }}
         }}
 
-        /* Remove Streamlit chrome and default spacing */
-        header[data-testid="stHeader"], #MainMenu, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {{
+        /* Remove Streamlit chrome and default top spacing / flex gap above header */
+        header[data-testid="stHeader"], #MainMenu, footer, [data-testid="stToolbar"], [data-testid="stDecoration"], [data-testid="stStatusWidget"] {{
             display: none !important;
+            height: 0 !important;
         }}
-        .stApp {{
+        .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {{
             background-color: {bg_shell};
             font-family: "Inter", "Segoe UI", sans-serif;
             color: {text_main};
+            padding-top: 0 !important;
+            margin-top: 0 !important;
         }}
-        .block-container {{
+        .block-container, [data-testid="stAppViewBlockContainer"], [data-testid="stMainBlockContainer"] {{
             padding: 0 !important;
+            margin: 0 !important;
             max-width: 100% !important;
+        }}
+        /* Collapse invisible <style> markdown wrapper and top-level vertical gap so header sits flush at y=0 */
+        [data-testid="stMainBlockContainer"] > div > [data-testid="stVerticalBlock"],
+        .block-container > div > [data-testid="stVerticalBlock"] {{
+            gap: 0 !important;
+            padding-top: 0 !important;
+            margin-top: 0 !important;
+        }}
+        [data-testid="stElementContainer"]:has(style),
+        .element-container:has(style) {{
+            display: none !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }}
 
         /* ===== EXACT DESKTOP TOP HEADER BAR (#header) ===== */
@@ -848,7 +872,11 @@ def dialog_import_videos(single_videos: list[dict], mc_scenes: list[dict]) -> No
         "<div class='fk-muted' style='margin-bottom:10px;'>Choose a pre-indexed CCTV recording from the Thesis Evaluation Library for instant playback, or upload your own short CCTV clip (≤25 MB, ≤15s) for live Model 12 (Video SOTA) inference.</div>",
         unsafe_allow_html=True,
     )
-    t_lib, t_mc, t_up = st.tabs(["Prepared CCTV Library (15 videos)", "Multi-Camera Pairs (6 scenes)", "Upload Custom Clip (≤25 MB)"])
+    t_lib, t_mc, t_up = st.tabs([
+        f"Prepared CCTV Library ({len(single_videos)} videos)",
+        f"Multi-Camera Pairs ({len(mc_scenes)} scenes)",
+        "Upload Custom Clip (≤25 MB)",
+    ])
 
     with t_lib:
         cats = ["All"] + sorted(list({v["category"] for v in single_videos}))

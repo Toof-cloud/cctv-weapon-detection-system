@@ -77,9 +77,10 @@ research/model_improvement/annotated_frames*/
 research/model_improvement/annotated_videos*/
 research/model_improvement/dataset/hard_negatives*/
 
-# Web deployment staging bundle (pushed separately to Hugging Face Spaces)
+# Web deployment staging bundle
 hf_space_bundle/
-web_app/library_data/videos/
+!web_app/library_data/videos/
+!web_app/library_data/videos/*.mp4
 
 
 
