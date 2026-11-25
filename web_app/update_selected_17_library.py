@@ -117,20 +117,34 @@ def get_video_meta(path: Path) -> dict:
     }
 
 
-def transcode_to_web_h264(src: Path, dst: Path, max_width: int = 960, crf: int = 26, trim_start_sec: float = 0.0) -> None:
+def transcode_to_web_h264(
+    src: Path,
+    dst: Path,
+    max_width: int = 960,
+    crf: int = 26,
+    trim_start_sec: float = 0.0,
+    exact_cfr_fps: float | None = None,
+    fast_seek_gop: bool = False,
+) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
     cmd = [FFMPEG_BIN, "-y"]
     if trim_start_sec > 0.0:
         cmd += ["-ss", f"{trim_start_sec:.3f}"]
+    cmd += ["-i", str(src), "-c:v", "libx264", "-pix_fmt", "yuv420p"]
+
+    if exact_cfr_fps and exact_cfr_fps > 0:
+        # Force 0.000s initial PTS and exact OpenCV frame-index CFR timing (N / fps)
+        # so HTML5 <video>.currentTime matches desktop OpenCV frame_number / fps to the millisecond!
+        vf_str = f"setpts=N/({exact_cfr_fps:.6f}*TB),scale='min({max_width},iw)':-2"
+        cmd += ["-vf", vf_str, "-fps_mode", "cfr", "-r", f"{exact_cfr_fps:.6f}"]
+    else:
+        cmd += ["-vf", f"scale='min({max_width},iw)':-2"]
+
+    if fast_seek_gop:
+        # Short GOP (keyframe every 8 frames = ~0.48s) + zero B-frames so HTML5 video seeks & starts instantaneously while keeping total library ~48 MB!
+        cmd += ["-g", "8", "-keyint_min", "4", "-bf", "0"]
+
     cmd += [
-        "-i",
-        str(src),
-        "-c:v",
-        "libx264",
-        "-pix_fmt",
-        "yuv420p",
-        "-vf",
-        f"scale='min({max_width},iw)':-2",
         "-crf",
         str(crf),
         "-preset",
@@ -205,14 +219,16 @@ def package_stream(
     enh_csv: Path | None = None,
     trim_start_sec: float = 0.0,
     offset_seconds: float = 0.0,
+    is_multicam: bool = False,
 ) -> dict:
-    print(f"  -> Packaging {vid_id} (has_enhanced={enh_src is not None}, trim={trim_start_sec}s, offset={offset_seconds}s)", flush=True)
+    print(f"  -> Packaging {vid_id} (has_enhanced={enh_src is not None}, trim={trim_start_sec}s, offset={offset_seconds}s, mc={is_multicam})", flush=True)
+    om = get_video_meta(orig_src)
+    cfr_fps = om["fps"] if is_multicam else None
     orig_raw_web = WEB_VIDEOS_DIR / f"{vid_id}_orig_raw.mp4"
     orig_ann_web = WEB_VIDEOS_DIR / f"{vid_id}_orig_annot.mp4"
-    transcode_to_web_h264(orig_src, orig_raw_web, trim_start_sec=trim_start_sec)
-    transcode_to_web_h264(orig_annot, orig_ann_web, trim_start_sec=trim_start_sec)
+    transcode_to_web_h264(orig_src, orig_raw_web, trim_start_sec=trim_start_sec, exact_cfr_fps=cfr_fps, fast_seek_gop=is_multicam)
+    transcode_to_web_h264(orig_annot, orig_ann_web, trim_start_sec=trim_start_sec, exact_cfr_fps=cfr_fps, fast_seek_gop=is_multicam)
 
-    om = get_video_meta(orig_src)
     wm = get_video_meta(orig_raw_web)
     fhash = sha256_file(orig_src)
     recs_orig = parse_detections_csv(orig_csv, om["width"], om["height"], trim_start_sec=trim_start_sec, fps=om["fps"])
@@ -231,11 +247,12 @@ def package_stream(
     enh_filename = None
 
     if has_enh:
+        em = get_video_meta(enh_src)
+        enh_cfr = om["fps"] if is_multicam else None
         enh_raw_web = WEB_VIDEOS_DIR / f"{vid_id}_enh_raw.mp4"
         enh_ann_web = WEB_VIDEOS_DIR / f"{vid_id}_enh_annot.mp4"
-        transcode_to_web_h264(enh_src, enh_raw_web, trim_start_sec=trim_start_sec)
-        transcode_to_web_h264(enh_annot, enh_ann_web, trim_start_sec=trim_start_sec)
-        em = get_video_meta(enh_src)
+        transcode_to_web_h264(enh_src, enh_raw_web, trim_start_sec=trim_start_sec, exact_cfr_fps=enh_cfr, fast_seek_gop=is_multicam)
+        transcode_to_web_h264(enh_annot, enh_ann_web, trim_start_sec=trim_start_sec, exact_cfr_fps=enh_cfr, fast_seek_gop=is_multicam)
         recs_enh = parse_detections_csv(enh_csv, em["width"], em["height"], trim_start_sec=trim_start_sec, fps=em["fps"])
         enh_telem_rel = f"telemetry/{vid_id}_enh.json"
         (WEB_TELEM_DIR / f"{vid_id}_enh.json").write_text(
@@ -426,6 +443,7 @@ def main() -> None:
         enh_csv=d_mc / "STAGED_SCENE007_CAM1_Enhanced_M12_detections.csv",
         trim_start_sec=0.0,
         offset_seconds=0.000,
+        is_multicam=True,
     )
     mc_pair1_c2 = package_stream(
         vid_id="MC01_CAM02",
@@ -440,6 +458,7 @@ def main() -> None:
         enh_csv=d_mc / "STAGED_SCENE007_CAM2_Enhanced_M12_detections.csv",
         trim_start_sec=0.0,
         offset_seconds=1.780,  # Analyst-arranged exact start offset (+1.780 s)
+        is_multicam=True,
     )
 
     mc_pair2_c1 = package_stream(
@@ -455,6 +474,7 @@ def main() -> None:
         enh_csv=d_mc / "MC03_SCENE012_Knife_CAM01_Enhanced_M12_detections.csv",
         trim_start_sec=0.0,
         offset_seconds=0.000,
+        is_multicam=True,
     )
     mc_pair2_c2 = package_stream(
         vid_id="MC02_CAM02",
@@ -469,6 +489,7 @@ def main() -> None:
         enh_csv=d_mc / "MC03_SCENE012_Knife_CAM02_Enhanced_M12_detections.csv",
         trim_start_sec=0.0,
         offset_seconds=0.760,  # Analyst-arranged exact start offset (+0.760 s)
+        is_multicam=True,
     )
 
     mc_pair3_c1 = package_stream(
@@ -484,6 +505,7 @@ def main() -> None:
         enh_csv=d_mc / "MC01_SCENE004_Handgun_CAM01_Enhanced_M12_detections.csv",
         trim_start_sec=0.0,
         offset_seconds=0.000,
+        is_multicam=True,
     )
     mc_pair3_c2 = package_stream(
         vid_id="MC03_CAM02",
@@ -498,6 +520,7 @@ def main() -> None:
         enh_csv=d_mc / "MC01_SCENE004_Handgun_CAM02_Enhanced_M12_detections.csv",
         trim_start_sec=0.0,
         offset_seconds=1.100,  # Analyst-arranged exact start offset (+1.100 s)
+        is_multicam=True,
     )
 
     mc_pair4_c1 = package_stream(
@@ -510,6 +533,7 @@ def main() -> None:
         orig_csv=d_nw_st / "NOV20_Pair05_Smartphone_CAM01_M12_detections.csv",
         trim_start_sec=0.0,
         offset_seconds=0.000,
+        is_multicam=True,
     )
     mc_pair4_c2 = package_stream(
         vid_id="MC04_CAM02",
@@ -521,6 +545,7 @@ def main() -> None:
         orig_csv=d_nw_st / "NOV20_Pair05_Smartphone_CAM02_M12_detections.csv",
         trim_start_sec=0.0,
         offset_seconds=0.000,
+        is_multicam=True,
     )
 
     multicam_scenes = [

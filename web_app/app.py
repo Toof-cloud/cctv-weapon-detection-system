@@ -1009,6 +1009,7 @@ def render_synced_dual_camera_player(
     meta2: str = "",
     offset1: float = 0.0,
     offset2: float = 0.0,
+    initial_session_sec: float | None = None,
     sync_clock: str = "",
 ) -> None:
     p1 = WEB_DATA_DIR / rel1
@@ -1021,6 +1022,7 @@ def render_synced_dual_camera_player(
         st.warning("Multi-camera video streams unavailable.")
         return
 
+    init_sec = float(initial_session_sec) if initial_session_sec is not None else min(float(offset1), float(offset2), 0.0)
     sync_tag = sync_clock or f"CAM-01 offset {offset1:+.3f}s · CAM-02 offset {offset2:+.3f}s"
     components.html(
         f"""
@@ -1202,7 +1204,7 @@ def render_synced_dual_camera_player(
                     </div>
                     <div class="mc-filename" title="{fn1}">{fn1}</div>
                     <div class="mc-vid-wrap" id="wrap1">
-                        <video id="v1" src="{uri1}" playsinline preload="auto"></video>
+                        <video id="v1" src="{uri1}" muted playsinline preload="auto"></video>
                         <div class="mc-outside-mask" id="mask1">No recording at this session time<br/>(Starts at {offset1:+.3f} s)</div>
                     </div>
                     <div class="mc-foot-meta"><span>{meta1}</span><span id="cov1">In view</span></div>
@@ -1211,15 +1213,15 @@ def render_synced_dual_camera_player(
 
                 <div class="mc-card">
                     <div class="mc-card-top">
-                        <span class="mc-cam-title" id="hdr2">CAM-02 · 00:00.000</span>
+                        <span class="mc-cam-title" id="hdr2">CAM-02 · Outside recording</span>
                         <span class="mc-offset-pill">Start offset {offset2:+.3f} s</span>
                     </div>
                     <div class="mc-filename" title="{fn2}">{fn2}</div>
                     <div class="mc-vid-wrap" id="wrap2">
-                        <video id="v2" src="{uri2}" playsinline preload="auto"></video>
+                        <video id="v2" src="{uri2}" muted playsinline preload="auto"></video>
                         <div class="mc-outside-mask" id="mask2">No recording at this session time<br/>(Starts at {offset2:+.3f} s)</div>
                     </div>
-                    <div class="mc-foot-meta"><span>{meta2}</span><span id="cov2">Waiting</span></div>
+                    <div class="mc-foot-meta"><span>{meta2}</span><span id="cov2">Outside recording</span></div>
                     <div class="mc-status-strip"><span>{lbl2}</span><span>POV 2</span></div>
                 </div>
             </div>
@@ -1227,7 +1229,7 @@ def render_synced_dual_camera_player(
             <div class="mc-ctrl-bar">
                 <button class="mc-btn" id="btnPlay">▶ Play all</button>
                 <button class="mc-btn mc-btn-sec" id="btnRestart">↺ 0.000s</button>
-                <input type="range" class="mc-scrub" id="scrubber" min="0" max="11" step="0.01" value="0" />
+                <input type="range" class="mc-scrub" id="scrubber" min="0" max="11" step="0.005" value="0" />
                 <span class="mc-time" id="timeTxt">Session 00:00.000</span>
                 <button class="mc-btn mc-btn-sec" id="btnSpeed" title="Toggle playback speed">1.0×</button>
                 <span class="mc-sync-pill" title="{sync_tag}">● ALIGNED</span>
@@ -1239,6 +1241,8 @@ def render_synced_dual_camera_player(
             const off2 = {float(offset2):.4f};
             const v1 = document.getElementById("v1");
             const v2 = document.getElementById("v2");
+            v1.muted = true;
+            v2.muted = true;
             const mask1 = document.getElementById("mask1");
             const mask2 = document.getElementById("mask2");
             const hdr1 = document.getElementById("hdr1");
@@ -1253,8 +1257,8 @@ def render_synced_dual_camera_player(
             const outer = document.getElementById("mcOuter");
 
             let minSession = Math.min(off1, off2, 0.0);
-            let maxSession = 10.0;
-            let sessionSec = minSession;
+            let maxSession = 10.9;
+            let sessionSec = {init_sec:.4f};
             let isPlaying = false;
             let isScrubbing = false;
             let speed = 1.0;
@@ -1304,25 +1308,33 @@ def render_synced_dual_camera_player(
             function syncSingleCam(vid, mask, hdr, cov, camName, offset, tSession, forceSeek) {{
                 const dur = (isFinite(vid.duration) && vid.duration > 0) ? vid.duration : 0;
                 const local = tSession - offset;
-                const inside = dur > 0 ? (local >= -0.005 && local < dur - 0.02) : (local >= 0);
+                const inside = dur > 0 ? (local >= -0.002 && local < dur - 0.015) : (local >= 0);
                 if (inside) {{
-                    const clamped = Math.max(0, Math.min(local, Math.max(0, dur - 0.02)));
+                    const clamped = Math.max(0, Math.min(local, Math.max(0, dur - 0.015)));
                     mask.style.display = "none";
                     hdr.textContent = camName + " · " + fmtClock(clamped);
                     cov.textContent = "In view";
                     if (isPlaying && !isScrubbing) {{
-                        if (Math.abs((vid.currentTime || 0) - clamped) > 0.14 || forceSeek) {{
+                        const diff = Math.abs((vid.currentTime || 0) - clamped);
+                        if (forceSeek || diff > 0.045) {{
                             try {{ vid.currentTime = clamped; }} catch (e) {{}}
                         }}
-                        if (vid.paused) vid.play().catch(() => {{}});
+                        if (vid.paused) {{
+                            try {{ vid.currentTime = clamped; }} catch (e) {{}}
+                            vid.play().catch(() => {{}});
+                        }}
                     }} else {{
                         if (!vid.paused) vid.pause();
-                        if (Math.abs((vid.currentTime || 0) - clamped) > 0.02 || forceSeek) {{
+                        if (forceSeek || Math.abs((vid.currentTime || 0) - clamped) > 0.005) {{
                             try {{ vid.currentTime = clamped; }} catch (e) {{}}
                         }}
                     }}
                 }} else {{
                     if (!vid.paused) vid.pause();
+                    if (local < 0 && (vid.currentTime || 0) > 0.01) {{
+                        // Keep parked at 0.000s while waiting for start offset so play() starts instantaneously!
+                        try {{ vid.currentTime = 0; }} catch (e) {{}}
+                    }}
                     mask.style.display = "flex";
                     mask.innerHTML = local < 0
                         ? ("No recording at this session time<br/><span style='font-size:11px;color:#6f86b2;margin-top:3px;'>Starts at session " + fmtClock(offset) + "</span>")
@@ -1349,7 +1361,7 @@ def render_synced_dual_camera_player(
 
             function togglePlay() {{
                 if (!isPlaying) {{
-                    if (sessionSec >= maxSession - 0.05) {{
+                    if (sessionSec >= maxSession - 0.04) {{
                         sessionSec = minSession;
                     }}
                     isPlaying = true;
@@ -1391,7 +1403,17 @@ def render_synced_dual_camera_player(
                 if (isPlaying && !isScrubbing) {{
                     const dt = Math.max(0, (nowMs - lastWallMs) / 1000.0) * speed;
                     lastWallMs = nowMs;
-                    const nextT = sessionSec + dt;
+                    // Anchor session clock directly to whichever camera is actively playing so decoder cadence & session time never drift!
+                    const d1 = (isFinite(v1.duration) && v1.duration > 0) ? v1.duration : 0;
+                    const d2 = (isFinite(v2.duration) && v2.duration > 0) ? v2.duration : 0;
+                    let nextT = sessionSec + dt;
+                    if (!v1.paused && d1 > 0 && (sessionSec - off1) >= 0 && (sessionSec - off1) < d1 - 0.04) {{
+                        const v1Session = v1.currentTime + off1;
+                        if (Math.abs(v1Session - nextT) < 0.25) nextT = v1Session;
+                    }} else if (!v2.paused && d2 > 0 && (sessionSec - off2) >= 0 && (sessionSec - off2) < d2 - 0.04) {{
+                        const v2Session = v2.currentTime + off2;
+                        if (Math.abs(v2Session - nextT) < 0.25) nextT = v2Session;
+                    }}
                     if (nextT >= maxSession - 0.01) {{
                         applySessionTime(maxSession, true);
                         stopPlayback();
@@ -1404,7 +1426,7 @@ def render_synced_dual_camera_player(
                 requestAnimationFrame(tick);
             }}
             requestAnimationFrame(tick);
-            applySessionTime(minSession, true);
+            applySessionTime(sessionSec, true);
         }})();
         </script>
         </body>
@@ -2202,12 +2224,14 @@ def render_multicam_page(mc_scenes: list[dict]) -> None:
                     ss["mc_is_enhanced"] = False
                     ss["mc_view_mode"] = "Original"
                     ss["mc_analysis_ready"] = False
+                    ss["mc_seek_sec"] = None
                     st.rerun()
                 elif picked_mc == -1 and scene is not None:
                     ss["active_mc_key"] = None
                     ss["mc_is_enhanced"] = False
                     ss["mc_view_mode"] = "Original"
                     ss["mc_analysis_ready"] = False
+                    ss["mc_seek_sec"] = None
                     st.rerun()
 
                 # Enhancement (BasicVSR++) card — clicking Enhance video automatically switches both cameras to Enhanced Annotated!
@@ -2364,11 +2388,16 @@ def render_multicam_page(mc_scenes: list[dict]) -> None:
                         meta2=meta2,
                         offset1=off1,
                         offset2=off2,
+                        initial_session_sec=ss.get("mc_seek_sec"),
                         sync_clock=scene.get("sync_clock", ""),
                     )
 
                 with st.container(key="fk_obs_box"):
-                    tl_hdr = f"DETECTED OBJECTS · {len(combined)} OBSERVATIONS" if mc_ready else "DETECTED OBJECTS · TIMELINE"
+                    tl_hdr = (
+                        f"DETECTED OBJECTS · {len(combined)} OBSERVATIONS · CLICK A ROW TO JUMP BOTH CAMERAS"
+                        if mc_ready
+                        else "DETECTED OBJECTS · TIMELINE"
+                    )
                     st.markdown(f"<div class='fk-sec fk-sec-first'>{tl_hdr}</div>", unsafe_allow_html=True)
                     if mc_ready and combined:
                         df_mc = pd.DataFrame([
@@ -2382,7 +2411,22 @@ def render_multicam_page(mc_scenes: list[dict]) -> None:
                             }
                             for r in combined
                         ])
-                        st.dataframe(df_mc, width="stretch", hide_index=True, height=205)
+                        mc_ev = st.dataframe(
+                            df_mc,
+                            width="stretch",
+                            hide_index=True,
+                            height=205,
+                            on_select="rerun",
+                            selection_mode="single-row",
+                            key=f"mc_tl_tbl_{scene['scene_key']}_{'enh' if is_mc_enh else 'orig'}_{ss['mc_conf_pct']}_{int(mc_intel)}",
+                        )
+                        if mc_ev and mc_ev.selection and mc_ev.selection.rows:
+                            sel_r = mc_ev.selection.rows[0]
+                            if 0 <= sel_r < len(combined):
+                                target_s = float(combined[sel_r]["session_seconds"])
+                                if ss.get("mc_seek_sec") != target_s:
+                                    ss["mc_seek_sec"] = target_s
+                                    st.rerun()
                     else:
                         st.dataframe(pd.DataFrame(columns=["Session time", "Camera", "Frame", "Object", "Confidence", "Cross-view"]), width="stretch", hide_index=True, height=160)
 

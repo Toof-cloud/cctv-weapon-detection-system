@@ -360,10 +360,10 @@
         "web_meta": {
           "width": 960,
           "height": 540,
-          "fps": 15.0,
+          "fps": 15.016,
           "total_frames": 164,
-          "duration_seconds": 10.93,
-          "file_size_mb": 0.41
+          "duration_seconds": 10.92,
+          "file_size_mb": 1.14
         },
         "original_video_rel": "videos/MC01_CAM01_orig_raw.mp4",
         "annotated_video_rel": "videos/MC01_CAM01_orig_annot.mp4",
@@ -396,10 +396,10 @@
         "web_meta": {
           "width": 960,
           "height": 540,
-          "fps": 16.63,
-          "total_frames": 151,
-          "duration_seconds": 9.08,
-          "file_size_mb": 0.57
+          "fps": 16.704,
+          "total_frames": 152,
+          "duration_seconds": 9.1,
+          "file_size_mb": 1.17
         },
         "original_video_rel": "videos/MC01_CAM02_orig_raw.mp4",
         "annotated_video_rel": "videos/MC01_CAM02_orig_annot.mp4",
@@ -441,10 +441,10 @@
         "web_meta": {
           "width": 960,
           "height": 540,
-          "fps": 14.81,
-          "total_frames": 156,
-          "duration_seconds": 10.53,
-          "file_size_mb": 0.38
+          "fps": 14.829,
+          "total_frames": 157,
+          "duration_seconds": 10.59,
+          "file_size_mb": 1.09
         },
         "original_video_rel": "videos/MC02_CAM01_orig_raw.mp4",
         "annotated_video_rel": "videos/MC02_CAM01_orig_annot.mp4",
@@ -478,9 +478,9 @@
           "width": 960,
           "height": 540,
           "fps": 16.737,
-          "total_frames": 158,
-          "duration_seconds": 9.44,
-          "file_size_mb": 0.48
+          "total_frames": 159,
+          "duration_seconds": 9.5,
+          "file_size_mb": 1.21
         },
         "original_video_rel": "videos/MC02_CAM02_orig_raw.mp4",
         "annotated_video_rel": "videos/MC02_CAM02_orig_annot.mp4",
@@ -525,7 +525,7 @@
           "fps": 15.0,
           "total_frames": 135,
           "duration_seconds": 9.0,
-          "file_size_mb": 0.32
+          "file_size_mb": 0.88
         },
         "original_video_rel": "videos/MC03_CAM01_orig_raw.mp4",
         "annotated_video_rel": "videos/MC03_CAM01_orig_annot.mp4",
@@ -559,9 +559,9 @@
           "width": 960,
           "height": 540,
           "fps": 16.457,
-          "total_frames": 131,
-          "duration_seconds": 7.96,
-          "file_size_mb": 0.32
+          "total_frames": 132,
+          "duration_seconds": 8.02,
+          "file_size_mb": 0.96
         },
         "original_video_rel": "videos/MC03_CAM02_orig_raw.mp4",
         "annotated_video_rel": "videos/MC03_CAM02_orig_annot.mp4",
@@ -603,10 +603,10 @@
         "web_meta": {
           "width": 960,
           "height": 540,
-          "fps": 17.903,
-          "total_frames": 169,
-          "duration_seconds": 9.44,
-          "file_size_mb": 0.55
+          "fps": 17.932,
+          "total_frames": 170,
+          "duration_seconds": 9.48,
+          "file_size_mb": 1.33
         },
         "original_video_rel": "videos/MC04_CAM01_orig_raw.mp4",
         "annotated_video_rel": "videos/MC04_CAM01_orig_annot.mp4",
@@ -640,9 +640,9 @@
           "width": 960,
           "height": 540,
           "fps": 16.545,
-          "total_frames": 182,
-          "duration_seconds": 11.0,
-          "file_size_mb": 0.36
+          "total_frames": 183,
+          "duration_seconds": 11.06,
+          "file_size_mb": 1.49
         },
         "original_video_rel": "videos/MC04_CAM02_orig_raw.mp4",
         "annotated_video_rel": "videos/MC04_CAM02_orig_annot.mp4",
