@@ -1315,12 +1315,14 @@ def render_synced_dual_camera_player(
                     hdr.textContent = camName + " · " + fmtClock(clamped);
                     cov.textContent = "In view";
                     if (isPlaying && !isScrubbing) {{
+                        if (vid.playbackRate !== speed) {{
+                            try {{ vid.playbackRate = speed; }} catch (e) {{}}
+                        }}
                         const diff = Math.abs((vid.currentTime || 0) - clamped);
-                        if (forceSeek || diff > 0.045) {{
+                        if (!vid.seeking && (forceSeek || diff > 0.22)) {{
                             try {{ vid.currentTime = clamped; }} catch (e) {{}}
                         }}
-                        if (vid.paused) {{
-                            try {{ vid.currentTime = clamped; }} catch (e) {{}}
+                        if (vid.paused && !vid.seeking) {{
                             vid.play().catch(() => {{}});
                         }}
                     }} else {{
