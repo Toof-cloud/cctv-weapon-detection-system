@@ -1,9 +1,9 @@
 {
   "records_50pct": [
     {
-      "frame_number": 15,
-      "timestamp_seconds": 0.998,
-      "timestamp_formatted": "00:00:01.00",
+      "frame_number": 30,
+      "timestamp_seconds": 1.998,
+      "timestamp_formatted": "00:01.998",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -23,9 +23,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (49.6% < 50.0%)"
     },
     {
-      "frame_number": 16,
-      "timestamp_seconds": 1.065,
-      "timestamp_formatted": "00:00:01.06",
+      "frame_number": 31,
+      "timestamp_seconds": 2.065,
+      "timestamp_formatted": "00:02.065",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -45,9 +45,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (48.7% < 50.0%)"
     },
     {
-      "frame_number": 17,
-      "timestamp_seconds": 1.131,
-      "timestamp_formatted": "00:00:01.13",
+      "frame_number": 32,
+      "timestamp_seconds": 2.131,
+      "timestamp_formatted": "00:02.131",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -67,9 +67,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 18,
-      "timestamp_seconds": 1.198,
-      "timestamp_formatted": "00:00:01.20",
+      "frame_number": 33,
+      "timestamp_seconds": 2.198,
+      "timestamp_formatted": "00:02.198",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -89,9 +89,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 19,
-      "timestamp_seconds": 1.264,
-      "timestamp_formatted": "00:00:01.26",
+      "frame_number": 34,
+      "timestamp_seconds": 2.264,
+      "timestamp_formatted": "00:02.264",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -111,9 +111,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 20,
-      "timestamp_seconds": 1.331,
-      "timestamp_formatted": "00:00:01.33",
+      "frame_number": 35,
+      "timestamp_seconds": 2.331,
+      "timestamp_formatted": "00:02.331",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -133,9 +133,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 21,
-      "timestamp_seconds": 1.398,
-      "timestamp_formatted": "00:00:01.40",
+      "frame_number": 36,
+      "timestamp_seconds": 2.398,
+      "timestamp_formatted": "00:02.398",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -155,9 +155,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 22,
-      "timestamp_seconds": 1.464,
-      "timestamp_formatted": "00:00:01.46",
+      "frame_number": 37,
+      "timestamp_seconds": 2.464,
+      "timestamp_formatted": "00:02.464",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -177,9 +177,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 23,
-      "timestamp_seconds": 1.531,
-      "timestamp_formatted": "00:00:01.53",
+      "frame_number": 38,
+      "timestamp_seconds": 2.531,
+      "timestamp_formatted": "00:02.531",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -199,9 +199,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 24,
-      "timestamp_seconds": 1.597,
-      "timestamp_formatted": "00:00:01.60",
+      "frame_number": 39,
+      "timestamp_seconds": 2.597,
+      "timestamp_formatted": "00:02.597",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -221,9 +221,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 25,
-      "timestamp_seconds": 1.664,
-      "timestamp_formatted": "00:00:01.66",
+      "frame_number": 40,
+      "timestamp_seconds": 2.664,
+      "timestamp_formatted": "00:02.664",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -243,9 +243,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 26,
-      "timestamp_seconds": 1.731,
-      "timestamp_formatted": "00:00:01.73",
+      "frame_number": 41,
+      "timestamp_seconds": 2.731,
+      "timestamp_formatted": "00:02.731",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -265,9 +265,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 27,
-      "timestamp_seconds": 1.797,
-      "timestamp_formatted": "00:00:01.80",
+      "frame_number": 42,
+      "timestamp_seconds": 2.797,
+      "timestamp_formatted": "00:02.797",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -287,9 +287,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 28,
-      "timestamp_seconds": 1.864,
-      "timestamp_formatted": "00:00:01.86",
+      "frame_number": 43,
+      "timestamp_seconds": 2.864,
+      "timestamp_formatted": "00:02.864",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -309,9 +309,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 29,
-      "timestamp_seconds": 1.93,
-      "timestamp_formatted": "00:00:01.93",
+      "frame_number": 44,
+      "timestamp_seconds": 2.93,
+      "timestamp_formatted": "00:02.930",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -331,9 +331,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 30,
-      "timestamp_seconds": 1.997,
-      "timestamp_formatted": "00:00:02.00",
+      "frame_number": 45,
+      "timestamp_seconds": 2.997,
+      "timestamp_formatted": "00:02.997",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -353,9 +353,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 31,
-      "timestamp_seconds": 2.063,
-      "timestamp_formatted": "00:00:02.06",
+      "frame_number": 46,
+      "timestamp_seconds": 3.063,
+      "timestamp_formatted": "00:03.063",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -375,9 +375,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 32,
-      "timestamp_seconds": 2.13,
-      "timestamp_formatted": "00:00:02.13",
+      "frame_number": 47,
+      "timestamp_seconds": 3.13,
+      "timestamp_formatted": "00:03.130",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -397,9 +397,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 33,
-      "timestamp_seconds": 2.197,
-      "timestamp_formatted": "00:00:02.20",
+      "frame_number": 48,
+      "timestamp_seconds": 3.197,
+      "timestamp_formatted": "00:03.197",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -419,9 +419,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 34,
-      "timestamp_seconds": 2.263,
-      "timestamp_formatted": "00:00:02.26",
+      "frame_number": 49,
+      "timestamp_seconds": 3.263,
+      "timestamp_formatted": "00:03.263",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -441,9 +441,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 35,
-      "timestamp_seconds": 2.33,
-      "timestamp_formatted": "00:00:02.33",
+      "frame_number": 50,
+      "timestamp_seconds": 3.33,
+      "timestamp_formatted": "00:03.330",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -463,9 +463,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 36,
-      "timestamp_seconds": 2.396,
-      "timestamp_formatted": "00:00:02.40",
+      "frame_number": 51,
+      "timestamp_seconds": 3.396,
+      "timestamp_formatted": "00:03.396",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -485,9 +485,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 37,
-      "timestamp_seconds": 2.463,
-      "timestamp_formatted": "00:00:02.46",
+      "frame_number": 52,
+      "timestamp_seconds": 3.463,
+      "timestamp_formatted": "00:03.463",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -507,9 +507,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 38,
-      "timestamp_seconds": 2.53,
-      "timestamp_formatted": "00:00:02.53",
+      "frame_number": 53,
+      "timestamp_seconds": 3.53,
+      "timestamp_formatted": "00:03.530",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -529,9 +529,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 39,
-      "timestamp_seconds": 2.596,
-      "timestamp_formatted": "00:00:02.60",
+      "frame_number": 54,
+      "timestamp_seconds": 3.596,
+      "timestamp_formatted": "00:03.596",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -551,9 +551,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 40,
-      "timestamp_seconds": 2.663,
-      "timestamp_formatted": "00:00:02.66",
+      "frame_number": 55,
+      "timestamp_seconds": 3.663,
+      "timestamp_formatted": "00:03.663",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -573,9 +573,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 41,
-      "timestamp_seconds": 2.729,
-      "timestamp_formatted": "00:00:02.73",
+      "frame_number": 56,
+      "timestamp_seconds": 3.729,
+      "timestamp_formatted": "00:03.729",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -595,9 +595,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 42,
-      "timestamp_seconds": 2.796,
-      "timestamp_formatted": "00:00:02.80",
+      "frame_number": 57,
+      "timestamp_seconds": 3.796,
+      "timestamp_formatted": "00:03.796",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -617,9 +617,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 43,
-      "timestamp_seconds": 2.863,
-      "timestamp_formatted": "00:00:02.86",
+      "frame_number": 58,
+      "timestamp_seconds": 3.863,
+      "timestamp_formatted": "00:03.863",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -639,9 +639,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 44,
-      "timestamp_seconds": 2.929,
-      "timestamp_formatted": "00:00:02.93",
+      "frame_number": 59,
+      "timestamp_seconds": 3.929,
+      "timestamp_formatted": "00:03.929",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -661,9 +661,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 57,
-      "timestamp_seconds": 3.795,
-      "timestamp_formatted": "00:00:03.79",
+      "frame_number": 72,
+      "timestamp_seconds": 4.795,
+      "timestamp_formatted": "00:04.795",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -683,9 +683,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 59,
-      "timestamp_seconds": 3.928,
-      "timestamp_formatted": "00:00:03.93",
+      "frame_number": 74,
+      "timestamp_seconds": 4.928,
+      "timestamp_formatted": "00:04.928",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -705,9 +705,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (48.7% < 50.0%)"
     },
     {
-      "frame_number": 60,
-      "timestamp_seconds": 3.995,
-      "timestamp_formatted": "00:00:04.00",
+      "frame_number": 75,
+      "timestamp_seconds": 4.995,
+      "timestamp_formatted": "00:04.995",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "handgun",
       "bounding_box": [
@@ -727,9 +727,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (43.9% < 50.0%)"
     },
     {
-      "frame_number": 61,
-      "timestamp_seconds": 4.061,
-      "timestamp_formatted": "00:00:04.06",
+      "frame_number": 76,
+      "timestamp_seconds": 5.061,
+      "timestamp_formatted": "00:05.061",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -749,9 +749,9 @@
       "rejection_reason": "UNPHYSICAL_PERSON_LOCATION (rel_y=0.98 below feet)"
     },
     {
-      "frame_number": 75,
-      "timestamp_seconds": 4.994,
-      "timestamp_formatted": "00:00:04.99",
+      "frame_number": 90,
+      "timestamp_seconds": 5.994,
+      "timestamp_formatted": "00:05.994",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -771,9 +771,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 76,
-      "timestamp_seconds": 5.06,
-      "timestamp_formatted": "00:00:05.06",
+      "frame_number": 91,
+      "timestamp_seconds": 6.06,
+      "timestamp_formatted": "00:06.060",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -793,9 +793,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 86,
-      "timestamp_seconds": 5.726,
-      "timestamp_formatted": "00:00:05.73",
+      "frame_number": 101,
+      "timestamp_seconds": 6.726,
+      "timestamp_formatted": "00:06.726",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -815,9 +815,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (35.4% < 50.0%)"
     },
     {
-      "frame_number": 87,
-      "timestamp_seconds": 5.793,
-      "timestamp_formatted": "00:00:05.79",
+      "frame_number": 102,
+      "timestamp_seconds": 6.793,
+      "timestamp_formatted": "00:06.793",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -837,9 +837,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (38.0% < 50.0%)"
     },
     {
-      "frame_number": 88,
-      "timestamp_seconds": 5.86,
-      "timestamp_formatted": "00:00:05.86",
+      "frame_number": 103,
+      "timestamp_seconds": 6.86,
+      "timestamp_formatted": "00:06.860",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -859,9 +859,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (44.1% < 50.0%)"
     },
     {
-      "frame_number": 89,
-      "timestamp_seconds": 5.926,
-      "timestamp_formatted": "00:00:05.93",
+      "frame_number": 104,
+      "timestamp_seconds": 6.926,
+      "timestamp_formatted": "00:06.926",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -881,9 +881,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (44.1% < 50.0%)"
     },
     {
-      "frame_number": 90,
-      "timestamp_seconds": 5.993,
-      "timestamp_formatted": "00:00:05.99",
+      "frame_number": 105,
+      "timestamp_seconds": 6.993,
+      "timestamp_formatted": "00:06.993",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -903,9 +903,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (44.4% < 50.0%)"
     },
     {
-      "frame_number": 91,
-      "timestamp_seconds": 6.059,
-      "timestamp_formatted": "00:00:06.06",
+      "frame_number": 106,
+      "timestamp_seconds": 7.059,
+      "timestamp_formatted": "00:07.059",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -925,9 +925,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (44.4% < 50.0%)"
     },
     {
-      "frame_number": 92,
-      "timestamp_seconds": 6.126,
-      "timestamp_formatted": "00:00:06.13",
+      "frame_number": 107,
+      "timestamp_seconds": 7.126,
+      "timestamp_formatted": "00:07.126",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -947,9 +947,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (40.5% < 50.0%)"
     },
     {
-      "frame_number": 93,
-      "timestamp_seconds": 6.193,
-      "timestamp_formatted": "00:00:06.19",
+      "frame_number": 108,
+      "timestamp_seconds": 7.193,
+      "timestamp_formatted": "00:07.193",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -969,9 +969,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (44.7% < 50.0%)"
     },
     {
-      "frame_number": 94,
-      "timestamp_seconds": 6.259,
-      "timestamp_formatted": "00:00:06.26",
+      "frame_number": 109,
+      "timestamp_seconds": 7.259,
+      "timestamp_formatted": "00:07.259",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -991,9 +991,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (44.4% < 50.0%)"
     },
     {
-      "frame_number": 95,
-      "timestamp_seconds": 6.326,
-      "timestamp_formatted": "00:00:06.33",
+      "frame_number": 110,
+      "timestamp_seconds": 7.326,
+      "timestamp_formatted": "00:07.326",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1013,9 +1013,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (46.2% < 50.0%)"
     },
     {
-      "frame_number": 96,
-      "timestamp_seconds": 6.392,
-      "timestamp_formatted": "00:00:06.39",
+      "frame_number": 111,
+      "timestamp_seconds": 7.392,
+      "timestamp_formatted": "00:07.392",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1035,9 +1035,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (47.1% < 50.0%)"
     },
     {
-      "frame_number": 97,
-      "timestamp_seconds": 6.459,
-      "timestamp_formatted": "00:00:06.46",
+      "frame_number": 112,
+      "timestamp_seconds": 7.459,
+      "timestamp_formatted": "00:07.459",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1057,9 +1057,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (44.0% < 50.0%)"
     },
     {
-      "frame_number": 98,
-      "timestamp_seconds": 6.526,
-      "timestamp_formatted": "00:00:06.53",
+      "frame_number": 113,
+      "timestamp_seconds": 7.526,
+      "timestamp_formatted": "00:07.526",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1079,9 +1079,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (41.5% < 50.0%)"
     },
     {
-      "frame_number": 99,
-      "timestamp_seconds": 6.592,
-      "timestamp_formatted": "00:00:06.59",
+      "frame_number": 114,
+      "timestamp_seconds": 7.592,
+      "timestamp_formatted": "00:07.592",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1101,9 +1101,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (38.8% < 50.0%)"
     },
     {
-      "frame_number": 100,
-      "timestamp_seconds": 6.659,
-      "timestamp_formatted": "00:00:06.66",
+      "frame_number": 115,
+      "timestamp_seconds": 7.659,
+      "timestamp_formatted": "00:07.659",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1123,9 +1123,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (39.2% < 50.0%)"
     },
     {
-      "frame_number": 101,
-      "timestamp_seconds": 6.725,
-      "timestamp_formatted": "00:00:06.72",
+      "frame_number": 116,
+      "timestamp_seconds": 7.725,
+      "timestamp_formatted": "00:07.725",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1145,9 +1145,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (40.4% < 50.0%)"
     },
     {
-      "frame_number": 102,
-      "timestamp_seconds": 6.792,
-      "timestamp_formatted": "00:00:06.79",
+      "frame_number": 117,
+      "timestamp_seconds": 7.792,
+      "timestamp_formatted": "00:07.792",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1167,9 +1167,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (41.2% < 50.0%)"
     },
     {
-      "frame_number": 103,
-      "timestamp_seconds": 6.859,
-      "timestamp_formatted": "00:00:06.86",
+      "frame_number": 118,
+      "timestamp_seconds": 7.859,
+      "timestamp_formatted": "00:07.859",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1189,9 +1189,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (43.7% < 50.0%)"
     },
     {
-      "frame_number": 104,
-      "timestamp_seconds": 6.925,
-      "timestamp_formatted": "00:00:06.92",
+      "frame_number": 119,
+      "timestamp_seconds": 7.925,
+      "timestamp_formatted": "00:07.925",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1211,9 +1211,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (44.9% < 50.0%)"
     },
     {
-      "frame_number": 116,
-      "timestamp_seconds": 7.724,
-      "timestamp_formatted": "00:00:07.72",
+      "frame_number": 131,
+      "timestamp_seconds": 8.724,
+      "timestamp_formatted": "00:08.724",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1233,9 +1233,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 117,
-      "timestamp_seconds": 7.791,
-      "timestamp_formatted": "00:00:07.79",
+      "frame_number": 132,
+      "timestamp_seconds": 8.791,
+      "timestamp_formatted": "00:08.791",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1255,9 +1255,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 118,
-      "timestamp_seconds": 7.857,
-      "timestamp_formatted": "00:00:07.86",
+      "frame_number": 133,
+      "timestamp_seconds": 8.857,
+      "timestamp_formatted": "00:08.857",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1277,9 +1277,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 119,
-      "timestamp_seconds": 7.924,
-      "timestamp_formatted": "00:00:07.92",
+      "frame_number": 134,
+      "timestamp_seconds": 8.924,
+      "timestamp_formatted": "00:08.924",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1299,9 +1299,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 136,
-      "timestamp_seconds": 9.056,
-      "timestamp_formatted": "00:00:09.06",
+      "frame_number": 151,
+      "timestamp_seconds": 10.056,
+      "timestamp_formatted": "00:10.056",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1321,9 +1321,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (42.9% < 50.0%)"
     },
     {
-      "frame_number": 137,
-      "timestamp_seconds": 9.123,
-      "timestamp_formatted": "00:00:09.12",
+      "frame_number": 152,
+      "timestamp_seconds": 10.123,
+      "timestamp_formatted": "00:10.123",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "handgun",
       "bounding_box": [
@@ -1343,9 +1343,9 @@
       "rejection_reason": "BARE_HUMAN_LIMB (skin=74.8% >= 55% empty hand/arm)"
     },
     {
-      "frame_number": 138,
-      "timestamp_seconds": 9.189,
-      "timestamp_formatted": "00:00:09.19",
+      "frame_number": 153,
+      "timestamp_seconds": 10.189,
+      "timestamp_formatted": "00:10.189",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "handgun",
       "bounding_box": [
@@ -1365,9 +1365,9 @@
       "rejection_reason": "BARE_HUMAN_LIMB (skin=83.6% >= 55% empty hand/arm)"
     },
     {
-      "frame_number": 140,
-      "timestamp_seconds": 9.323,
-      "timestamp_formatted": "00:00:09.32",
+      "frame_number": 155,
+      "timestamp_seconds": 10.323,
+      "timestamp_formatted": "00:10.323",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "handgun",
       "bounding_box": [
@@ -1387,9 +1387,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (36.0% < 50.0%)"
     },
     {
-      "frame_number": 143,
-      "timestamp_seconds": 9.522,
-      "timestamp_formatted": "00:00:09.52",
+      "frame_number": 158,
+      "timestamp_seconds": 10.522,
+      "timestamp_formatted": "00:10.522",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1409,9 +1409,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 144,
-      "timestamp_seconds": 9.589,
-      "timestamp_formatted": "00:00:09.59",
+      "frame_number": 159,
+      "timestamp_seconds": 10.589,
+      "timestamp_formatted": "00:10.589",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1431,9 +1431,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 144,
-      "timestamp_seconds": 9.589,
-      "timestamp_formatted": "00:00:09.59",
+      "frame_number": 159,
+      "timestamp_seconds": 10.589,
+      "timestamp_formatted": "00:10.589",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1453,9 +1453,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 145,
-      "timestamp_seconds": 9.656,
-      "timestamp_formatted": "00:00:09.66",
+      "frame_number": 160,
+      "timestamp_seconds": 10.656,
+      "timestamp_formatted": "00:10.656",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1475,9 +1475,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 145,
-      "timestamp_seconds": 9.656,
-      "timestamp_formatted": "00:00:09.66",
+      "frame_number": 160,
+      "timestamp_seconds": 10.656,
+      "timestamp_formatted": "00:10.656",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1497,9 +1497,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 146,
-      "timestamp_seconds": 9.722,
-      "timestamp_formatted": "00:00:09.72",
+      "frame_number": 161,
+      "timestamp_seconds": 10.722,
+      "timestamp_formatted": "00:10.722",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1519,9 +1519,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 146,
-      "timestamp_seconds": 9.722,
-      "timestamp_formatted": "00:00:09.72",
+      "frame_number": 161,
+      "timestamp_seconds": 10.722,
+      "timestamp_formatted": "00:10.722",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1541,9 +1541,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 147,
-      "timestamp_seconds": 9.789,
-      "timestamp_formatted": "00:00:09.79",
+      "frame_number": 162,
+      "timestamp_seconds": 10.789,
+      "timestamp_formatted": "00:10.789",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "handgun",
       "bounding_box": [
@@ -1563,9 +1563,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (45.9% < 50.0%)"
     },
     {
-      "frame_number": 148,
-      "timestamp_seconds": 9.855,
-      "timestamp_formatted": "00:00:09.86",
+      "frame_number": 163,
+      "timestamp_seconds": 10.855,
+      "timestamp_formatted": "00:10.855",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "handgun",
       "bounding_box": [
@@ -1585,9 +1585,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (47.5% < 50.0%)"
     },
     {
-      "frame_number": 148,
-      "timestamp_seconds": 9.855,
-      "timestamp_formatted": "00:00:09.86",
+      "frame_number": 163,
+      "timestamp_seconds": 10.855,
+      "timestamp_formatted": "00:10.855",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "handgun",
       "bounding_box": [
@@ -1609,9 +1609,9 @@
   ],
   "records_20pct": [
     {
-      "frame_number": 15,
-      "timestamp_seconds": 0.998,
-      "timestamp_formatted": "00:00:01.00",
+      "frame_number": 30,
+      "timestamp_seconds": 1.998,
+      "timestamp_formatted": "00:01.998",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1631,9 +1631,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (49.6% < 50.0%)"
     },
     {
-      "frame_number": 16,
-      "timestamp_seconds": 1.065,
-      "timestamp_formatted": "00:00:01.06",
+      "frame_number": 31,
+      "timestamp_seconds": 2.065,
+      "timestamp_formatted": "00:02.065",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1653,9 +1653,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (48.7% < 50.0%)"
     },
     {
-      "frame_number": 17,
-      "timestamp_seconds": 1.131,
-      "timestamp_formatted": "00:00:01.13",
+      "frame_number": 32,
+      "timestamp_seconds": 2.131,
+      "timestamp_formatted": "00:02.131",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1675,9 +1675,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 18,
-      "timestamp_seconds": 1.198,
-      "timestamp_formatted": "00:00:01.20",
+      "frame_number": 33,
+      "timestamp_seconds": 2.198,
+      "timestamp_formatted": "00:02.198",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1697,9 +1697,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 19,
-      "timestamp_seconds": 1.264,
-      "timestamp_formatted": "00:00:01.26",
+      "frame_number": 34,
+      "timestamp_seconds": 2.264,
+      "timestamp_formatted": "00:02.264",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1719,9 +1719,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 20,
-      "timestamp_seconds": 1.331,
-      "timestamp_formatted": "00:00:01.33",
+      "frame_number": 35,
+      "timestamp_seconds": 2.331,
+      "timestamp_formatted": "00:02.331",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1741,9 +1741,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 21,
-      "timestamp_seconds": 1.398,
-      "timestamp_formatted": "00:00:01.40",
+      "frame_number": 36,
+      "timestamp_seconds": 2.398,
+      "timestamp_formatted": "00:02.398",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1763,9 +1763,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 22,
-      "timestamp_seconds": 1.464,
-      "timestamp_formatted": "00:00:01.46",
+      "frame_number": 37,
+      "timestamp_seconds": 2.464,
+      "timestamp_formatted": "00:02.464",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1785,9 +1785,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 23,
-      "timestamp_seconds": 1.531,
-      "timestamp_formatted": "00:00:01.53",
+      "frame_number": 38,
+      "timestamp_seconds": 2.531,
+      "timestamp_formatted": "00:02.531",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1807,9 +1807,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 24,
-      "timestamp_seconds": 1.597,
-      "timestamp_formatted": "00:00:01.60",
+      "frame_number": 39,
+      "timestamp_seconds": 2.597,
+      "timestamp_formatted": "00:02.597",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1829,9 +1829,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 25,
-      "timestamp_seconds": 1.664,
-      "timestamp_formatted": "00:00:01.66",
+      "frame_number": 40,
+      "timestamp_seconds": 2.664,
+      "timestamp_formatted": "00:02.664",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1851,9 +1851,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 26,
-      "timestamp_seconds": 1.731,
-      "timestamp_formatted": "00:00:01.73",
+      "frame_number": 41,
+      "timestamp_seconds": 2.731,
+      "timestamp_formatted": "00:02.731",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1873,9 +1873,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 27,
-      "timestamp_seconds": 1.797,
-      "timestamp_formatted": "00:00:01.80",
+      "frame_number": 42,
+      "timestamp_seconds": 2.797,
+      "timestamp_formatted": "00:02.797",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1895,9 +1895,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 28,
-      "timestamp_seconds": 1.864,
-      "timestamp_formatted": "00:00:01.86",
+      "frame_number": 43,
+      "timestamp_seconds": 2.864,
+      "timestamp_formatted": "00:02.864",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1917,9 +1917,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 29,
-      "timestamp_seconds": 1.93,
-      "timestamp_formatted": "00:00:01.93",
+      "frame_number": 44,
+      "timestamp_seconds": 2.93,
+      "timestamp_formatted": "00:02.930",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1939,9 +1939,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 30,
-      "timestamp_seconds": 1.997,
-      "timestamp_formatted": "00:00:02.00",
+      "frame_number": 45,
+      "timestamp_seconds": 2.997,
+      "timestamp_formatted": "00:02.997",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1961,9 +1961,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 31,
-      "timestamp_seconds": 2.063,
-      "timestamp_formatted": "00:00:02.06",
+      "frame_number": 46,
+      "timestamp_seconds": 3.063,
+      "timestamp_formatted": "00:03.063",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -1983,9 +1983,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 32,
-      "timestamp_seconds": 2.13,
-      "timestamp_formatted": "00:00:02.13",
+      "frame_number": 47,
+      "timestamp_seconds": 3.13,
+      "timestamp_formatted": "00:03.130",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2005,9 +2005,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 33,
-      "timestamp_seconds": 2.197,
-      "timestamp_formatted": "00:00:02.20",
+      "frame_number": 48,
+      "timestamp_seconds": 3.197,
+      "timestamp_formatted": "00:03.197",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2027,9 +2027,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 34,
-      "timestamp_seconds": 2.263,
-      "timestamp_formatted": "00:00:02.26",
+      "frame_number": 49,
+      "timestamp_seconds": 3.263,
+      "timestamp_formatted": "00:03.263",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2049,9 +2049,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 35,
-      "timestamp_seconds": 2.33,
-      "timestamp_formatted": "00:00:02.33",
+      "frame_number": 50,
+      "timestamp_seconds": 3.33,
+      "timestamp_formatted": "00:03.330",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2071,9 +2071,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 36,
-      "timestamp_seconds": 2.396,
-      "timestamp_formatted": "00:00:02.40",
+      "frame_number": 51,
+      "timestamp_seconds": 3.396,
+      "timestamp_formatted": "00:03.396",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2093,9 +2093,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 37,
-      "timestamp_seconds": 2.463,
-      "timestamp_formatted": "00:00:02.46",
+      "frame_number": 52,
+      "timestamp_seconds": 3.463,
+      "timestamp_formatted": "00:03.463",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2115,9 +2115,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 38,
-      "timestamp_seconds": 2.53,
-      "timestamp_formatted": "00:00:02.53",
+      "frame_number": 53,
+      "timestamp_seconds": 3.53,
+      "timestamp_formatted": "00:03.530",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2137,9 +2137,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 39,
-      "timestamp_seconds": 2.596,
-      "timestamp_formatted": "00:00:02.60",
+      "frame_number": 54,
+      "timestamp_seconds": 3.596,
+      "timestamp_formatted": "00:03.596",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2159,9 +2159,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 40,
-      "timestamp_seconds": 2.663,
-      "timestamp_formatted": "00:00:02.66",
+      "frame_number": 55,
+      "timestamp_seconds": 3.663,
+      "timestamp_formatted": "00:03.663",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2181,9 +2181,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 41,
-      "timestamp_seconds": 2.729,
-      "timestamp_formatted": "00:00:02.73",
+      "frame_number": 56,
+      "timestamp_seconds": 3.729,
+      "timestamp_formatted": "00:03.729",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2203,9 +2203,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 42,
-      "timestamp_seconds": 2.796,
-      "timestamp_formatted": "00:00:02.80",
+      "frame_number": 57,
+      "timestamp_seconds": 3.796,
+      "timestamp_formatted": "00:03.796",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2225,9 +2225,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 43,
-      "timestamp_seconds": 2.863,
-      "timestamp_formatted": "00:00:02.86",
+      "frame_number": 58,
+      "timestamp_seconds": 3.863,
+      "timestamp_formatted": "00:03.863",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2247,9 +2247,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 44,
-      "timestamp_seconds": 2.929,
-      "timestamp_formatted": "00:00:02.93",
+      "frame_number": 59,
+      "timestamp_seconds": 3.929,
+      "timestamp_formatted": "00:03.929",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2269,9 +2269,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 57,
-      "timestamp_seconds": 3.795,
-      "timestamp_formatted": "00:00:03.79",
+      "frame_number": 72,
+      "timestamp_seconds": 4.795,
+      "timestamp_formatted": "00:04.795",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2291,9 +2291,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 59,
-      "timestamp_seconds": 3.928,
-      "timestamp_formatted": "00:00:03.93",
+      "frame_number": 74,
+      "timestamp_seconds": 4.928,
+      "timestamp_formatted": "00:04.928",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2313,9 +2313,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (48.7% < 50.0%)"
     },
     {
-      "frame_number": 60,
-      "timestamp_seconds": 3.995,
-      "timestamp_formatted": "00:00:04.00",
+      "frame_number": 75,
+      "timestamp_seconds": 4.995,
+      "timestamp_formatted": "00:04.995",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "handgun",
       "bounding_box": [
@@ -2335,9 +2335,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (43.9% < 50.0%)"
     },
     {
-      "frame_number": 61,
-      "timestamp_seconds": 4.061,
-      "timestamp_formatted": "00:00:04.06",
+      "frame_number": 76,
+      "timestamp_seconds": 5.061,
+      "timestamp_formatted": "00:05.061",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2357,9 +2357,9 @@
       "rejection_reason": "UNPHYSICAL_PERSON_LOCATION (rel_y=0.98 below feet)"
     },
     {
-      "frame_number": 75,
-      "timestamp_seconds": 4.994,
-      "timestamp_formatted": "00:00:04.99",
+      "frame_number": 90,
+      "timestamp_seconds": 5.994,
+      "timestamp_formatted": "00:05.994",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2379,9 +2379,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 76,
-      "timestamp_seconds": 5.06,
-      "timestamp_formatted": "00:00:05.06",
+      "frame_number": 91,
+      "timestamp_seconds": 6.06,
+      "timestamp_formatted": "00:06.060",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2401,9 +2401,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 86,
-      "timestamp_seconds": 5.726,
-      "timestamp_formatted": "00:00:05.73",
+      "frame_number": 101,
+      "timestamp_seconds": 6.726,
+      "timestamp_formatted": "00:06.726",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2423,9 +2423,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (35.4% < 50.0%)"
     },
     {
-      "frame_number": 87,
-      "timestamp_seconds": 5.793,
-      "timestamp_formatted": "00:00:05.79",
+      "frame_number": 102,
+      "timestamp_seconds": 6.793,
+      "timestamp_formatted": "00:06.793",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2445,9 +2445,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (38.0% < 50.0%)"
     },
     {
-      "frame_number": 88,
-      "timestamp_seconds": 5.86,
-      "timestamp_formatted": "00:00:05.86",
+      "frame_number": 103,
+      "timestamp_seconds": 6.86,
+      "timestamp_formatted": "00:06.860",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2467,9 +2467,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (44.1% < 50.0%)"
     },
     {
-      "frame_number": 89,
-      "timestamp_seconds": 5.926,
-      "timestamp_formatted": "00:00:05.93",
+      "frame_number": 104,
+      "timestamp_seconds": 6.926,
+      "timestamp_formatted": "00:06.926",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2489,9 +2489,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (44.1% < 50.0%)"
     },
     {
-      "frame_number": 90,
-      "timestamp_seconds": 5.993,
-      "timestamp_formatted": "00:00:05.99",
+      "frame_number": 105,
+      "timestamp_seconds": 6.993,
+      "timestamp_formatted": "00:06.993",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2511,9 +2511,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (44.4% < 50.0%)"
     },
     {
-      "frame_number": 91,
-      "timestamp_seconds": 6.059,
-      "timestamp_formatted": "00:00:06.06",
+      "frame_number": 106,
+      "timestamp_seconds": 7.059,
+      "timestamp_formatted": "00:07.059",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2533,9 +2533,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (44.4% < 50.0%)"
     },
     {
-      "frame_number": 92,
-      "timestamp_seconds": 6.126,
-      "timestamp_formatted": "00:00:06.13",
+      "frame_number": 107,
+      "timestamp_seconds": 7.126,
+      "timestamp_formatted": "00:07.126",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2555,9 +2555,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (40.5% < 50.0%)"
     },
     {
-      "frame_number": 93,
-      "timestamp_seconds": 6.193,
-      "timestamp_formatted": "00:00:06.19",
+      "frame_number": 108,
+      "timestamp_seconds": 7.193,
+      "timestamp_formatted": "00:07.193",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2577,9 +2577,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (44.7% < 50.0%)"
     },
     {
-      "frame_number": 94,
-      "timestamp_seconds": 6.259,
-      "timestamp_formatted": "00:00:06.26",
+      "frame_number": 109,
+      "timestamp_seconds": 7.259,
+      "timestamp_formatted": "00:07.259",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2599,9 +2599,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (44.4% < 50.0%)"
     },
     {
-      "frame_number": 95,
-      "timestamp_seconds": 6.326,
-      "timestamp_formatted": "00:00:06.33",
+      "frame_number": 110,
+      "timestamp_seconds": 7.326,
+      "timestamp_formatted": "00:07.326",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2621,9 +2621,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (46.2% < 50.0%)"
     },
     {
-      "frame_number": 96,
-      "timestamp_seconds": 6.392,
-      "timestamp_formatted": "00:00:06.39",
+      "frame_number": 111,
+      "timestamp_seconds": 7.392,
+      "timestamp_formatted": "00:07.392",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2643,9 +2643,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (47.1% < 50.0%)"
     },
     {
-      "frame_number": 97,
-      "timestamp_seconds": 6.459,
-      "timestamp_formatted": "00:00:06.46",
+      "frame_number": 112,
+      "timestamp_seconds": 7.459,
+      "timestamp_formatted": "00:07.459",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2665,9 +2665,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (44.0% < 50.0%)"
     },
     {
-      "frame_number": 98,
-      "timestamp_seconds": 6.526,
-      "timestamp_formatted": "00:00:06.53",
+      "frame_number": 113,
+      "timestamp_seconds": 7.526,
+      "timestamp_formatted": "00:07.526",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2687,9 +2687,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (41.5% < 50.0%)"
     },
     {
-      "frame_number": 99,
-      "timestamp_seconds": 6.592,
-      "timestamp_formatted": "00:00:06.59",
+      "frame_number": 114,
+      "timestamp_seconds": 7.592,
+      "timestamp_formatted": "00:07.592",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2709,9 +2709,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (38.8% < 50.0%)"
     },
     {
-      "frame_number": 100,
-      "timestamp_seconds": 6.659,
-      "timestamp_formatted": "00:00:06.66",
+      "frame_number": 115,
+      "timestamp_seconds": 7.659,
+      "timestamp_formatted": "00:07.659",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2731,9 +2731,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (39.2% < 50.0%)"
     },
     {
-      "frame_number": 101,
-      "timestamp_seconds": 6.725,
-      "timestamp_formatted": "00:00:06.72",
+      "frame_number": 116,
+      "timestamp_seconds": 7.725,
+      "timestamp_formatted": "00:07.725",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2753,9 +2753,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (40.4% < 50.0%)"
     },
     {
-      "frame_number": 102,
-      "timestamp_seconds": 6.792,
-      "timestamp_formatted": "00:00:06.79",
+      "frame_number": 117,
+      "timestamp_seconds": 7.792,
+      "timestamp_formatted": "00:07.792",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2775,9 +2775,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (41.2% < 50.0%)"
     },
     {
-      "frame_number": 103,
-      "timestamp_seconds": 6.859,
-      "timestamp_formatted": "00:00:06.86",
+      "frame_number": 118,
+      "timestamp_seconds": 7.859,
+      "timestamp_formatted": "00:07.859",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2797,9 +2797,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (43.7% < 50.0%)"
     },
     {
-      "frame_number": 104,
-      "timestamp_seconds": 6.925,
-      "timestamp_formatted": "00:00:06.92",
+      "frame_number": 119,
+      "timestamp_seconds": 7.925,
+      "timestamp_formatted": "00:07.925",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2819,9 +2819,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (44.9% < 50.0%)"
     },
     {
-      "frame_number": 116,
-      "timestamp_seconds": 7.724,
-      "timestamp_formatted": "00:00:07.72",
+      "frame_number": 131,
+      "timestamp_seconds": 8.724,
+      "timestamp_formatted": "00:08.724",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2841,9 +2841,9 @@
       "rejection_reason": "NO_PERSON_IN_SCENE"
     },
     {
-      "frame_number": 117,
-      "timestamp_seconds": 7.791,
-      "timestamp_formatted": "00:00:07.79",
+      "frame_number": 132,
+      "timestamp_seconds": 8.791,
+      "timestamp_formatted": "00:08.791",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2863,9 +2863,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 118,
-      "timestamp_seconds": 7.857,
-      "timestamp_formatted": "00:00:07.86",
+      "frame_number": 133,
+      "timestamp_seconds": 8.857,
+      "timestamp_formatted": "00:08.857",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2885,9 +2885,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 119,
-      "timestamp_seconds": 7.924,
-      "timestamp_formatted": "00:00:07.92",
+      "frame_number": 134,
+      "timestamp_seconds": 8.924,
+      "timestamp_formatted": "00:08.924",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2907,9 +2907,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 136,
-      "timestamp_seconds": 9.056,
-      "timestamp_formatted": "00:00:09.06",
+      "frame_number": 151,
+      "timestamp_seconds": 10.056,
+      "timestamp_formatted": "00:10.056",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -2929,9 +2929,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (42.9% < 50.0%)"
     },
     {
-      "frame_number": 137,
-      "timestamp_seconds": 9.123,
-      "timestamp_formatted": "00:00:09.12",
+      "frame_number": 152,
+      "timestamp_seconds": 10.123,
+      "timestamp_formatted": "00:10.123",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "handgun",
       "bounding_box": [
@@ -2951,9 +2951,9 @@
       "rejection_reason": "BARE_HUMAN_LIMB (skin=74.8% >= 55% empty hand/arm)"
     },
     {
-      "frame_number": 138,
-      "timestamp_seconds": 9.189,
-      "timestamp_formatted": "00:00:09.19",
+      "frame_number": 153,
+      "timestamp_seconds": 10.189,
+      "timestamp_formatted": "00:10.189",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "handgun",
       "bounding_box": [
@@ -2973,9 +2973,9 @@
       "rejection_reason": "BARE_HUMAN_LIMB (skin=83.6% >= 55% empty hand/arm)"
     },
     {
-      "frame_number": 140,
-      "timestamp_seconds": 9.323,
-      "timestamp_formatted": "00:00:09.32",
+      "frame_number": 155,
+      "timestamp_seconds": 10.323,
+      "timestamp_formatted": "00:10.323",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "handgun",
       "bounding_box": [
@@ -2995,9 +2995,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (36.0% < 50.0%)"
     },
     {
-      "frame_number": 143,
-      "timestamp_seconds": 9.522,
-      "timestamp_formatted": "00:00:09.52",
+      "frame_number": 158,
+      "timestamp_seconds": 10.522,
+      "timestamp_formatted": "00:10.522",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -3017,9 +3017,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 144,
-      "timestamp_seconds": 9.589,
-      "timestamp_formatted": "00:00:09.59",
+      "frame_number": 159,
+      "timestamp_seconds": 10.589,
+      "timestamp_formatted": "00:10.589",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -3039,9 +3039,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 144,
-      "timestamp_seconds": 9.589,
-      "timestamp_formatted": "00:00:09.59",
+      "frame_number": 159,
+      "timestamp_seconds": 10.589,
+      "timestamp_formatted": "00:10.589",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -3061,9 +3061,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 145,
-      "timestamp_seconds": 9.656,
-      "timestamp_formatted": "00:00:09.66",
+      "frame_number": 160,
+      "timestamp_seconds": 10.656,
+      "timestamp_formatted": "00:10.656",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -3083,9 +3083,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 145,
-      "timestamp_seconds": 9.656,
-      "timestamp_formatted": "00:00:09.66",
+      "frame_number": 160,
+      "timestamp_seconds": 10.656,
+      "timestamp_formatted": "00:10.656",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -3105,9 +3105,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 146,
-      "timestamp_seconds": 9.722,
-      "timestamp_formatted": "00:00:09.72",
+      "frame_number": 161,
+      "timestamp_seconds": 10.722,
+      "timestamp_formatted": "00:10.722",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -3127,9 +3127,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 146,
-      "timestamp_seconds": 9.722,
-      "timestamp_formatted": "00:00:09.72",
+      "frame_number": 161,
+      "timestamp_seconds": 10.722,
+      "timestamp_formatted": "00:10.722",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "knife",
       "bounding_box": [
@@ -3149,9 +3149,9 @@
       "rejection_reason": ""
     },
     {
-      "frame_number": 147,
-      "timestamp_seconds": 9.789,
-      "timestamp_formatted": "00:00:09.79",
+      "frame_number": 162,
+      "timestamp_seconds": 10.789,
+      "timestamp_formatted": "00:10.789",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "handgun",
       "bounding_box": [
@@ -3171,9 +3171,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (45.9% < 50.0%)"
     },
     {
-      "frame_number": 148,
-      "timestamp_seconds": 9.855,
-      "timestamp_formatted": "00:00:09.86",
+      "frame_number": 163,
+      "timestamp_seconds": 10.855,
+      "timestamp_formatted": "00:10.855",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "handgun",
       "bounding_box": [
@@ -3193,9 +3193,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (47.5% < 50.0%)"
     },
     {
-      "frame_number": 148,
-      "timestamp_seconds": 9.855,
-      "timestamp_formatted": "00:00:09.86",
+      "frame_number": 163,
+      "timestamp_seconds": 10.855,
+      "timestamp_formatted": "00:10.855",
       "camera_id": "SCENE007_CAM01_Origi",
       "object_label": "handgun",
       "bounding_box": [

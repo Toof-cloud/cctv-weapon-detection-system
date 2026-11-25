@@ -165,43 +165,69 @@ def build_multicam_pdf_bytes(
 
     c1 = scene_info["cam1"]
     c2 = scene_info["cam2"]
-    story.append(Paragraph("1. Synchronized Camera Feeds & Cryptographic Hashes", h2_s))
+    off1 = float(c1.get("offset_seconds", 0.0) or 0.0)
+    off2 = float(c2.get("offset_seconds", 0.0) or 0.0)
+    story.append(Paragraph("1. Synchronized Camera Feeds, Start Offsets & Cryptographic Hashes", h2_s))
     meta_rows = [
-        ["Camera ID", "Source Video", "SHA-256 Hash (First 32 hex)", "Detections"],
-        ["CAM-01", c1.get("source_filename", ""), c1.get("sha256", "")[:32] + "...", str(len(cam1_records))],
-        ["CAM-02", c2.get("source_filename", ""), c2.get("sha256", "")[:32] + "...", str(len(cam2_records))],
+        ["Camera ID", "Source Video", "Start Offset", "SHA-256 Hash (First 24 hex)", "Detections"],
+        ["CAM-01", c1.get("source_filename", ""), f"{off1:+.3f} s", c1.get("sha256", "")[:24] + "...", str(len(cam1_records))],
+        ["CAM-02", c2.get("source_filename", ""), f"{off2:+.3f} s", c2.get("sha256", "")[:24] + "...", str(len(cam2_records))],
     ]
-    t_meta = Table(meta_rows, colWidths=[0.9 * inch, 2.5 * inch, 2.9 * inch, 1.0 * inch])
+    t_meta = Table(meta_rows, colWidths=[0.85 * inch, 2.35 * inch, 0.9 * inch, 2.25 * inch, 0.95 * inch])
     t_meta.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1e3a8a")),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("FONTSIZE", (0, 0), (-1, -1), 8.5),
+        ("FONTSIZE", (0, 0), (-1, -1), 8.2),
         ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
         ("PADDING", (0, 0), (-1, -1), 5),
     ]))
     story.append(t_meta)
 
+    def _fmt_sess(sec: float) -> str:
+        sec = max(0.0, sec)
+        m = int(sec // 60)
+        s = sec - m * 60
+        return f"{m:02d}:{s:06.3f}"
+
     combined = sorted(
-        [{**r, "cam": "CAM-01"} for r in cam1_records] + [{**r, "cam": "CAM-02"} for r in cam2_records],
-        key=lambda x: (x["timestamp_seconds"], x["cam"]),
+        [
+            {
+                **r,
+                "cam": "CAM-01",
+                "session_seconds": round(float(r["timestamp_seconds"]) + off1, 3),
+                "session_formatted": r.get("session_formatted") or _fmt_sess(float(r["timestamp_seconds"]) + off1),
+            }
+            for r in cam1_records
+        ]
+        + [
+            {
+                **r,
+                "cam": "CAM-02",
+                "session_seconds": round(float(r["timestamp_seconds"]) + off2, 3),
+                "session_formatted": r.get("session_formatted") or _fmt_sess(float(r["timestamp_seconds"]) + off2),
+            }
+            for r in cam2_records
+        ],
+        key=lambda x: (x["session_seconds"], x["cam"]),
     )
 
-    story.append(Paragraph("2. Unified Chronological Multi-Camera Timeline", h2_s))
+    story.append(Paragraph("2. Unified Chronological Multi-Camera Timeline (Session Time = Video Time + Start Offset)", h2_s))
     if not combined:
         story.append(Paragraph(f"No confirmed weapon threats detected across CAM-01 or CAM-02 at threshold {threshold*100:.0f}% (CCTV Intelligence: {'ON' if cctv_intel_enabled else 'OFF'}).", body_s))
     else:
-        rows = [["Time", "Camera", "Frame", "Weapon Class", "Confidence", "Bounding Box"]]
+        rows = [["Session Time", "Camera", "Video Time", "Frame", "Weapon Class", "Confidence", "Cross-View"]]
         for r in combined[:90]:
             rows.append([
-                r["timestamp_formatted"],
+                r["session_formatted"],
                 r["cam"],
+                r["timestamp_formatted"],
                 str(r["frame_number"]),
                 r["object_label"].upper(),
                 f"{r['confidence_score']*100:.1f}%",
-                str(r["bounding_box"]),
+                r.get("corroboration_status", "Aligned"),
             ])
-        t_tl = Table(rows, colWidths=[1.0 * inch, 0.9 * inch, 0.75 * inch, 1.15 * inch, 1.0 * inch, 2.5 * inch])
+        t_tl = Table(rows, colWidths=[1.0 * inch, 0.8 * inch, 1.0 * inch, 0.65 * inch, 1.15 * inch, 0.95 * inch, 1.75 * inch])
         t_tl.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0f172a")),
             ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),

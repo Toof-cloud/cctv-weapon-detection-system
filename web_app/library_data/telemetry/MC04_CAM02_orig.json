@@ -1,9 +1,9 @@
 {
   "records_50pct": [
     {
-      "frame_number": 88,
-      "timestamp_seconds": 5.346,
-      "timestamp_formatted": "00:00:05.35",
+      "frame_number": 105,
+      "timestamp_seconds": 6.346,
+      "timestamp_formatted": "00:06.346",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -23,9 +23,9 @@
       "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
     },
     {
-      "frame_number": 89,
-      "timestamp_seconds": 5.407,
-      "timestamp_formatted": "00:00:05.41",
+      "frame_number": 106,
+      "timestamp_seconds": 6.407,
+      "timestamp_formatted": "00:06.407",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -45,9 +45,9 @@
       "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
     },
     {
-      "frame_number": 90,
-      "timestamp_seconds": 5.467,
-      "timestamp_formatted": "00:00:05.47",
+      "frame_number": 107,
+      "timestamp_seconds": 6.467,
+      "timestamp_formatted": "00:06.467",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -67,9 +67,9 @@
       "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
     },
     {
-      "frame_number": 91,
-      "timestamp_seconds": 5.527,
-      "timestamp_formatted": "00:00:05.53",
+      "frame_number": 108,
+      "timestamp_seconds": 6.527,
+      "timestamp_formatted": "00:06.527",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -89,9 +89,9 @@
       "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
     },
     {
-      "frame_number": 92,
-      "timestamp_seconds": 5.588,
-      "timestamp_formatted": "00:00:05.59",
+      "frame_number": 109,
+      "timestamp_seconds": 6.588,
+      "timestamp_formatted": "00:06.588",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -111,9 +111,9 @@
       "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
     },
     {
-      "frame_number": 93,
-      "timestamp_seconds": 5.648,
-      "timestamp_formatted": "00:00:05.65",
+      "frame_number": 110,
+      "timestamp_seconds": 6.648,
+      "timestamp_formatted": "00:06.648",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -133,9 +133,9 @@
       "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
     },
     {
-      "frame_number": 94,
-      "timestamp_seconds": 5.709,
-      "timestamp_formatted": "00:00:05.71",
+      "frame_number": 111,
+      "timestamp_seconds": 6.709,
+      "timestamp_formatted": "00:06.709",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -155,9 +155,9 @@
       "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
     },
     {
-      "frame_number": 95,
-      "timestamp_seconds": 5.769,
-      "timestamp_formatted": "00:00:05.77",
+      "frame_number": 112,
+      "timestamp_seconds": 6.769,
+      "timestamp_formatted": "00:06.769",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -177,9 +177,9 @@
       "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
     },
     {
-      "frame_number": 96,
-      "timestamp_seconds": 5.83,
-      "timestamp_formatted": "00:00:05.83",
+      "frame_number": 113,
+      "timestamp_seconds": 6.83,
+      "timestamp_formatted": "00:06.830",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -199,9 +199,9 @@
       "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
     },
     {
-      "frame_number": 113,
-      "timestamp_seconds": 6.857,
-      "timestamp_formatted": "00:00:06.86",
+      "frame_number": 130,
+      "timestamp_seconds": 7.857,
+      "timestamp_formatted": "00:07.857",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -221,9 +221,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (47.4% < 50.0%)"
     },
     {
-      "frame_number": 115,
-      "timestamp_seconds": 6.978,
-      "timestamp_formatted": "00:00:06.98",
+      "frame_number": 132,
+      "timestamp_seconds": 7.978,
+      "timestamp_formatted": "00:07.978",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "handgun",
       "bounding_box": [
@@ -243,9 +243,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (41.9% < 50.0%)"
     },
     {
-      "frame_number": 138,
-      "timestamp_seconds": 8.368,
-      "timestamp_formatted": "00:00:08.37",
+      "frame_number": 155,
+      "timestamp_seconds": 9.368,
+      "timestamp_formatted": "00:09.368",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "handgun",
       "bounding_box": [
@@ -265,9 +265,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (48.4% < 50.0%)"
     },
     {
-      "frame_number": 139,
-      "timestamp_seconds": 8.429,
-      "timestamp_formatted": "00:00:08.43",
+      "frame_number": 156,
+      "timestamp_seconds": 9.429,
+      "timestamp_formatted": "00:09.429",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "handgun",
       "bounding_box": [
@@ -287,9 +287,9 @@
       "rejection_reason": "BARE_HUMAN_LIMB (skin=60.1% >= 55% empty hand/arm)"
     },
     {
-      "frame_number": 145,
-      "timestamp_seconds": 8.791,
-      "timestamp_formatted": "00:00:08.79",
+      "frame_number": 162,
+      "timestamp_seconds": 9.791,
+      "timestamp_formatted": "00:09.791",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "handgun",
       "bounding_box": [
@@ -309,9 +309,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (45.3% < 50.0%)"
     },
     {
-      "frame_number": 163,
-      "timestamp_seconds": 9.879,
-      "timestamp_formatted": "00:00:09.88",
+      "frame_number": 180,
+      "timestamp_seconds": 10.879,
+      "timestamp_formatted": "00:10.879",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -333,9 +333,9 @@
   ],
   "records_20pct": [
     {
-      "frame_number": 88,
-      "timestamp_seconds": 5.346,
-      "timestamp_formatted": "00:00:05.35",
+      "frame_number": 105,
+      "timestamp_seconds": 6.346,
+      "timestamp_formatted": "00:06.346",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -355,9 +355,9 @@
       "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
     },
     {
-      "frame_number": 89,
-      "timestamp_seconds": 5.407,
-      "timestamp_formatted": "00:00:05.41",
+      "frame_number": 106,
+      "timestamp_seconds": 6.407,
+      "timestamp_formatted": "00:06.407",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -377,9 +377,9 @@
       "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
     },
     {
-      "frame_number": 90,
-      "timestamp_seconds": 5.467,
-      "timestamp_formatted": "00:00:05.47",
+      "frame_number": 107,
+      "timestamp_seconds": 6.467,
+      "timestamp_formatted": "00:06.467",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -399,9 +399,9 @@
       "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
     },
     {
-      "frame_number": 91,
-      "timestamp_seconds": 5.527,
-      "timestamp_formatted": "00:00:05.53",
+      "frame_number": 108,
+      "timestamp_seconds": 6.527,
+      "timestamp_formatted": "00:06.527",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -421,9 +421,9 @@
       "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
     },
     {
-      "frame_number": 92,
-      "timestamp_seconds": 5.588,
-      "timestamp_formatted": "00:00:05.59",
+      "frame_number": 109,
+      "timestamp_seconds": 6.588,
+      "timestamp_formatted": "00:06.588",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -443,9 +443,9 @@
       "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
     },
     {
-      "frame_number": 93,
-      "timestamp_seconds": 5.648,
-      "timestamp_formatted": "00:00:05.65",
+      "frame_number": 110,
+      "timestamp_seconds": 6.648,
+      "timestamp_formatted": "00:06.648",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -465,9 +465,9 @@
       "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
     },
     {
-      "frame_number": 94,
-      "timestamp_seconds": 5.709,
-      "timestamp_formatted": "00:00:05.71",
+      "frame_number": 111,
+      "timestamp_seconds": 6.709,
+      "timestamp_formatted": "00:06.709",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -487,9 +487,9 @@
       "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
     },
     {
-      "frame_number": 95,
-      "timestamp_seconds": 5.769,
-      "timestamp_formatted": "00:00:05.77",
+      "frame_number": 112,
+      "timestamp_seconds": 6.769,
+      "timestamp_formatted": "00:06.769",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -509,9 +509,9 @@
       "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
     },
     {
-      "frame_number": 96,
-      "timestamp_seconds": 5.83,
-      "timestamp_formatted": "00:00:05.83",
+      "frame_number": 113,
+      "timestamp_seconds": 6.83,
+      "timestamp_formatted": "00:06.830",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -531,9 +531,9 @@
       "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
     },
     {
-      "frame_number": 113,
-      "timestamp_seconds": 6.857,
-      "timestamp_formatted": "00:00:06.86",
+      "frame_number": 130,
+      "timestamp_seconds": 7.857,
+      "timestamp_formatted": "00:07.857",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [
@@ -553,9 +553,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (47.4% < 50.0%)"
     },
     {
-      "frame_number": 115,
-      "timestamp_seconds": 6.978,
-      "timestamp_formatted": "00:00:06.98",
+      "frame_number": 132,
+      "timestamp_seconds": 7.978,
+      "timestamp_formatted": "00:07.978",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "handgun",
       "bounding_box": [
@@ -575,9 +575,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (41.9% < 50.0%)"
     },
     {
-      "frame_number": 138,
-      "timestamp_seconds": 8.368,
-      "timestamp_formatted": "00:00:08.37",
+      "frame_number": 155,
+      "timestamp_seconds": 9.368,
+      "timestamp_formatted": "00:09.368",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "handgun",
       "bounding_box": [
@@ -597,9 +597,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (48.4% < 50.0%)"
     },
     {
-      "frame_number": 139,
-      "timestamp_seconds": 8.429,
-      "timestamp_formatted": "00:00:08.43",
+      "frame_number": 156,
+      "timestamp_seconds": 9.429,
+      "timestamp_formatted": "00:09.429",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "handgun",
       "bounding_box": [
@@ -619,9 +619,9 @@
       "rejection_reason": "BARE_HUMAN_LIMB (skin=60.1% >= 55% empty hand/arm)"
     },
     {
-      "frame_number": 145,
-      "timestamp_seconds": 8.791,
-      "timestamp_formatted": "00:00:08.79",
+      "frame_number": 162,
+      "timestamp_seconds": 9.791,
+      "timestamp_formatted": "00:09.791",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "handgun",
       "bounding_box": [
@@ -641,9 +641,9 @@
       "rejection_reason": "BELOW_CLASS_THRESHOLD (45.3% < 50.0%)"
     },
     {
-      "frame_number": 163,
-      "timestamp_seconds": 9.879,
-      "timestamp_formatted": "00:00:09.88",
+      "frame_number": 180,
+      "timestamp_seconds": 10.879,
+      "timestamp_formatted": "00:10.879",
       "camera_id": "NOV20_Pair05_Smartphon",
       "object_label": "knife",
       "bounding_box": [

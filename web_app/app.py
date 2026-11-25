@@ -922,14 +922,106 @@ def lock_dropdowns_non_editable() -> None:
     )
 
 
-def render_synced_dual_camera_player(rel1: str, rel2: str, lbl1: str, lbl2: str, sync_clock: str = "") -> None:
-    uri1 = _video_data_uri(rel1)
-    uri2 = _video_data_uri(rel2)
+def _fmt_session_time(sec: float) -> str:
+    sign = "-" if sec < 0 else ""
+    a = abs(sec)
+    m = int(a // 60)
+    s = a - m * 60
+    return f"{sign}{m:02d}:{s:06.3f}"
+
+
+def compute_multicam_corroboration(
+    recs1: list[dict],
+    recs2: list[dict],
+    off1: float,
+    dur1: float,
+    off2: float,
+    dur2: float,
+    window_sec: float = 1.5,
+) -> tuple[list[dict], dict]:
+    """Exact manuscript cross-view observation matching (matches mockup_ui/multi_camera.py)."""
+    rows: list[dict] = []
+    for cam_id, recs, off in [("CAM-01", recs1, off1), ("CAM-02", recs2, off2)]:
+        for r in recs:
+            v_sec = float(r["timestamp_seconds"])
+            s_sec = round(v_sec + off, 3)
+            rows.append({
+                **r,
+                "camera": cam_id,
+                "video_seconds": v_sec,
+                "session_seconds": s_sec,
+                "session_formatted": _fmt_session_time(s_sec),
+                "corroboration_status": "Not Applicable",
+            })
+    rows.sort(key=lambda x: (x["session_seconds"], x["camera"], x["frame_number"]))
+
+    cam_spans = {
+        "CAM-01": (off1, off1 + max(0.1, dur1)),
+        "CAM-02": (off2, off2 + max(0.1, dur2)),
+    }
+    for row in rows:
+        t = row["session_seconds"]
+        my_cam = row["camera"]
+        peer_cam = "CAM-02" if my_cam == "CAM-01" else "CAM-01"
+        p_start, p_end = cam_spans[peer_cam]
+        m_start, m_end = cam_spans[my_cam]
+        if not (p_start <= t < p_end):
+            row["corroboration_status"] = "Not Applicable"
+            continue
+        candidates = [
+            other for other in rows
+            if other["camera"] == peer_cam
+            and abs(other["session_seconds"] - t) <= window_sec
+            and (m_start <= other["session_seconds"] < m_end)
+        ]
+        matches = [other for other in candidates if other["object_label"] == row["object_label"]]
+        if matches:
+            row["corroboration_status"] = "Corroborated"
+        elif candidates:
+            row["corroboration_status"] = "Uncertain"
+        else:
+            row["corroboration_status"] = "Not Corroborated"
+
+    corr_cnt = sum(1 for r in rows if r["corroboration_status"] == "Corroborated")
+    not_corr_cnt = sum(1 for r in rows if r["corroboration_status"] == "Not Corroborated")
+    unc_cnt = sum(1 for r in rows if r["corroboration_status"] == "Uncertain")
+    na_cnt = sum(1 for r in rows if r["corroboration_status"] == "Not Applicable")
+    eligible = corr_cnt + not_corr_cnt
+    mccr_pct = round(100.0 * corr_cnt / eligible, 2) if eligible > 0 else None
+    return rows, {
+        "Corroborated": corr_cnt,
+        "Not Corroborated": not_corr_cnt,
+        "Uncertain": unc_cnt,
+        "Not Applicable": na_cnt,
+        "eligible": eligible,
+        "mccr_percent": mccr_pct,
+    }
+
+
+def render_synced_dual_camera_player(
+    rel1: str,
+    rel2: str,
+    lbl1: str,
+    lbl2: str,
+    fn1: str = "",
+    fn2: str = "",
+    meta1: str = "",
+    meta2: str = "",
+    offset1: float = 0.0,
+    offset2: float = 0.0,
+    sync_clock: str = "",
+) -> None:
+    p1 = WEB_DATA_DIR / rel1
+    p2 = WEB_DATA_DIR / rel2
+    m1 = p1.stat().st_mtime if p1.exists() else 0.0
+    m2 = p2.stat().st_mtime if p2.exists() else 0.0
+    uri1 = _video_data_uri(rel1, _mtime=m1)
+    uri2 = _video_data_uri(rel2, _mtime=m2)
     if not (uri1 and uri2):
         st.warning("Multi-camera video streams unavailable.")
         return
 
-    sync_tag = sync_clock or "Wall-Clock Synchronized"
+    sync_tag = sync_clock or f"CAM-01 offset {offset1:+.3f}s · CAM-02 offset {offset2:+.3f}s"
     components.html(
         f"""
         <!DOCTYPE html>
@@ -937,33 +1029,68 @@ def render_synced_dual_camera_player(rel1: str, rel2: str, lbl1: str, lbl2: str,
         <head>
         <style>
             * {{ box-sizing: border-box; margin: 0; padding: 0; font-family: "Inter", "Segoe UI", sans-serif; }}
-            body {{ background: transparent; overflow: hidden; }}
-            .mc-shell {{
-                background: #0d1c42;
-                border: 1px solid #22396f;
-                border-radius: 10px;
-                padding: 10px 12px 10px 12px;
-                color: #ffffff;
+            html, body {{
+                background: transparent;
+                margin: 0;
+                padding: 0;
+                overflow: visible;
+            }}
+            .mc-outer {{
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding: 2px 1px 6px 1px;
             }}
             .mc-grid {{
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 10px;
+                gap: 12px;
             }}
-            .mc-cam-lbl {{
-                font-size: 11px;
-                font-weight: 700;
-                letter-spacing: 0.45px;
-                color: #c7d7f4;
-                margin-bottom: 5px;
+            .mc-card {{
+                background: #ffffff;
+                border: 1px solid #dce4ef;
+                border-radius: 12px;
+                padding: 10px 12px 10px 12px;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                box-shadow: 0 1px 2px rgba(13, 28, 66, 0.04);
+            }}
+            .mc-card-top {{
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                gap: 8px;
+            }}
+            .mc-cam-title {{
+                font-size: 12.5px;
+                font-weight: 700;
+                color: #162238;
+                letter-spacing: 0.2px;
+                font-variant-numeric: tabular-nums;
+            }}
+            .mc-offset-pill {{
+                background: #eef3fb;
+                border: 1px solid #cddaf0;
+                color: #22396f;
+                font-size: 10.5px;
+                font-weight: 600;
+                padding: 2px 8px;
+                border-radius: 999px;
+                white-space: nowrap;
+            }}
+            .mc-filename {{
+                font-size: 11.5px;
+                color: #5b6982;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }}
             .mc-vid-wrap {{
-                background: #060e24;
-                border: 1px solid #22396f;
-                border-radius: 6px;
+                position: relative;
+                background: #081126;
+                border: 1px solid #1e3261;
+                border-radius: 8px;
                 overflow: hidden;
                 aspect-ratio: 16 / 9;
                 display: flex;
@@ -977,22 +1104,56 @@ def render_synced_dual_camera_player(rel1: str, rel2: str, lbl1: str, lbl2: str,
                 object-fit: contain;
                 display: block;
             }}
+            .mc-outside-mask {{
+                position: absolute;
+                inset: 0;
+                background: #070e20;
+                color: #9db2d8;
+                font-size: 12px;
+                font-weight: 500;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 12px;
+                z-index: 3;
+            }}
+            .mc-foot-meta {{
+                font-size: 11px;
+                color: #5b6982;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 6px;
+                font-variant-numeric: tabular-nums;
+            }}
+            .mc-status-strip {{
+                background: #eef3fb;
+                border-radius: 6px;
+                padding: 4px 8px;
+                font-size: 11px;
+                font-weight: 600;
+                color: #22396f;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }}
             .mc-ctrl-bar {{
                 display: flex;
                 align-items: center;
-                gap: 8px;
-                margin-top: 9px;
-                background: #142654;
-                border: 1px solid #2b457d;
-                border-radius: 8px;
-                padding: 6px 10px;
+                gap: 10px;
+                background: #0d1c42;
+                border: 1px solid #22396f;
+                border-radius: 10px;
+                padding: 8px 12px;
+                color: #ffffff;
             }}
             .mc-btn {{
                 background: #22396f;
                 color: #ffffff;
-                border: 1px solid #506b9e;
-                border-radius: 6px;
-                padding: 5px 11px;
+                border: 1px solid #5875ab;
+                border-radius: 7px;
+                padding: 5px 12px;
                 font-size: 12px;
                 font-weight: 600;
                 cursor: pointer;
@@ -1000,9 +1161,10 @@ def render_synced_dual_camera_player(rel1: str, rel2: str, lbl1: str, lbl2: str,
             }}
             .mc-btn:hover {{ background: #304d85; border-color: #9db9ee; }}
             .mc-btn-sec {{
-                background: #172950;
-                border-color: #415985;
+                background: #162852;
+                border-color: #3d588a;
                 font-weight: 500;
+                padding: 5px 9px;
             }}
             .mc-scrub {{
                 flex: 1;
@@ -1013,88 +1175,189 @@ def render_synced_dual_camera_player(rel1: str, rel2: str, lbl1: str, lbl2: str,
             .mc-time {{
                 font-size: 11.5px;
                 font-variant-numeric: tabular-nums;
-                color: #dce7fa;
-                min-width: 96px;
+                color: #e4edfc;
+                min-width: 124px;
                 text-align: right;
+                font-weight: 600;
             }}
             .mc-sync-pill {{
-                background: rgba(46, 184, 92, 0.18);
+                background: rgba(46, 184, 92, 0.2);
                 border: 1px solid #39b566;
-                color: #8ef0b0;
+                color: #96f2b5;
                 font-size: 10px;
                 font-weight: 700;
-                padding: 2px 7px;
+                padding: 3px 8px;
                 border-radius: 999px;
                 white-space: nowrap;
             }}
         </style>
         </head>
         <body>
-        <div class="mc-shell">
+        <div class="mc-outer" id="mcOuter">
             <div class="mc-grid">
-                <div>
-                    <div class="mc-cam-lbl"><span>{lbl1}</span><span class="mc-sync-pill">SYNCED POV 1</span></div>
-                    <div class="mc-vid-wrap" id="wrap1"><video id="v1" src="{uri1}" playsinline preload="auto"></video></div>
+                <div class="mc-card">
+                    <div class="mc-card-top">
+                        <span class="mc-cam-title" id="hdr1">CAM-01 · 00:00.000</span>
+                        <span class="mc-offset-pill">Start offset {offset1:+.3f} s</span>
+                    </div>
+                    <div class="mc-filename" title="{fn1}">{fn1}</div>
+                    <div class="mc-vid-wrap" id="wrap1">
+                        <video id="v1" src="{uri1}" playsinline preload="auto"></video>
+                        <div class="mc-outside-mask" id="mask1">No recording at this session time<br/>(Starts at {offset1:+.3f} s)</div>
+                    </div>
+                    <div class="mc-foot-meta"><span>{meta1}</span><span id="cov1">In view</span></div>
+                    <div class="mc-status-strip"><span>{lbl1}</span><span>POV 1</span></div>
                 </div>
-                <div>
-                    <div class="mc-cam-lbl"><span>{lbl2}</span><span class="mc-sync-pill">SYNCED POV 2</span></div>
-                    <div class="mc-vid-wrap" id="wrap2"><video id="v2" src="{uri2}" playsinline preload="auto"></video></div>
+
+                <div class="mc-card">
+                    <div class="mc-card-top">
+                        <span class="mc-cam-title" id="hdr2">CAM-02 · 00:00.000</span>
+                        <span class="mc-offset-pill">Start offset {offset2:+.3f} s</span>
+                    </div>
+                    <div class="mc-filename" title="{fn2}">{fn2}</div>
+                    <div class="mc-vid-wrap" id="wrap2">
+                        <video id="v2" src="{uri2}" playsinline preload="auto"></video>
+                        <div class="mc-outside-mask" id="mask2">No recording at this session time<br/>(Starts at {offset2:+.3f} s)</div>
+                    </div>
+                    <div class="mc-foot-meta"><span>{meta2}</span><span id="cov2">Waiting</span></div>
+                    <div class="mc-status-strip"><span>{lbl2}</span><span>POV 2</span></div>
                 </div>
             </div>
+
             <div class="mc-ctrl-bar">
-                <button class="mc-btn" id="btnPlay">▶ Play Both</button>
-                <button class="mc-btn mc-btn-sec" id="btnRestart">↺ 0.0s</button>
-                <input type="range" class="mc-scrub" id="scrubber" min="0" max="10" step="0.02" value="0" />
-                <span class="mc-time" id="timeTxt">0.00s / 0.00s</span>
+                <button class="mc-btn" id="btnPlay">▶ Play all</button>
+                <button class="mc-btn mc-btn-sec" id="btnRestart">↺ 0.000s</button>
+                <input type="range" class="mc-scrub" id="scrubber" min="0" max="11" step="0.01" value="0" />
+                <span class="mc-time" id="timeTxt">Session 00:00.000</span>
                 <button class="mc-btn mc-btn-sec" id="btnSpeed" title="Toggle playback speed">1.0×</button>
-                <span class="mc-sync-pill" title="{sync_tag}">● SYNC LOCK</span>
+                <span class="mc-sync-pill" title="{sync_tag}">● ALIGNED</span>
             </div>
         </div>
         <script>
         (function() {{
+            const off1 = {float(offset1):.4f};
+            const off2 = {float(offset2):.4f};
             const v1 = document.getElementById("v1");
             const v2 = document.getElementById("v2");
+            const mask1 = document.getElementById("mask1");
+            const mask2 = document.getElementById("mask2");
+            const hdr1 = document.getElementById("hdr1");
+            const hdr2 = document.getElementById("hdr2");
+            const cov1 = document.getElementById("cov1");
+            const cov2 = document.getElementById("cov2");
             const btnPlay = document.getElementById("btnPlay");
             const btnRestart = document.getElementById("btnRestart");
             const btnSpeed = document.getElementById("btnSpeed");
             const scrubber = document.getElementById("scrubber");
             const timeTxt = document.getElementById("timeTxt");
-            let maxDur = 10.0;
+            const outer = document.getElementById("mcOuter");
+
+            let minSession = Math.min(off1, off2, 0.0);
+            let maxSession = 10.0;
+            let sessionSec = minSession;
+            let isPlaying = false;
             let isScrubbing = false;
             let speed = 1.0;
+            let lastWallMs = performance.now();
+
+            function fitIframeHeight() {{
+                try {{
+                    if (window.frameElement && outer) {{
+                        const h = Math.ceil(outer.getBoundingClientRect().height) + 6;
+                        if (h > 200) {{
+                            window.frameElement.style.height = h + "px";
+                            window.frameElement.height = h;
+                        }}
+                    }}
+                }} catch (e) {{}}
+            }}
+
+            if (typeof ResizeObserver !== "undefined") {{
+                new ResizeObserver(fitIframeHeight).observe(outer);
+            }}
+            window.addEventListener("resize", fitIframeHeight);
+            setTimeout(fitIframeHeight, 60);
+            setTimeout(fitIframeHeight, 300);
+
+            function fmtClock(sec) {{
+                const neg = sec < 0 ? "-" : "";
+                const a = Math.abs(sec);
+                const m = Math.floor(a / 60);
+                const s = a - m * 60;
+                const sStr = s < 10 ? "0" + s.toFixed(3) : s.toFixed(3);
+                return neg + String(m).padStart(2, "0") + ":" + sStr;
+            }}
 
             function updateMeta() {{
-                const d1 = isFinite(v1.duration) && v1.duration > 0 ? v1.duration : 0;
-                const d2 = isFinite(v2.duration) && v2.duration > 0 ? v2.duration : 0;
-                maxDur = Math.max(d1, d2, 1.0);
-                scrubber.max = maxDur.toFixed(2);
-                renderTime(0);
+                const d1 = (isFinite(v1.duration) && v1.duration > 0) ? v1.duration : 9.0;
+                const d2 = (isFinite(v2.duration) && v2.duration > 0) ? v2.duration : 9.0;
+                minSession = Math.min(off1, off2, 0.0);
+                maxSession = Math.max(off1 + d1, off2 + d2, 1.0);
+                scrubber.min = minSession.toFixed(3);
+                scrubber.max = maxSession.toFixed(3);
+                applySessionTime(sessionSec, true);
+                fitIframeHeight();
             }}
             v1.addEventListener("loadedmetadata", updateMeta);
             v2.addEventListener("loadedmetadata", updateMeta);
 
-            function renderTime(t) {{
-                timeTxt.textContent = t.toFixed(2) + "s / " + maxDur.toFixed(2) + "s";
-                if (!isScrubbing) scrubber.value = Math.min(t, maxDur);
+            function syncSingleCam(vid, mask, hdr, cov, camName, offset, tSession, forceSeek) {{
+                const dur = (isFinite(vid.duration) && vid.duration > 0) ? vid.duration : 0;
+                const local = tSession - offset;
+                const inside = dur > 0 ? (local >= -0.005 && local < dur - 0.02) : (local >= 0);
+                if (inside) {{
+                    const clamped = Math.max(0, Math.min(local, Math.max(0, dur - 0.02)));
+                    mask.style.display = "none";
+                    hdr.textContent = camName + " · " + fmtClock(clamped);
+                    cov.textContent = "In view";
+                    if (isPlaying && !isScrubbing) {{
+                        if (Math.abs((vid.currentTime || 0) - clamped) > 0.14 || forceSeek) {{
+                            try {{ vid.currentTime = clamped; }} catch (e) {{}}
+                        }}
+                        if (vid.paused) vid.play().catch(() => {{}});
+                    }} else {{
+                        if (!vid.paused) vid.pause();
+                        if (Math.abs((vid.currentTime || 0) - clamped) > 0.02 || forceSeek) {{
+                            try {{ vid.currentTime = clamped; }} catch (e) {{}}
+                        }}
+                    }}
+                }} else {{
+                    if (!vid.paused) vid.pause();
+                    mask.style.display = "flex";
+                    mask.innerHTML = local < 0
+                        ? ("No recording at this session time<br/><span style='font-size:11px;color:#6f86b2;margin-top:3px;'>Starts at session " + fmtClock(offset) + "</span>")
+                        : ("No recording at this session time<br/><span style='font-size:11px;color:#6f86b2;margin-top:3px;'>Recording ended at session " + fmtClock(offset + dur) + "</span>");
+                    hdr.textContent = camName + " · Outside recording";
+                    cov.textContent = "Outside recording";
+                }}
             }}
 
-            function syncSlaveTo(t) {{
-                if (isFinite(v1.duration)) v1.currentTime = Math.min(t, Math.max(0, v1.duration - 0.01));
-                if (isFinite(v2.duration)) v2.currentTime = Math.min(t, Math.max(0, v2.duration - 0.01));
-                renderTime(t);
+            function applySessionTime(t, forceSeek) {{
+                sessionSec = Math.max(minSession, Math.min(t, maxSession));
+                timeTxt.textContent = "Session " + fmtClock(sessionSec);
+                if (!isScrubbing) scrubber.value = sessionSec.toFixed(3);
+                syncSingleCam(v1, mask1, hdr1, cov1, "CAM-01", off1, sessionSec, forceSeek);
+                syncSingleCam(v2, mask2, hdr2, cov2, "CAM-02", off2, sessionSec, forceSeek);
+            }}
+
+            function stopPlayback() {{
+                isPlaying = false;
+                v1.pause();
+                v2.pause();
+                btnPlay.textContent = "▶ Play all";
             }}
 
             function togglePlay() {{
-                if (v1.paused && v2.paused) {{
-                    const cur = Math.max(v1.currentTime || 0, v2.currentTime || 0);
-                    if (cur >= maxDur - 0.08) syncSlaveTo(0);
-                    if (!isFinite(v1.duration) || v1.currentTime < v1.duration - 0.05) v1.play();
-                    if (!isFinite(v2.duration) || v2.currentTime < v2.duration - 0.05) v2.play();
-                    btnPlay.textContent = "⏸ Pause Both";
+                if (!isPlaying) {{
+                    if (sessionSec >= maxSession - 0.05) {{
+                        sessionSec = minSession;
+                    }}
+                    isPlaying = true;
+                    lastWallMs = performance.now();
+                    btnPlay.textContent = "⏸ Pause all";
+                    applySessionTime(sessionSec, true);
                 }} else {{
-                    v1.pause();
-                    v2.pause();
-                    btnPlay.textContent = "▶ Play Both";
+                    stopPlayback();
                 }}
             }}
 
@@ -1103,10 +1366,8 @@ def render_synced_dual_camera_player(rel1: str, rel2: str, lbl1: str, lbl2: str,
             document.getElementById("wrap2").addEventListener("click", togglePlay);
 
             btnRestart.addEventListener("click", () => {{
-                v1.pause();
-                v2.pause();
-                syncSlaveTo(0);
-                btnPlay.textContent = "▶ Play Both";
+                stopPlayback();
+                applySessionTime(minSession, true);
             }});
 
             btnSpeed.addEventListener("click", () => {{
@@ -1118,38 +1379,38 @@ def render_synced_dual_camera_player(rel1: str, rel2: str, lbl1: str, lbl2: str,
 
             scrubber.addEventListener("input", () => {{
                 isScrubbing = true;
-                const t = parseFloat(scrubber.value);
-                syncSlaveTo(t);
+                if (isPlaying) stopPlayback();
+                applySessionTime(parseFloat(scrubber.value), true);
             }});
             scrubber.addEventListener("change", () => {{
                 isScrubbing = false;
+                applySessionTime(parseFloat(scrubber.value), true);
             }});
 
-            setInterval(() => {{
-                if (v1.paused && v2.paused) return;
-                const master = (!v1.paused && (!isFinite(v1.duration) || v1.currentTime < v1.duration - 0.05)) ? v1 : v2;
-                const slave = master === v1 ? v2 : v1;
-                const t = master.currentTime || 0;
-                if (isFinite(slave.duration) && t < slave.duration - 0.08) {{
-                    if (Math.abs((slave.currentTime || 0) - t) > 0.08) {{
-                        slave.currentTime = t;
+            function tick(nowMs) {{
+                if (isPlaying && !isScrubbing) {{
+                    const dt = Math.max(0, (nowMs - lastWallMs) / 1000.0) * speed;
+                    lastWallMs = nowMs;
+                    const nextT = sessionSec + dt;
+                    if (nextT >= maxSession - 0.01) {{
+                        applySessionTime(maxSession, true);
+                        stopPlayback();
+                    }} else {{
+                        applySessionTime(nextT, false);
                     }}
-                    if (slave.paused) slave.play().catch(() => {{}});
+                }} else {{
+                    lastWallMs = nowMs;
                 }}
-                renderTime(t);
-                if ((v1.ended || v1.currentTime >= (v1.duration || 0) - 0.04) &&
-                    (v2.ended || v2.currentTime >= (v2.duration || 0) - 0.04)) {{
-                    v1.pause();
-                    v2.pause();
-                    btnPlay.textContent = "▶ Play Both";
-                }}
-            }}, 80);
+                requestAnimationFrame(tick);
+            }}
+            requestAnimationFrame(tick);
+            applySessionTime(minSession, true);
         }})();
         </script>
         </body>
         </html>
         """,
-        height=342,
+        height=435,
     )
 
 
@@ -1859,22 +2120,29 @@ def render_multicam_page(mc_scenes: list[dict]) -> None:
 
     if scene is not None:
         c1, c2 = scene["cam1"], scene["cam2"]
+        off1 = float(c1.get("offset_seconds", 0.0) or 0.0)
+        off2 = float(c2.get("offset_seconds", 0.0) or 0.0)
+        dur1 = float(c1.get("orig_meta", {}).get("duration_seconds", 9.0) or 9.0)
+        dur2 = float(c2.get("orig_meta", {}).get("duration_seconds", 9.0) or 9.0)
+        win_sec = float(scene.get("matching_window_seconds", 1.5) or 1.5)
         t1_rel = c1["enhanced_telemetry_rel"] if is_mc_enh else c1["telemetry_rel"]
         t2_rel = c2["enhanced_telemetry_rel"] if is_mc_enh else c2["telemetry_rel"]
         if mc_ready:
-            t1 = load_telemetry(t1_rel)
-            t2 = load_telemetry(t2_rel)
+            t1_p = WEB_DATA_DIR / t1_rel
+            t2_p = WEB_DATA_DIR / t2_rel
+            t1 = load_telemetry(t1_rel, _mtime=(t1_p.stat().st_mtime if t1_p.exists() else 0.0))
+            t2 = load_telemetry(t2_rel, _mtime=(t2_p.stat().st_mtime if t2_p.exists() else 0.0))
             recs1 = filter_records(t1, mc_thresh, mc_intel)
             recs2 = filter_records(t2, mc_thresh, mc_intel)
-            combined = sorted(
-                [{**r, "camera": "CAM-01"} for r in recs1] + [{**r, "camera": "CAM-02"} for r in recs2],
-                key=lambda x: (x["timestamp_seconds"], x["camera"]),
-            )
+            combined, mc_metrics = compute_multicam_corroboration(recs1, recs2, off1, dur1, off2, dur2, window_sec=win_sec)
         else:
             recs1, recs2, combined = [], [], []
+            mc_metrics = {"Corroborated": 0, "Not Corroborated": 0, "Uncertain": 0, "Not Applicable": 0, "eligible": 0, "mccr_percent": None}
     else:
         c1, c2 = None, None
+        off1, off2 = 0.0, 0.0
         recs1, recs2, combined = [], [], []
+        mc_metrics = {"Corroborated": 0, "Not Corroborated": 0, "Uncertain": 0, "Not Applicable": 0, "eligible": 0, "mccr_percent": None}
 
     with st.container(key="fk_body_wrap"):
         col_side, col_work, col_sum = st.columns([0.92, 2.30, 1.02], gap="small")
@@ -1886,12 +2154,14 @@ def render_multicam_page(mc_scenes: list[dict]) -> None:
                 if scene is not None:
                     for cam_lbl, info in [("CAM-01", c1), ("CAM-02", c2)]:
                         om = info["orig_meta"]
+                        cam_off = float(info.get("offset_seconds", 0.0) or 0.0)
+                        off_str = f" · offset {cam_off:+.3f} s" if abs(cam_off) > 1e-4 else " · offset 0.000 s"
                         fn_disp = (info.get("enhanced_filename") or info["source_filename"]) if is_mc_enh else info["source_filename"]
                         st.markdown(
                             f"""
                             <div class='fk-evidence-card'>
                                 <div class='fk-evidence-title'>{cam_lbl} · {fn_disp}</div>
-                                <div class='fk-muted'>{om['width']}×{om['height']} · {om['fps']} fps · {info['web_meta']['duration_seconds']}s</div>
+                                <div class='fk-muted'>{om['width']}×{om['height']} · {om['fps']} fps{off_str}</div>
                             </div>
                             """,
                             unsafe_allow_html=True,
@@ -2061,38 +2331,57 @@ def render_multicam_page(mc_scenes: list[dict]) -> None:
                     )
                 else:
                     show_det = mc_ready and (ss["mc_view_mode"] == "Detected")
-                    lbl1 = f"CAM-01 · {len(recs1)} ALERTS" if mc_ready else "CAM-01 · ORIGINAL STREAM"
-                    lbl2 = f"CAM-02 · {len(recs2)} ALERTS" if mc_ready else "CAM-02 · ORIGINAL STREAM"
+                    lbl1 = f"Analyzed · {len(recs1)} observations" if mc_ready else ("Enhanced · Ready for analysis" if is_mc_enh else "Imported · Ready for analysis")
+                    lbl2 = f"Analyzed · {len(recs2)} observations" if mc_ready else ("Enhanced · Ready for analysis" if is_mc_enh else "Imported · Ready for analysis")
+                    fn1 = (c1.get("enhanced_filename") or c1["source_filename"]) if is_mc_enh else c1["source_filename"]
+                    fn2 = (c2.get("enhanced_filename") or c2["source_filename"]) if is_mc_enh else c2["source_filename"]
+                    om1, om2 = c1["orig_meta"], c2["orig_meta"]
+                    meta1 = f"{om1['width']} × {om1['height']} · {om1['fps']:.2f} FPS · {om1['duration_seconds']:.2f}s"
+                    meta2 = f"{om2['width']} × {om2['height']} · {om2['fps']:.2f} FPS · {om2['duration_seconds']:.2f}s"
                     if is_mc_enh:
                         rel1 = c1["enhanced_annotated_video_rel"] if show_det else c1["enhanced_original_video_rel"]
                         rel2 = c2["enhanced_annotated_video_rel"] if show_det else c2["enhanced_original_video_rel"]
                     else:
                         rel1 = c1["annotated_video_rel"] if show_det else c1["original_video_rel"]
                         rel2 = c2["annotated_video_rel"] if show_det else c2["original_video_rel"]
-                    render_synced_dual_camera_player(rel1, rel2, lbl1, lbl2, sync_clock=scene.get("sync_clock", ""))
+                    render_synced_dual_camera_player(
+                        rel1,
+                        rel2,
+                        lbl1,
+                        lbl2,
+                        fn1=fn1,
+                        fn2=fn2,
+                        meta1=meta1,
+                        meta2=meta2,
+                        offset1=off1,
+                        offset2=off2,
+                        sync_clock=scene.get("sync_clock", ""),
+                    )
 
                 with st.container(key="fk_obs_box"):
-                    st.markdown("<div class='fk-sec fk-sec-first'>UNIFIED CHRONOLOGICAL MULTI-CAMERA TIMELINE</div>", unsafe_allow_html=True)
+                    tl_hdr = f"DETECTED OBJECTS · {len(combined)} OBSERVATIONS" if mc_ready else "DETECTED OBJECTS · TIMELINE"
+                    st.markdown(f"<div class='fk-sec fk-sec-first'>{tl_hdr}</div>", unsafe_allow_html=True)
                     if mc_ready and combined:
                         df_mc = pd.DataFrame([
                             {
-                                "Time": r["timestamp_formatted"],
+                                "Session time": r["session_formatted"],
                                 "Camera": r["camera"],
+                                "Frame": r["frame_number"],
                                 "Object": r["object_label"].title(),
                                 "Confidence": f"{r['confidence_score']*100:.1f}%",
-                                "Frame": r["frame_number"],
+                                "Cross-view": r["corroboration_status"],
                             }
                             for r in combined
                         ])
                         st.dataframe(df_mc, width="stretch", hide_index=True, height=205)
                     else:
-                        st.dataframe(pd.DataFrame(columns=["Time", "Camera", "Object", "Confidence", "Frame"]), width="stretch", hide_index=True, height=160)
+                        st.dataframe(pd.DataFrame(columns=["Session time", "Camera", "Frame", "Object", "Confidence", "Cross-view"]), width="stretch", hide_index=True, height=160)
 
                 st.markdown(
                     """
                     <div style='display:flex; justify-content:space-between; align-items:center; margin-top:8px;'>
                         <span class='fk-safety-note'>Automated multi-camera detections require human review.</span>
-                        <span class='fk-muted'>CAM-01 + CAM-02 Synchronized Corroboration</span>
+                        <span class='fk-muted'>Session time = video time + start offset</span>
                     </div>
                     """,
                     unsafe_allow_html=True,
@@ -2122,21 +2411,38 @@ def render_multicam_page(mc_scenes: list[dict]) -> None:
                 if scene is None:
                     st.markdown("<div class='fk-muted' style='margin-bottom:14px;'>Import or select a Multi-Camera scene, choose a confidence threshold, then click Analyze video.</div>", unsafe_allow_html=True)
                 elif not mc_ready:
-                    st.markdown(f"<div class='fk-muted' style='margin-bottom:14px;'>Synchronized streams loaded. Adjust the confidence threshold (<b>{ss['mc_conf_pct']}%</b>) and click <b>Analyze video</b> to run cross-camera corroboration.</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div class='fk-muted' style='margin-bottom:14px;'>Aligned recordings loaded (<b>{scene.get('sync_clock', '')}</b>). Click <b>Analyze video</b> or <b>Enhance video</b> to run cross-camera corroboration.</div>", unsafe_allow_html=True)
+                    st.markdown("<div class='fk-sec'>CROSS-CAMERA REVIEW</div>", unsafe_allow_html=True)
+                    st.markdown(
+                        """
+                        <div class='fk-status-card'>
+                            <div class='fk-metric-num' style='font-size:20px;'>—</div>
+                            <div class='fk-muted'>Multi-camera corroboration rate (MCCR)</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
                 else:
-                    corroborated = len(recs1) > 0 and len(recs2) > 0
+                    mccr_disp = f"{mc_metrics['mccr_percent']:.1f}%" if mc_metrics["mccr_percent"] is not None else "N/A"
+                    st.markdown("<div class='fk-sec'>CROSS-CAMERA REVIEW</div>", unsafe_allow_html=True)
                     st.markdown(
                         f"""
                         <div class='fk-status-card'>
-                            <div class='fk-status-title'>{'Dual-Camera Corroborated' if corroborated else 'Clean Non-Weapon / Single-Angle Scene'}</div>
-                            <div class='fk-muted'>CAM-01: {len(recs1)} alerts · CAM-02: {len(recs2)} alerts</div>
+                            <div class='fk-metric-num' style='font-size:20px;'>{mccr_disp}</div>
+                            <div class='fk-muted'>Multi-camera corroboration rate (MCCR)</div>
+                            <div class='fk-muted' style='margin-top:6px;'>
+                                {mc_metrics['Corroborated']} corroborated · {mc_metrics['Not Corroborated']} not corroborated<br/>
+                                {mc_metrics['Not Applicable']} outside overlap · CAM-01: {len(recs1)} · CAM-02: {len(recs2)}
+                            </div>
                         </div>
                         """,
                         unsafe_allow_html=True,
                     )
                     st.markdown("<div class='fk-sec'>FORENSIC EXPORT</div>", unsafe_allow_html=True)
-                    mc_pdf = build_multicam_pdf_bytes(scene, recs1, recs2, mc_thresh, mc_intel)
-                    mc_csv = pd.DataFrame(combined).to_csv(index=False).encode("utf-8") if combined else b"camera,timestamp_formatted,frame_number,object_label,confidence_score\n"
+                    mc_r1_c = [r for r in combined if r["camera"] == "CAM-01"]
+                    mc_r2_c = [r for r in combined if r["camera"] == "CAM-02"]
+                    mc_pdf = build_multicam_pdf_bytes(scene, mc_r1_c, mc_r2_c, mc_thresh, mc_intel)
+                    mc_csv = pd.DataFrame(combined).to_csv(index=False).encode("utf-8") if combined else b"session_formatted,camera,timestamp_formatted,frame_number,object_label,confidence_score,corroboration_status\n"
                     st.download_button("Multi-Camera PDF Report", data=mc_pdf, file_name=f"FORENSIKADA_{scene['scene_key']}_multicam.pdf", mime="application/pdf", type="primary", width="stretch")
                     st.download_button("Combined Timeline (CSV)", data=mc_csv, file_name=f"FORENSIKADA_{scene['scene_key']}_combined.csv", mime="text/csv", width="stretch")
 
@@ -2269,12 +2575,26 @@ def main() -> None:
         with hc_sav:
             if is_mc_mode and mc_ready_hdr:
                 use_mc_e = bool(ss.get("mc_is_enhanced", False)) and bool(active_mc_scene.get("has_enhanced", False))
-                mc_t1 = load_telemetry(active_mc_scene["cam1"]["enhanced_telemetry_rel"] if use_mc_e else active_mc_scene["cam1"]["telemetry_rel"])
-                mc_t2 = load_telemetry(active_mc_scene["cam2"]["enhanced_telemetry_rel"] if use_mc_e else active_mc_scene["cam2"]["telemetry_rel"])
+                t1_r = active_mc_scene["cam1"]["enhanced_telemetry_rel"] if use_mc_e else active_mc_scene["cam1"]["telemetry_rel"]
+                t2_r = active_mc_scene["cam2"]["enhanced_telemetry_rel"] if use_mc_e else active_mc_scene["cam2"]["telemetry_rel"]
+                mc_t1 = load_telemetry(t1_r, _mtime=((WEB_DATA_DIR / t1_r).stat().st_mtime if (WEB_DATA_DIR / t1_r).exists() else 0.0))
+                mc_t2 = load_telemetry(t2_r, _mtime=((WEB_DATA_DIR / t2_r).stat().st_mtime if (WEB_DATA_DIR / t2_r).exists() else 0.0))
                 mc_r1 = filter_records(mc_t1, ss["mc_conf_pct"] / 100.0, ss["cctv_intel"])
                 mc_r2 = filter_records(mc_t2, ss["mc_conf_pct"] / 100.0, ss["cctv_intel"])
+                c1_hdr, c2_hdr = active_mc_scene["cam1"], active_mc_scene["cam2"]
+                comb_hdr, _ = compute_multicam_corroboration(
+                    mc_r1,
+                    mc_r2,
+                    float(c1_hdr.get("offset_seconds", 0.0) or 0.0),
+                    float(c1_hdr.get("orig_meta", {}).get("duration_seconds", 9.0) or 9.0),
+                    float(c2_hdr.get("offset_seconds", 0.0) or 0.0),
+                    float(c2_hdr.get("orig_meta", {}).get("duration_seconds", 9.0) or 9.0),
+                    window_sec=float(active_mc_scene.get("matching_window_seconds", 1.5) or 1.5),
+                )
+                mc_r1_c = [r for r in comb_hdr if r["camera"] == "CAM-01"]
+                mc_r2_c = [r for r in comb_hdr if r["camera"] == "CAM-02"]
                 mc_scene_exp = {**active_mc_scene, "version": "Enhanced" if use_mc_e else "Original"}
-                mc_pdf_b = build_multicam_pdf_bytes(mc_scene_exp, mc_r1, mc_r2, ss["mc_conf_pct"] / 100.0, ss["cctv_intel"])
+                mc_pdf_b = build_multicam_pdf_bytes(mc_scene_exp, mc_r1_c, mc_r2_c, ss["mc_conf_pct"] / 100.0, ss["cctv_intel"])
                 st.download_button(
                     "Save report (PDF)",
                     data=mc_pdf_b,

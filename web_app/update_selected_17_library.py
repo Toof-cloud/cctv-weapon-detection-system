@@ -204,8 +204,9 @@ def package_stream(
     enh_annot: Path | None = None,
     enh_csv: Path | None = None,
     trim_start_sec: float = 0.0,
+    offset_seconds: float = 0.0,
 ) -> dict:
-    print(f"  -> Packaging {vid_id} (has_enhanced={enh_src is not None}, trim={trim_start_sec}s)", flush=True)
+    print(f"  -> Packaging {vid_id} (has_enhanced={enh_src is not None}, trim={trim_start_sec}s, offset={offset_seconds}s)", flush=True)
     orig_raw_web = WEB_VIDEOS_DIR / f"{vid_id}_orig_raw.mp4"
     orig_ann_web = WEB_VIDEOS_DIR / f"{vid_id}_orig_annot.mp4"
     transcode_to_web_h264(orig_src, orig_raw_web, trim_start_sec=trim_start_sec)
@@ -254,6 +255,7 @@ def package_stream(
         "version": "Original",
         "has_enhanced": has_enh,
         "camera_id": camera_id,
+        "offset_seconds": round(float(offset_seconds), 3),
         "source_filename": orig_src.name,
         "enhanced_filename": enh_filename,
         "sha256": fhash,
@@ -406,7 +408,8 @@ def main() -> None:
         ),
     ]
 
-    # ==================== 4 MULTI-CAMERA ENTRIES (ONE PER SCENE, WALL-CLOCK SYNCED) ====================
+    # ==================== 4 MULTI-CAMERA ENTRIES (UNTRIMMED + EXACT ANALYST START OFFSETS) ====================
+    # Session time = video_time + offset_seconds (matches desktop mockup_ui/multi_camera_panel.py 1:1!)
     nov20_dir = s_dir / "03_staged_and_multicamera" / "nov20_staged_test_videos" / "Nov 20 - Staged Test Videos"
     st_enh_dir = s_dir / "05_historical_consultations" / "DEFENSE" / "STAGED DATASET"
 
@@ -421,7 +424,8 @@ def main() -> None:
         enh_src=st_enh_dir / "CAM1_SCENE007_enhanced.mp4",
         enh_annot=d_mc / "STAGED_SCENE007_CAM1_Enhanced_M12_annotated.mp4",
         enh_csv=d_mc / "STAGED_SCENE007_CAM1_Enhanced_M12_detections.csv",
-        trim_start_sec=1.0,  # Aligns CAM-01 11:59:03 -> 11:59:04 to match CAM-02 11:59:04!
+        trim_start_sec=0.0,
+        offset_seconds=0.000,
     )
     mc_pair1_c2 = package_stream(
         vid_id="MC01_CAM02",
@@ -435,6 +439,7 @@ def main() -> None:
         enh_annot=d_mc / "STAGED_SCENE007_CAM2_Enhanced_M12_annotated.mp4",
         enh_csv=d_mc / "STAGED_SCENE007_CAM2_Enhanced_M12_detections.csv",
         trim_start_sec=0.0,
+        offset_seconds=1.780,  # Analyst-arranged exact start offset (+1.780 s)
     )
 
     mc_pair2_c1 = package_stream(
@@ -448,7 +453,8 @@ def main() -> None:
         enh_src=e_dir / "MULTI_CAMERA" / "MC03_CAM01_Enhanced.mp4",
         enh_annot=d_mc / "MC03_SCENE012_Knife_CAM01_Enhanced_M12_annotated.mp4",
         enh_csv=d_mc / "MC03_SCENE012_Knife_CAM01_Enhanced_M12_detections.csv",
-        trim_start_sec=0.0,  # Already starts at exact wall-clock 12:05:22!
+        trim_start_sec=0.0,
+        offset_seconds=0.000,
     )
     mc_pair2_c2 = package_stream(
         vid_id="MC02_CAM02",
@@ -461,7 +467,8 @@ def main() -> None:
         enh_src=e_dir / "MULTI_CAMERA" / "MC03_CAM02_Enhanced.mp4",
         enh_annot=d_mc / "MC03_SCENE012_Knife_CAM02_Enhanced_M12_annotated.mp4",
         enh_csv=d_mc / "MC03_SCENE012_Knife_CAM02_Enhanced_M12_detections.csv",
-        trim_start_sec=0.0,  # Already starts at exact wall-clock 12:05:22!
+        trim_start_sec=0.0,
+        offset_seconds=0.760,  # Analyst-arranged exact start offset (+0.760 s)
     )
 
     mc_pair3_c1 = package_stream(
@@ -475,7 +482,8 @@ def main() -> None:
         enh_src=e_dir / "MULTI_CAMERA" / "MC01_CAM01_Enhanced.mp4",
         enh_annot=d_mc / "MC01_SCENE004_Handgun_CAM01_Enhanced_M12_annotated.mp4",
         enh_csv=d_mc / "MC01_SCENE004_Handgun_CAM01_Enhanced_M12_detections.csv",
-        trim_start_sec=0.0,  # Already starts at exact wall-clock 11:48:00!
+        trim_start_sec=0.0,
+        offset_seconds=0.000,
     )
     mc_pair3_c2 = package_stream(
         vid_id="MC03_CAM02",
@@ -488,7 +496,8 @@ def main() -> None:
         enh_src=e_dir / "MULTI_CAMERA" / "MC01_CAM02_Enhanced.mp4",
         enh_annot=d_mc / "MC01_SCENE004_Handgun_CAM02_Enhanced_M12_annotated.mp4",
         enh_csv=d_mc / "MC01_SCENE004_Handgun_CAM02_Enhanced_M12_detections.csv",
-        trim_start_sec=0.0,  # Already starts at exact wall-clock 11:48:00!
+        trim_start_sec=0.0,
+        offset_seconds=1.100,  # Analyst-arranged exact start offset (+1.100 s)
     )
 
     mc_pair4_c1 = package_stream(
@@ -500,6 +509,7 @@ def main() -> None:
         orig_annot=d_nw_st / "NOV20_Pair05_Smartphone_CAM01_M12_annotated.mp4",
         orig_csv=d_nw_st / "NOV20_Pair05_Smartphone_CAM01_M12_detections.csv",
         trim_start_sec=0.0,
+        offset_seconds=0.000,
     )
     mc_pair4_c2 = package_stream(
         vid_id="MC04_CAM02",
@@ -509,47 +519,52 @@ def main() -> None:
         orig_src=nov20_dir / "CAM 02" / "1795150158464_0.mp4",
         orig_annot=d_nw_st / "NOV20_Pair05_Smartphone_CAM02_M12_annotated.mp4",
         orig_csv=d_nw_st / "NOV20_Pair05_Smartphone_CAM02_M12_detections.csv",
-        trim_start_sec=1.0,  # Aligns CAM-02 12:49:15 -> 12:49:16 to match CAM-01 12:49:16!
+        trim_start_sec=0.0,
+        offset_seconds=0.000,
     )
 
     multicam_scenes = [
         {
             "scene_key": "MC01",
-            "scene_id": "MC01",
+            "scene_id": "SCENE-007",
             "title": "Multi-Camera Weapon 1 — Dual-Knife Transition Scene 007 (CAM 01 & CAM 02)",
             "category": "Multi-Camera Knife",
             "has_enhanced": True,
-            "sync_clock": "2026-09-12 11:59:04 AM (Wall-Clock Synced)",
+            "matching_window_seconds": 1.5,
+            "sync_clock": "CAM-01 offset 0.000 s · CAM-02 offset +1.780 s",
             "cam1": mc_pair1_c1,
             "cam2": mc_pair1_c2,
         },
         {
             "scene_key": "MC02",
-            "scene_id": "MC02",
+            "scene_id": "SCENE-012",
             "title": "Multi-Camera Weapon 2 — Handgun Suspect Transition Scene 012 (CAM 01 & CAM 02)",
             "category": "Multi-Camera Handgun",
             "has_enhanced": True,
-            "sync_clock": "2026-09-12 12:05:22 PM (Wall-Clock Synced)",
+            "matching_window_seconds": 1.5,
+            "sync_clock": "CAM-01 offset 0.000 s · CAM-02 offset +0.760 s",
             "cam1": mc_pair2_c1,
             "cam2": mc_pair2_c2,
         },
         {
             "scene_key": "MC03",
-            "scene_id": "MC03",
+            "scene_id": "SCENE-001",
             "title": "Multi-Camera Weapon 3 — Kitchen Knife Transition Scene 001 (CAM 01 & CAM 02)",
             "category": "Multi-Camera Knife",
             "has_enhanced": True,
-            "sync_clock": "2026-09-12 11:48:00 AM (Wall-Clock Synced)",
+            "matching_window_seconds": 1.5,
+            "sync_clock": "CAM-01 offset 0.000 s · CAM-02 offset +1.100 s",
             "cam1": mc_pair3_c1,
             "cam2": mc_pair3_c2,
         },
         {
             "scene_key": "MC04",
-            "scene_id": "MC04",
+            "scene_id": "PAIR-05",
             "title": "Multi-Camera Non-Weapon — Staged Smartphone Distractor (CAM 01 & CAM 02)",
             "category": "Multi-Camera No-Weapon",
             "has_enhanced": False,
-            "sync_clock": "2026-11-20 12:49:16 PM (Wall-Clock Synced)",
+            "matching_window_seconds": 1.5,
+            "sync_clock": "CAM-01 offset 0.000 s · CAM-02 offset 0.000 s",
             "cam1": mc_pair4_c1,
             "cam2": mc_pair4_c2,
         },
