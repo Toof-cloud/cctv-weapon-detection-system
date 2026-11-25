@@ -416,7 +416,7 @@ def main() -> None:
     mc_pair1_c1 = package_stream(
         vid_id="MC01_CAM01",
         title="Multi-Camera Weapon 1 (Scene 007) — CAM-01",
-        category="Multi-Camera Knife",
+        category="Multi-Camera Handgun & Knife",
         camera_id="CAM-01",
         orig_src=sc007_c1_orig_src,
         orig_annot=sc007_c1_orig_mp4,
@@ -430,7 +430,7 @@ def main() -> None:
     mc_pair1_c2 = package_stream(
         vid_id="MC01_CAM02",
         title="Multi-Camera Weapon 1 (Scene 007) — CAM-02",
-        category="Multi-Camera Knife",
+        category="Multi-Camera Handgun & Knife",
         camera_id="CAM-02",
         orig_src=sc007_c2_orig_src,
         orig_annot=sc007_c2_orig_mp4,
@@ -527,8 +527,8 @@ def main() -> None:
         {
             "scene_key": "MC01",
             "scene_id": "SCENE-007",
-            "title": "Multi-Camera Weapon 1 — Dual-Knife Transition Scene 007 (CAM 01 & CAM 02)",
-            "category": "Multi-Camera Knife",
+            "title": "Multi-Camera Weapon 1 — Handgun & Knife Transition Scene 007 (CAM 01 & CAM 02)",
+            "category": "Multi-Camera Handgun & Knife",
             "has_enhanced": True,
             "matching_window_seconds": 1.5,
             "sync_clock": "CAM-01 offset 0.000 s · CAM-02 offset +1.780 s",

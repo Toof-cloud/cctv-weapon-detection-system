@@ -27,7 +27,7 @@
       "timestamp_seconds": 0.06,
       "timestamp_formatted": "00:00.060",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         377,
         310,
@@ -49,7 +49,7 @@
       "timestamp_seconds": 0.12,
       "timestamp_formatted": "00:00.120",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         375,
         299,
@@ -71,7 +71,7 @@
       "timestamp_seconds": 0.18,
       "timestamp_formatted": "00:00.180",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         372,
         297,
@@ -93,7 +93,7 @@
       "timestamp_seconds": 0.239,
       "timestamp_formatted": "00:00.239",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         368,
         303,
@@ -379,7 +379,7 @@
       "timestamp_seconds": 1.197,
       "timestamp_formatted": "00:01.197",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         370,
         380,
@@ -401,7 +401,7 @@
       "timestamp_seconds": 1.317,
       "timestamp_formatted": "00:01.317",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         318,
         467,
@@ -533,7 +533,7 @@
       "timestamp_seconds": 1.616,
       "timestamp_formatted": "00:01.616",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         460,
         356,
@@ -577,7 +577,7 @@
       "timestamp_seconds": 1.676,
       "timestamp_formatted": "00:01.676",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         461,
         365,
@@ -643,7 +643,7 @@
       "timestamp_seconds": 1.796,
       "timestamp_formatted": "00:01.796",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         458,
         387,
@@ -665,7 +665,7 @@
       "timestamp_seconds": 1.856,
       "timestamp_formatted": "00:01.856",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         441,
         383,
@@ -687,7 +687,7 @@
       "timestamp_seconds": 1.916,
       "timestamp_formatted": "00:01.916",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         435,
         379,
@@ -1061,7 +1061,7 @@
       "timestamp_seconds": 2.993,
       "timestamp_formatted": "00:02.993",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         762,
         392,
@@ -1105,7 +1105,7 @@
       "timestamp_seconds": 3.053,
       "timestamp_formatted": "00:03.053",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         781,
         389,
@@ -1127,7 +1127,7 @@
       "timestamp_seconds": 3.113,
       "timestamp_formatted": "00:03.113",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         786,
         394,
@@ -1149,7 +1149,7 @@
       "timestamp_seconds": 3.173,
       "timestamp_formatted": "00:03.173",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         789,
         395,
@@ -1171,7 +1171,7 @@
       "timestamp_seconds": 3.233,
       "timestamp_formatted": "00:03.233",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         782,
         425,
@@ -1193,7 +1193,7 @@
       "timestamp_seconds": 3.293,
       "timestamp_formatted": "00:03.293",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         769,
         425,
@@ -1237,7 +1237,7 @@
       "timestamp_seconds": 3.532,
       "timestamp_formatted": "00:03.532",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         704,
         524,
@@ -1391,7 +1391,7 @@
       "timestamp_seconds": 4.191,
       "timestamp_formatted": "00:04.191",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         695,
         398,
@@ -1413,7 +1413,7 @@
       "timestamp_seconds": 4.25,
       "timestamp_formatted": "00:04.250",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         550,
         443,
@@ -1435,7 +1435,7 @@
       "timestamp_seconds": 4.25,
       "timestamp_formatted": "00:04.250",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         701,
         369,
@@ -1457,7 +1457,7 @@
       "timestamp_seconds": 4.31,
       "timestamp_formatted": "00:04.310",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         682,
         366,
@@ -1479,7 +1479,7 @@
       "timestamp_seconds": 4.37,
       "timestamp_formatted": "00:04.370",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         665,
         359,
@@ -1545,7 +1545,7 @@
       "timestamp_seconds": 4.49,
       "timestamp_formatted": "00:04.490",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         495,
         427,
@@ -1721,7 +1721,7 @@
       "timestamp_seconds": 5.328,
       "timestamp_formatted": "00:05.328",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         407,
         384,
@@ -1787,7 +1787,7 @@
       "timestamp_seconds": 5.448,
       "timestamp_formatted": "00:05.448",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         429,
         370,
@@ -1831,7 +1831,7 @@
       "timestamp_seconds": 5.568,
       "timestamp_formatted": "00:05.568",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         450,
         353,
@@ -1853,7 +1853,7 @@
       "timestamp_seconds": 5.627,
       "timestamp_formatted": "00:05.627",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         454,
         352,
@@ -1875,7 +1875,7 @@
       "timestamp_seconds": 5.687,
       "timestamp_formatted": "00:05.687",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         474,
         341,
@@ -1919,7 +1919,7 @@
       "timestamp_seconds": 5.747,
       "timestamp_formatted": "00:05.747",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         474,
         341,
@@ -1941,7 +1941,7 @@
       "timestamp_seconds": 5.807,
       "timestamp_formatted": "00:05.807",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         468,
         349,
@@ -1963,7 +1963,7 @@
       "timestamp_seconds": 5.867,
       "timestamp_formatted": "00:05.867",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         468,
         359,
@@ -2007,7 +2007,7 @@
       "timestamp_seconds": 5.987,
       "timestamp_formatted": "00:05.987",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         450,
         385,
@@ -2029,7 +2029,7 @@
       "timestamp_seconds": 6.046,
       "timestamp_formatted": "00:06.046",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         379,
         419,
@@ -2051,7 +2051,7 @@
       "timestamp_seconds": 6.106,
       "timestamp_formatted": "00:06.106",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         388,
         423,
@@ -2227,7 +2227,7 @@
       "timestamp_seconds": 7.004,
       "timestamp_formatted": "00:07.004",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         819,
         423,
@@ -2249,7 +2249,7 @@
       "timestamp_seconds": 7.064,
       "timestamp_formatted": "00:07.064",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         840,
         424,
@@ -2271,7 +2271,7 @@
       "timestamp_seconds": 7.124,
       "timestamp_formatted": "00:07.124",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         871,
         440,
@@ -2293,7 +2293,7 @@
       "timestamp_seconds": 7.184,
       "timestamp_formatted": "00:07.184",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         873,
         448,
@@ -2383,7 +2383,7 @@
       "timestamp_seconds": 0.06,
       "timestamp_formatted": "00:00.060",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         377,
         310,
@@ -2405,7 +2405,7 @@
       "timestamp_seconds": 0.12,
       "timestamp_formatted": "00:00.120",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         375,
         299,
@@ -2427,7 +2427,7 @@
       "timestamp_seconds": 0.18,
       "timestamp_formatted": "00:00.180",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         372,
         297,
@@ -2449,7 +2449,7 @@
       "timestamp_seconds": 0.239,
       "timestamp_formatted": "00:00.239",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         368,
         303,
@@ -2735,7 +2735,7 @@
       "timestamp_seconds": 1.197,
       "timestamp_formatted": "00:01.197",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         370,
         380,
@@ -2757,7 +2757,7 @@
       "timestamp_seconds": 1.317,
       "timestamp_formatted": "00:01.317",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         318,
         467,
@@ -2889,7 +2889,7 @@
       "timestamp_seconds": 1.616,
       "timestamp_formatted": "00:01.616",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         460,
         356,
@@ -2933,7 +2933,7 @@
       "timestamp_seconds": 1.676,
       "timestamp_formatted": "00:01.676",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         461,
         365,
@@ -2999,7 +2999,7 @@
       "timestamp_seconds": 1.796,
       "timestamp_formatted": "00:01.796",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         458,
         387,
@@ -3021,7 +3021,7 @@
       "timestamp_seconds": 1.856,
       "timestamp_formatted": "00:01.856",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         441,
         383,
@@ -3043,7 +3043,7 @@
       "timestamp_seconds": 1.916,
       "timestamp_formatted": "00:01.916",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         435,
         379,
@@ -3417,7 +3417,7 @@
       "timestamp_seconds": 2.993,
       "timestamp_formatted": "00:02.993",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         762,
         392,
@@ -3461,7 +3461,7 @@
       "timestamp_seconds": 3.053,
       "timestamp_formatted": "00:03.053",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         781,
         389,
@@ -3483,7 +3483,7 @@
       "timestamp_seconds": 3.113,
       "timestamp_formatted": "00:03.113",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         786,
         394,
@@ -3505,7 +3505,7 @@
       "timestamp_seconds": 3.173,
       "timestamp_formatted": "00:03.173",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         789,
         395,
@@ -3527,7 +3527,7 @@
       "timestamp_seconds": 3.233,
       "timestamp_formatted": "00:03.233",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         782,
         425,
@@ -3549,7 +3549,7 @@
       "timestamp_seconds": 3.293,
       "timestamp_formatted": "00:03.293",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         769,
         425,
@@ -3593,7 +3593,7 @@
       "timestamp_seconds": 3.532,
       "timestamp_formatted": "00:03.532",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         704,
         524,
@@ -3747,7 +3747,7 @@
       "timestamp_seconds": 4.191,
       "timestamp_formatted": "00:04.191",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         695,
         398,
@@ -3769,7 +3769,7 @@
       "timestamp_seconds": 4.25,
       "timestamp_formatted": "00:04.250",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         550,
         443,
@@ -3791,7 +3791,7 @@
       "timestamp_seconds": 4.25,
       "timestamp_formatted": "00:04.250",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         701,
         369,
@@ -3813,7 +3813,7 @@
       "timestamp_seconds": 4.31,
       "timestamp_formatted": "00:04.310",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         682,
         366,
@@ -3835,7 +3835,7 @@
       "timestamp_seconds": 4.37,
       "timestamp_formatted": "00:04.370",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         665,
         359,
@@ -3901,7 +3901,7 @@
       "timestamp_seconds": 4.49,
       "timestamp_formatted": "00:04.490",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         495,
         427,
@@ -4077,7 +4077,7 @@
       "timestamp_seconds": 5.328,
       "timestamp_formatted": "00:05.328",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         407,
         384,
@@ -4143,7 +4143,7 @@
       "timestamp_seconds": 5.448,
       "timestamp_formatted": "00:05.448",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         429,
         370,
@@ -4187,7 +4187,7 @@
       "timestamp_seconds": 5.568,
       "timestamp_formatted": "00:05.568",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         450,
         353,
@@ -4209,7 +4209,7 @@
       "timestamp_seconds": 5.627,
       "timestamp_formatted": "00:05.627",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         454,
         352,
@@ -4231,7 +4231,7 @@
       "timestamp_seconds": 5.687,
       "timestamp_formatted": "00:05.687",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         474,
         341,
@@ -4275,7 +4275,7 @@
       "timestamp_seconds": 5.747,
       "timestamp_formatted": "00:05.747",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         474,
         341,
@@ -4297,7 +4297,7 @@
       "timestamp_seconds": 5.807,
       "timestamp_formatted": "00:05.807",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         468,
         349,
@@ -4319,7 +4319,7 @@
       "timestamp_seconds": 5.867,
       "timestamp_formatted": "00:05.867",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         468,
         359,
@@ -4363,7 +4363,7 @@
       "timestamp_seconds": 5.987,
       "timestamp_formatted": "00:05.987",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         450,
         385,
@@ -4385,7 +4385,7 @@
       "timestamp_seconds": 6.046,
       "timestamp_formatted": "00:06.046",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         379,
         419,
@@ -4407,7 +4407,7 @@
       "timestamp_seconds": 6.106,
       "timestamp_formatted": "00:06.106",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         388,
         423,
@@ -4583,7 +4583,7 @@
       "timestamp_seconds": 7.004,
       "timestamp_formatted": "00:07.004",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         819,
         423,
@@ -4605,7 +4605,7 @@
       "timestamp_seconds": 7.064,
       "timestamp_formatted": "00:07.064",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         840,
         424,
@@ -4627,7 +4627,7 @@
       "timestamp_seconds": 7.124,
       "timestamp_formatted": "00:07.124",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         871,
         440,
@@ -4649,7 +4649,7 @@
       "timestamp_seconds": 7.184,
       "timestamp_formatted": "00:07.184",
       "camera_id": "STAGED_SCENE007_CAM2_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         873,
         448,

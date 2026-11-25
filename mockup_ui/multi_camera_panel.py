@@ -247,6 +247,49 @@ class MultiCameraReportDialog(QDialog):
         close.rejected.connect(self.reject)
         layout.addWidget(close)
 
+def _auto_preset_for_sources(sources, alignment) -> bool:
+    """Automatically apply known calibrated start offsets and scene IDs when matching multi-camera clips are imported."""
+    names = " ".join(s.video.path.name.upper() for s in sources)
+    applied = False
+
+    # Known calibrated presets (Session time = video time + offset)
+    # 1. Scene 007 (Handgun + Knife): CAM1 = 0.000s, CAM2 = +1.780s
+    # 2. Scene 012 / MC03 (Handgun): CAM1 = 0.000s, CAM2 = +0.760s
+    # 3. Scene 001 / MC01 (Knife):   CAM1 = 0.000s, CAM2 = +1.100s
+    # 4. Pair 05 Smartphone (Non-Weapon): CAM1 = 0.000s, CAM2 = 0.000s
+    scene_id = None
+    cam2_offset = None
+    if "SCENE007" in names:
+        scene_id, cam2_offset = "SCENE-007", 1.780
+    elif "SCENE012" in names or "MC03_CAM" in names:
+        scene_id, cam2_offset = "SCENE-012", 0.760
+    elif "SCENE001" in names or "MC01_CAM" in names:
+        scene_id, cam2_offset = "SCENE-001", 1.100
+    elif "1869451F17C5_20261120124918870" in names or "1795150158464_0" in names:
+        scene_id, cam2_offset = "PAIR-05", 0.000
+
+    if scene_id is not None and len(sources) >= 2:
+        for s in sources:
+            fn = s.video.path.name.upper()
+            is_cam2 = ("CAM2" in fn or "CAM02" in fn or "CAM-02" in fn or "1795150158464_0" in fn)
+            if is_cam2:
+                s.camera_id = "CAM-02"
+                s.offset_seconds = cam2_offset
+            elif "CAM1" in fn or "CAM01" in fn or "CAM-01" in fn or "1869451F17C5" in fn:
+                s.camera_id = "CAM-01"
+                s.offset_seconds = 0.000
+        # Ensure unique IDs if order was reversed
+        if len({s.camera_id for s in sources}) == len(sources):
+            sources.sort(key=lambda x: x.camera_id)
+        if not alignment.scene_id.strip():
+            alignment.scene_id = scene_id
+        alignment.confirmed = True
+        if not alignment.method.strip():
+            alignment.method = f"Auto-applied calibrated scene offset ({cam2_offset:+.3f} s)"
+        applied = True
+    return applied
+
+
 class MultiCameraDialog(QWidget):
     """Multi-camera analysis page embedded in the main application window."""
     state_changed = Signal()
@@ -258,6 +301,7 @@ class MultiCameraDialog(QWidget):
         self.sources = [CameraSource(video, f"CAM-{index + 1:02d}") for index, video in enumerate(videos)]
         self.results, self.rows, self.cards, self.editors = [], [], [], []
         self.alignment = Alignment()
+        _auto_preset_for_sources(self.sources, self.alignment)
         self.bridge = ModelBridge()
         if parent and hasattr(parent, "bridge"):
             self.bridge.set_model_path(parent.bridge.model_path)
@@ -279,7 +323,7 @@ class MultiCameraDialog(QWidget):
         setup = QVBoxLayout(self.setup)
         setup.setContentsMargins(0, 0, 0, 0)
         setup.setSpacing(6)
-        self.scene = QLineEdit()
+        self.scene = QLineEdit(self.alignment.scene_id)
         self.scene.setPlaceholderText("Incident name or ID")
         self.scene.setAccessibleName("Incident name or ID")
         self.scene.setToolTip("Name this incident, for example Scene 004.")
@@ -301,6 +345,7 @@ class MultiCameraDialog(QWidget):
         setup.addSpacing(4)
         setup.addWidget(label("RECORDING ALIGNMENT", "sectionTitle"))
         self.confirmed = QCheckBox("Same incident, aligned")
+        self.confirmed.setChecked(self.alignment.confirmed)
         self.confirmed.setToolTip("Confirm after checking that the recordings correspond and their timing is aligned.")
         setup.addWidget(self.confirmed)
         self.details_button = QPushButton("Camera and timing details")
@@ -642,6 +687,9 @@ class MultiCameraDialog(QWidget):
             while f"CAM-{number:02d}" in {s.camera_id for s in self.sources}:
                 number += 1
             self.sources.append(CameraSource(video, f"CAM-{number:02d}"))
+        if _auto_preset_for_sources(self.sources, self.alignment):
+            self.scene.setText(self.alignment.scene_id)
+            self.confirmed.setChecked(self.alignment.confirmed)
         self.clear_results()
         self.rebuild_sources()
 

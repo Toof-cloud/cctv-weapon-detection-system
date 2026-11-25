@@ -2166,6 +2166,15 @@ def render_multicam_page(mc_scenes: list[dict]) -> None:
                             """,
                             unsafe_allow_html=True,
                         )
+                    st.markdown(
+                        f"""
+                        <div class='fk-status-card' style='margin:6px 0 8px 0; padding:8px 11px; border-left:3px solid #2b8a57;'>
+                            <div style='font-size:11.5px; font-weight:700; color:#1f6f46;'>✓ Same incident, aligned (Auto-applied)</div>
+                            <div class='fk-muted' style='margin-top:2px;'>{scene.get('sync_clock', '')}</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
                 else:
                     st.markdown(
                         """

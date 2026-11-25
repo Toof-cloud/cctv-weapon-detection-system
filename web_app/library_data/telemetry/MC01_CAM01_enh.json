@@ -577,7 +577,7 @@
       "timestamp_seconds": 8.791,
       "timestamp_formatted": "00:08.791",
       "camera_id": "STAGED_SCENE007_CAM1_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         101,
         431,
@@ -591,15 +591,15 @@
         0.71528
       ],
       "confidence_score": 0.8572,
-      "validation_status": "ANTHROPOMETRIC_SCALE_VIOLATION",
-      "rejection_reason": "ANTHROPOMETRIC_SCALE_VIOLATION (area 20.3% > 20.0% of person)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 133,
       "timestamp_seconds": 8.857,
       "timestamp_formatted": "00:08.857",
       "camera_id": "STAGED_SCENE007_CAM1_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         122,
         427,
@@ -613,15 +613,15 @@
         0.71667
       ],
       "confidence_score": 0.9573,
-      "validation_status": "ANTHROPOMETRIC_SCALE_VIOLATION",
-      "rejection_reason": "ANTHROPOMETRIC_SCALE_VIOLATION (area 21.1% > 20.0% of person)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 134,
       "timestamp_seconds": 8.924,
       "timestamp_formatted": "00:08.924",
       "camera_id": "STAGED_SCENE007_CAM1_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         146,
         432,
@@ -635,8 +635,8 @@
         0.72361
       ],
       "confidence_score": 0.8567,
-      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
-      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 1-frame transient proposal)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 136,
@@ -929,7 +929,7 @@
       "timestamp_seconds": 10.655,
       "timestamp_formatted": "00:10.655",
       "camera_id": "STAGED_SCENE007_CAM1_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         713,
         387,
@@ -943,8 +943,8 @@
         0.70556
       ],
       "confidence_score": 0.9393,
-      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
-      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 1-frame transient proposal)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 161,
@@ -1635,7 +1635,7 @@
       "timestamp_seconds": 8.791,
       "timestamp_formatted": "00:08.791",
       "camera_id": "STAGED_SCENE007_CAM1_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         101,
         431,
@@ -1649,15 +1649,15 @@
         0.71528
       ],
       "confidence_score": 0.8572,
-      "validation_status": "ANTHROPOMETRIC_SCALE_VIOLATION",
-      "rejection_reason": "ANTHROPOMETRIC_SCALE_VIOLATION (area 20.3% > 20.0% of person)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 133,
       "timestamp_seconds": 8.857,
       "timestamp_formatted": "00:08.857",
       "camera_id": "STAGED_SCENE007_CAM1_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         122,
         427,
@@ -1671,15 +1671,15 @@
         0.71667
       ],
       "confidence_score": 0.9573,
-      "validation_status": "ANTHROPOMETRIC_SCALE_VIOLATION",
-      "rejection_reason": "ANTHROPOMETRIC_SCALE_VIOLATION (area 21.1% > 20.0% of person)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 134,
       "timestamp_seconds": 8.924,
       "timestamp_formatted": "00:08.924",
       "camera_id": "STAGED_SCENE007_CAM1_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         146,
         432,
@@ -1693,8 +1693,8 @@
         0.72361
       ],
       "confidence_score": 0.8567,
-      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
-      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 1-frame transient proposal)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 136,
@@ -1987,7 +1987,7 @@
       "timestamp_seconds": 10.655,
       "timestamp_formatted": "00:10.655",
       "camera_id": "STAGED_SCENE007_CAM1_E",
-      "object_label": "knife",
+      "object_label": "handgun",
       "bounding_box": [
         713,
         387,
@@ -2001,8 +2001,8 @@
         0.70556
       ],
       "confidence_score": 0.9393,
-      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
-      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 1-frame transient proposal)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 161,

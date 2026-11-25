@@ -1015,16 +1015,24 @@ class CCTVIntelligenceFilter:
                 r["class_name"] = track_consensus[t_id]
 
         # Scene-wide consensus: In surveillance footage of an incident, if one weapon class overwhelmingly
-        # dominates confirmed security alerts (>= 75% of confirmed alerts and >= 2.5x secondary class),
-        # reconcile minor residual secondary ghost proposals to the dominant threat class.
+        # dominates confirmed security alerts (>= 85% of confirmed alerts) and the secondary class was never
+        # independently high-confidence (< 0.80), reconcile minor residual ghost proposals to the dominant class.
+        # Dual-weapon scenes where both handgun and knife achieve strong confidence (>= 0.80) preserve both classes!
         from collections import Counter
         confirmed_records = [r for r in records if r.get("status") == "CONFIRMED_ALERT"]
         if confirmed_records:
             c_counts = Counter(r.get("class_name") for r in confirmed_records)
+            c_max_conf: Dict[str, float] = {}
+            for r in confirmed_records:
+                cn = str(r.get("class_name", ""))
+                cf = float(r.get("confidence_score") or r.get("confidence") or 0.0)
+                c_max_conf[cn] = max(c_max_conf.get(cn, 0.0), cf)
             tot_confirmed = len(confirmed_records)
             dominant_class = None
             for c, cnt in c_counts.items():
-                if cnt >= max(2, int(0.60 * tot_confirmed)) and cnt > (tot_confirmed - cnt):
+                other_classes = [oc for oc in c_counts if oc != c]
+                other_strong = any(c_max_conf.get(oc, 0.0) >= 0.80 and c_counts[oc] >= 2 for oc in other_classes)
+                if not other_strong and cnt >= max(3, int(0.85 * tot_confirmed)) and cnt > (tot_confirmed - cnt):
                     dominant_class = c
                     break
             if dominant_class:
