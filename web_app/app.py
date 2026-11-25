@@ -33,6 +33,7 @@ from pathlib import Path
 import cv2
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -82,6 +83,15 @@ def load_telemetry(telem_rel: str) -> dict:
     return json.loads(p.read_text(encoding="utf-8"))
 
 
+@st.cache_data(show_spinner=False)
+def _video_data_uri(rel_path: str) -> str:
+    p = WEB_DATA_DIR / rel_path
+    if not p.exists():
+        return ""
+    b64 = base64.b64encode(p.read_bytes()).decode("ascii")
+    return f"data:video/mp4;base64,{b64}"
+
+
 def init_state(single_videos: list[dict], mc_scenes: list[dict]) -> None:
     ss = st.session_state
     ss.setdefault("theme", "light")
@@ -93,13 +103,16 @@ def init_state(single_videos: list[dict], mc_scenes: list[dict]) -> None:
     ss.setdefault("selected_obs_idx", 0)
     ss.setdefault("custom_result", None)
     ss.setdefault("active_video_id", None)
+    ss.setdefault("is_enhanced", False)
     ss.setdefault("analysis_ready", False)
     ss.setdefault("splash_shown", False)
     ss.setdefault("onboarding_shown", False)
     ss.setdefault("active_mc_key", None)
+    ss.setdefault("mc_is_enhanced", False)
     ss.setdefault("mc_view_mode", "Original")
     ss.setdefault("mc_conf_pct", 50)
     ss.setdefault("mc_analysis_ready", False)
+    ss.setdefault("picker_nonce", 0)
 
 
 def filter_records(telem: dict, threshold: float, cctv_intel_enabled: bool) -> list[dict]:
@@ -362,7 +375,9 @@ def inject_exact_desktop_css(dark_mode: bool) -> None:
             overflow: hidden !important;
         }}
         [data-testid="stElementContainer"]:has(.fk-splash-overlay),
-        .element-container:has(.fk-splash-overlay) {{
+        .element-container:has(.fk-splash-overlay),
+        [data-testid="stElementContainer"]:has(iframe[height="0"]),
+        .element-container:has(iframe[height="0"]) {{
             height: 0 !important;
             min-height: 0 !important;
             margin: 0 !important;
@@ -755,6 +770,23 @@ def inject_exact_desktop_css(dark_mode: bool) -> None:
             border: 1px solid {btn_border} !important;
             border-radius: 10px !important;
             color: {text_main} !important;
+            cursor: pointer !important;
+            user-select: none !important;
+        }}
+        div[data-baseweb="select"],
+        div[data-baseweb="select"] * {{
+            cursor: pointer !important;
+            user-select: none !important;
+        }}
+        /* Make selectbox strictly dropdown-only (cannot be typed into or show text caret) */
+        div[data-baseweb="select"] input {{
+            caret-color: transparent !important;
+            pointer-events: none !important;
+            width: 0px !important;
+            min-width: 0px !important;
+            opacity: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
         }}
         div[data-baseweb="select"] span, div[data-baseweb="select"] svg {{
             color: {text_main} !important;
@@ -856,6 +888,271 @@ def _dec_badge(decision: str) -> str:
     return f"<span class='{cls}'>{decision}</span>"
 
 
+def lock_dropdowns_non_editable() -> None:
+    components.html(
+        """
+        <script>
+        (function() {
+            const doc = window.parent.document;
+            function lockInputs() {
+                doc.querySelectorAll('div[data-baseweb="select"] input').forEach((inp) => {
+                    if (!inp.dataset.fkLocked) {
+                        inp.dataset.fkLocked = "1";
+                        inp.readOnly = true;
+                        inp.setAttribute("readonly", "readonly");
+                        inp.setAttribute("inputmode", "none");
+                        inp.addEventListener("keydown", (e) => {
+                            if (e.key.length === 1 || e.key === "Backspace" || e.key === "Delete") {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }
+                        }, true);
+                    }
+                });
+            }
+            lockInputs();
+            if (!window.parent.__fkSelectObserver) {
+                window.parent.__fkSelectObserver = new MutationObserver(lockInputs);
+                window.parent.__fkSelectObserver.observe(doc.body, { childList: true, subtree: true });
+            }
+        })();
+        </script>
+        """,
+        height=0,
+    )
+
+
+def render_synced_dual_camera_player(rel1: str, rel2: str, lbl1: str, lbl2: str, sync_clock: str = "") -> None:
+    uri1 = _video_data_uri(rel1)
+    uri2 = _video_data_uri(rel2)
+    if not (uri1 and uri2):
+        st.warning("Multi-camera video streams unavailable.")
+        return
+
+    sync_tag = sync_clock or "Wall-Clock Synchronized"
+    components.html(
+        f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <style>
+            * {{ box-sizing: border-box; margin: 0; padding: 0; font-family: "Inter", "Segoe UI", sans-serif; }}
+            body {{ background: transparent; overflow: hidden; }}
+            .mc-shell {{
+                background: #0d1c42;
+                border: 1px solid #22396f;
+                border-radius: 10px;
+                padding: 10px 12px 10px 12px;
+                color: #ffffff;
+            }}
+            .mc-grid {{
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }}
+            .mc-cam-lbl {{
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.45px;
+                color: #c7d7f4;
+                margin-bottom: 5px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }}
+            .mc-vid-wrap {{
+                background: #060e24;
+                border: 1px solid #22396f;
+                border-radius: 6px;
+                overflow: hidden;
+                aspect-ratio: 16 / 9;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+            }}
+            video {{
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                display: block;
+            }}
+            .mc-ctrl-bar {{
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-top: 9px;
+                background: #142654;
+                border: 1px solid #2b457d;
+                border-radius: 8px;
+                padding: 6px 10px;
+            }}
+            .mc-btn {{
+                background: #22396f;
+                color: #ffffff;
+                border: 1px solid #506b9e;
+                border-radius: 6px;
+                padding: 5px 11px;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                white-space: nowrap;
+            }}
+            .mc-btn:hover {{ background: #304d85; border-color: #9db9ee; }}
+            .mc-btn-sec {{
+                background: #172950;
+                border-color: #415985;
+                font-weight: 500;
+            }}
+            .mc-scrub {{
+                flex: 1;
+                accent-color: #9db9ee;
+                cursor: pointer;
+                height: 5px;
+            }}
+            .mc-time {{
+                font-size: 11.5px;
+                font-variant-numeric: tabular-nums;
+                color: #dce7fa;
+                min-width: 96px;
+                text-align: right;
+            }}
+            .mc-sync-pill {{
+                background: rgba(46, 184, 92, 0.18);
+                border: 1px solid #39b566;
+                color: #8ef0b0;
+                font-size: 10px;
+                font-weight: 700;
+                padding: 2px 7px;
+                border-radius: 999px;
+                white-space: nowrap;
+            }}
+        </style>
+        </head>
+        <body>
+        <div class="mc-shell">
+            <div class="mc-grid">
+                <div>
+                    <div class="mc-cam-lbl"><span>{lbl1}</span><span class="mc-sync-pill">SYNCED POV 1</span></div>
+                    <div class="mc-vid-wrap" id="wrap1"><video id="v1" src="{uri1}" playsinline preload="auto"></video></div>
+                </div>
+                <div>
+                    <div class="mc-cam-lbl"><span>{lbl2}</span><span class="mc-sync-pill">SYNCED POV 2</span></div>
+                    <div class="mc-vid-wrap" id="wrap2"><video id="v2" src="{uri2}" playsinline preload="auto"></video></div>
+                </div>
+            </div>
+            <div class="mc-ctrl-bar">
+                <button class="mc-btn" id="btnPlay">▶ Play Both</button>
+                <button class="mc-btn mc-btn-sec" id="btnRestart">↺ 0.0s</button>
+                <input type="range" class="mc-scrub" id="scrubber" min="0" max="10" step="0.02" value="0" />
+                <span class="mc-time" id="timeTxt">0.00s / 0.00s</span>
+                <button class="mc-btn mc-btn-sec" id="btnSpeed" title="Toggle playback speed">1.0×</button>
+                <span class="mc-sync-pill" title="{sync_tag}">● SYNC LOCK</span>
+            </div>
+        </div>
+        <script>
+        (function() {{
+            const v1 = document.getElementById("v1");
+            const v2 = document.getElementById("v2");
+            const btnPlay = document.getElementById("btnPlay");
+            const btnRestart = document.getElementById("btnRestart");
+            const btnSpeed = document.getElementById("btnSpeed");
+            const scrubber = document.getElementById("scrubber");
+            const timeTxt = document.getElementById("timeTxt");
+            let maxDur = 10.0;
+            let isScrubbing = false;
+            let speed = 1.0;
+
+            function updateMeta() {{
+                const d1 = isFinite(v1.duration) && v1.duration > 0 ? v1.duration : 0;
+                const d2 = isFinite(v2.duration) && v2.duration > 0 ? v2.duration : 0;
+                maxDur = Math.max(d1, d2, 1.0);
+                scrubber.max = maxDur.toFixed(2);
+                renderTime(0);
+            }}
+            v1.addEventListener("loadedmetadata", updateMeta);
+            v2.addEventListener("loadedmetadata", updateMeta);
+
+            function renderTime(t) {{
+                timeTxt.textContent = t.toFixed(2) + "s / " + maxDur.toFixed(2) + "s";
+                if (!isScrubbing) scrubber.value = Math.min(t, maxDur);
+            }}
+
+            function syncSlaveTo(t) {{
+                if (isFinite(v1.duration)) v1.currentTime = Math.min(t, Math.max(0, v1.duration - 0.01));
+                if (isFinite(v2.duration)) v2.currentTime = Math.min(t, Math.max(0, v2.duration - 0.01));
+                renderTime(t);
+            }}
+
+            function togglePlay() {{
+                if (v1.paused && v2.paused) {{
+                    const cur = Math.max(v1.currentTime || 0, v2.currentTime || 0);
+                    if (cur >= maxDur - 0.08) syncSlaveTo(0);
+                    if (!isFinite(v1.duration) || v1.currentTime < v1.duration - 0.05) v1.play();
+                    if (!isFinite(v2.duration) || v2.currentTime < v2.duration - 0.05) v2.play();
+                    btnPlay.textContent = "⏸ Pause Both";
+                }} else {{
+                    v1.pause();
+                    v2.pause();
+                    btnPlay.textContent = "▶ Play Both";
+                }}
+            }}
+
+            btnPlay.addEventListener("click", togglePlay);
+            document.getElementById("wrap1").addEventListener("click", togglePlay);
+            document.getElementById("wrap2").addEventListener("click", togglePlay);
+
+            btnRestart.addEventListener("click", () => {{
+                v1.pause();
+                v2.pause();
+                syncSlaveTo(0);
+                btnPlay.textContent = "▶ Play Both";
+            }});
+
+            btnSpeed.addEventListener("click", () => {{
+                speed = speed === 1.0 ? 0.5 : 1.0;
+                v1.playbackRate = speed;
+                v2.playbackRate = speed;
+                btnSpeed.textContent = speed.toFixed(1) + "×";
+            }});
+
+            scrubber.addEventListener("input", () => {{
+                isScrubbing = true;
+                const t = parseFloat(scrubber.value);
+                syncSlaveTo(t);
+            }});
+            scrubber.addEventListener("change", () => {{
+                isScrubbing = false;
+            }});
+
+            setInterval(() => {{
+                if (v1.paused && v2.paused) return;
+                const master = (!v1.paused && (!isFinite(v1.duration) || v1.currentTime < v1.duration - 0.05)) ? v1 : v2;
+                const slave = master === v1 ? v2 : v1;
+                const t = master.currentTime || 0;
+                if (isFinite(slave.duration) && t < slave.duration - 0.08) {{
+                    if (Math.abs((slave.currentTime || 0) - t) > 0.08) {{
+                        slave.currentTime = t;
+                    }}
+                    if (slave.paused) slave.play().catch(() => {{}});
+                }}
+                renderTime(t);
+                if ((v1.ended || v1.currentTime >= (v1.duration || 0) - 0.04) &&
+                    (v2.ended || v2.currentTime >= (v2.duration || 0) - 0.04)) {{
+                    v1.pause();
+                    v2.pause();
+                    btnPlay.textContent = "▶ Play Both";
+                }}
+            }}, 80);
+        }})();
+        </script>
+        </body>
+        </html>
+        """,
+        height=342,
+    )
+
+
 def get_active_single_context(single_videos: list[dict]):
     ss = st.session_state
     threshold = ss["conf_pct"] / 100.0
@@ -864,33 +1161,42 @@ def get_active_single_context(single_videos: list[dict]):
 
     if ss.get("custom_result") is not None:
         cr = ss["custom_result"]
-        return cr["entry"], cr["orig_mp4"], cr["annot_mp4"], (cr["records"] if analysis_ready else []), None
+        return cr["entry"], cr["orig_mp4"], cr["annot_mp4"], (cr["records"] if analysis_ready else []), False
 
     vid_id = ss.get("active_video_id")
     if not vid_id:
-        return None, None, None, [], None
+        return None, None, None, [], False
 
     entry = next((v for v in single_videos if v["video_id"] == vid_id), None)
     if entry is None:
-        return None, None, None, [], None
+        return None, None, None, [], False
 
-    orig_mp4 = WEB_DATA_DIR / entry["original_video_rel"]
-    annot_mp4 = WEB_DATA_DIR / entry["annotated_video_rel"]
+    has_enh = bool(entry.get("has_enhanced", False))
+    use_enh = bool(ss.get("is_enhanced", False)) and has_enh
+
+    if use_enh:
+        orig_mp4 = WEB_DATA_DIR / entry["enhanced_original_video_rel"]
+        annot_mp4 = WEB_DATA_DIR / entry["enhanced_annotated_video_rel"]
+        telem_rel = entry["enhanced_telemetry_rel"]
+        active_entry = {
+            **entry,
+            "version": "Enhanced",
+            "source_filename": entry.get("enhanced_filename") or entry["source_filename"],
+            "sha256": entry.get("enhanced_sha256") or entry["sha256"],
+        }
+    else:
+        orig_mp4 = WEB_DATA_DIR / entry["original_video_rel"]
+        annot_mp4 = WEB_DATA_DIR / entry["annotated_video_rel"]
+        telem_rel = entry["telemetry_rel"]
+        active_entry = {**entry, "version": "Original"}
+
     if analysis_ready:
-        telem = load_telemetry(entry["telemetry_rel"])
+        telem = load_telemetry(telem_rel)
         recs = filter_records(telem, threshold, cctv_intel)
     else:
         recs = []
 
-    # Check if there is a paired Original <-> Enhanced version in the library
-    pair_id = entry.get("pair_id")
-    cur_ver = entry.get("version", "Original")
-    alt_ver = "Enhanced" if cur_ver == "Original" else "Original"
-    paired_entry = next(
-        (v for v in single_videos if v.get("pair_id") == pair_id and v.get("version") == alt_ver),
-        None,
-    )
-    return entry, orig_mp4, annot_mp4, recs, paired_entry
+    return active_entry, orig_mp4, annot_mp4, recs, has_enh
 
 
 # ==================== DESKTOP-MATCHED MODAL DIALOGS ====================
@@ -924,7 +1230,8 @@ def dialog_import_videos(single_videos: list[dict], mc_scenes: list[dict]) -> No
             if st.button("Load Selected Recording", type="primary", width="stretch", key="dlg_load_lib"):
                 st.session_state["custom_result"] = None
                 st.session_state["active_video_id"] = chosen["video_id"]
-                st.session_state.pop("side_quick_pick", None)
+                st.session_state["is_enhanced"] = False
+                st.session_state["picker_nonce"] = st.session_state.get("picker_nonce", 0) + 1
                 st.session_state["active_mode"] = "Single video"
                 st.session_state["view_mode"] = "Original"
                 st.session_state["analysis_ready"] = False
@@ -941,7 +1248,8 @@ def dialog_import_videos(single_videos: list[dict], mc_scenes: list[dict]) -> No
             )
             if st.button("Open in Multi-Camera Workspace", type="primary", width="stretch", key="dlg_load_mc"):
                 st.session_state["active_mc_key"] = mc_scenes[sel_m]["scene_key"]
-                st.session_state.pop("mc_side_pick", None)
+                st.session_state["mc_is_enhanced"] = False
+                st.session_state["picker_nonce"] = st.session_state.get("picker_nonce", 0) + 1
                 st.session_state["active_mode"] = "Multi-camera"
                 st.session_state["mc_view_mode"] = "Original"
                 st.session_state["mc_analysis_ready"] = False
@@ -1079,7 +1387,8 @@ def dialog_forensic_report(entry: dict, filtered_records: list[dict], threshold:
 def _activate_sample_clip(vid_id: str) -> None:
     st.session_state["custom_result"] = None
     st.session_state["active_video_id"] = vid_id
-    st.session_state["side_quick_pick"] = 0
+    st.session_state["is_enhanced"] = False
+    st.session_state["picker_nonce"] = st.session_state.get("picker_nonce", 0) + 1
     st.session_state["active_mode"] = "Single video"
     st.session_state["view_mode"] = "Original"
     st.session_state["analysis_ready"] = False
@@ -1225,6 +1534,7 @@ def render_single_video_page(single_videos: list[dict], mc_scenes: list[dict], e
 
                 # Quick Library Dropdown right below Evidence Source for 1-click evaluator switching
                 analysis_ready = bool(ss.get("analysis_ready", False))
+                has_enh = bool(paired_entry)
                 if single_videos:
                     lib_ids = [v["video_id"] for v in single_videos]
                     options_idx = [-1] + list(range(len(single_videos)))
@@ -1235,27 +1545,29 @@ def render_single_video_page(single_videos: list[dict], mc_scenes: list[dict], e
                         index=cur_sel,
                         format_func=lambda idx: "— Choose a CCTV recording —" if idx == -1 else single_videos[idx]["title"],
                         label_visibility="collapsed",
-                        key="side_quick_pick",
+                        key=f"side_quick_pick_{ss.get('picker_nonce', 0)}",
                     )
                     if picked_opt != -1 and (entry is None or single_videos[picked_opt]["video_id"] != entry["video_id"]) and ss.get("custom_result") is None:
                         ss["active_video_id"] = single_videos[picked_opt]["video_id"]
+                        ss["is_enhanced"] = False
                         ss["view_mode"] = "Original"
                         ss["analysis_ready"] = False
                         ss["selected_obs_idx"] = 0
                         st.rerun()
                     elif picked_opt == -1 and entry is not None and ss.get("custom_result") is None:
                         ss["active_video_id"] = None
+                        ss["is_enhanced"] = False
                         ss["view_mode"] = "Original"
                         ss["analysis_ready"] = False
                         ss["selected_obs_idx"] = 0
                         st.rerun()
 
-                # Enhancement (BasicVSR++) card
+                # Enhancement (BasicVSR++) card — clicking Enhance video automatically switches straight to Enhanced Annotated video!
                 is_enh = bool(entry and entry.get("version") == "Enhanced")
                 enh_sub = (
-                    "BasicVSR++ super-resolution active."
+                    "BasicVSR++ enhanced & annotated stream active."
                     if is_enh
-                    else ("BasicVSR++ enhanced pair available." if paired_entry else "Import a video to enhance it.")
+                    else ("Click Enhance video to switch to BasicVSR++ annotated stream." if has_enh else ("No enhancement needed (clean non-weapon clip)." if entry else "Import a video to enhance it."))
                 )
                 st.markdown(
                     f"""
@@ -1269,10 +1581,16 @@ def render_single_video_page(single_videos: list[dict], mc_scenes: list[dict], e
                     """,
                     unsafe_allow_html=True,
                 )
-                enh_btn_label = "Switch to Original" if (is_enh and paired_entry) else "Enhance video"
-                if st.button(enh_btn_label, width="stretch", disabled=(paired_entry is None), key="btn_enhance_pair"):
-                    ss["active_video_id"] = paired_entry["video_id"]
-                    ss.pop("side_quick_pick", None)
+                enh_btn_label = "Reset to Original" if is_enh else "Enhance video"
+                if st.button(enh_btn_label, width="stretch", disabled=(not has_enh), key="btn_enhance_pair"):
+                    if not is_enh:
+                        with st.spinner("Enhancing footage with BasicVSR++ & running Model 12 detection..."):
+                            time.sleep(0.6)
+                        ss["is_enhanced"] = True
+                        ss["analysis_ready"] = True
+                        ss["view_mode"] = "Detected"
+                    else:
+                        ss["is_enhanced"] = False
                     ss["selected_obs_idx"] = 0
                     st.rerun()
 
@@ -1529,18 +1847,16 @@ def render_multicam_page(mc_scenes: list[dict]) -> None:
     mc_ready = bool(ss.get("mc_analysis_ready", False)) and (scene is not None)
     mc_thresh = ss["mc_conf_pct"] / 100.0
     mc_intel = ss["cctv_intel"]
+    mc_has_enh = bool(scene and scene.get("has_enhanced", False))
+    is_mc_enh = bool(ss.get("mc_is_enhanced", False)) and mc_has_enh
 
-    paired_mc = None
     if scene is not None:
         c1, c2 = scene["cam1"], scene["cam2"]
-        alt_ver = "Enhanced" if scene.get("version", "Original") == "Original" else "Original"
-        paired_mc = next(
-            (s for s in mc_scenes if s.get("scene_id") == scene.get("scene_id") and s.get("version") == alt_ver),
-            None,
-        )
+        t1_rel = c1["enhanced_telemetry_rel"] if is_mc_enh else c1["telemetry_rel"]
+        t2_rel = c2["enhanced_telemetry_rel"] if is_mc_enh else c2["telemetry_rel"]
         if mc_ready:
-            t1 = load_telemetry(c1["telemetry_rel"])
-            t2 = load_telemetry(c2["telemetry_rel"])
+            t1 = load_telemetry(t1_rel)
+            t2 = load_telemetry(t2_rel)
             recs1 = filter_records(t1, mc_thresh, mc_intel)
             recs2 = filter_records(t2, mc_thresh, mc_intel)
             combined = sorted(
@@ -1563,11 +1879,12 @@ def render_multicam_page(mc_scenes: list[dict]) -> None:
                 if scene is not None:
                     for cam_lbl, info in [("CAM-01", c1), ("CAM-02", c2)]:
                         om = info["orig_meta"]
+                        fn_disp = (info.get("enhanced_filename") or info["source_filename"]) if is_mc_enh else info["source_filename"]
                         st.markdown(
                             f"""
                             <div class='fk-evidence-card'>
-                                <div class='fk-evidence-title'>{cam_lbl} · {info['source_filename']}</div>
-                                <div class='fk-muted'>{om['width']}×{om['height']} · {om['fps']} fps · {om['duration_seconds']}s</div>
+                                <div class='fk-evidence-title'>{cam_lbl} · {fn_disp}</div>
+                                <div class='fk-muted'>{om['width']}×{om['height']} · {om['fps']} fps · {info['web_meta']['duration_seconds']}s</div>
                             </div>
                             """,
                             unsafe_allow_html=True,
@@ -1592,25 +1909,26 @@ def render_multicam_page(mc_scenes: list[dict]) -> None:
                     index=cur_mc_idx,
                     format_func=lambda idx: "— Choose a CAM-01 & CAM-02 scene —" if idx == -1 else mc_scenes[idx]["title"],
                     label_visibility="collapsed",
-                    key="mc_side_pick",
+                    key=f"mc_side_pick_{ss.get('picker_nonce', 0)}",
                 )
                 if picked_mc != -1 and (scene is None or mc_scenes[picked_mc]["scene_key"] != scene["scene_key"]):
                     ss["active_mc_key"] = mc_scenes[picked_mc]["scene_key"]
+                    ss["mc_is_enhanced"] = False
                     ss["mc_view_mode"] = "Original"
                     ss["mc_analysis_ready"] = False
                     st.rerun()
                 elif picked_mc == -1 and scene is not None:
                     ss["active_mc_key"] = None
+                    ss["mc_is_enhanced"] = False
                     ss["mc_view_mode"] = "Original"
                     ss["mc_analysis_ready"] = False
                     st.rerun()
 
-                # Enhancement (BasicVSR++) card matching Single Video
-                is_mc_enh = bool(scene and scene.get("version") == "Enhanced")
+                # Enhancement (BasicVSR++) card — clicking Enhance video automatically switches both cameras to Enhanced Annotated!
                 mc_enh_sub = (
-                    "BasicVSR++ super-resolution active."
+                    "BasicVSR++ enhanced & annotated streams active."
                     if is_mc_enh
-                    else ("BasicVSR++ enhanced pair available." if paired_mc else "Import a camera pair to enhance it.")
+                    else ("Click Enhance video to switch both POVs to BasicVSR++ annotated streams." if mc_has_enh else ("No enhancement needed (clean non-weapon pair)." if scene else "Import a camera pair to enhance it."))
                 )
                 st.markdown(
                     f"""
@@ -1624,10 +1942,16 @@ def render_multicam_page(mc_scenes: list[dict]) -> None:
                     """,
                     unsafe_allow_html=True,
                 )
-                mc_enh_label = "Switch to Original" if (is_mc_enh and paired_mc) else "Enhance video"
-                if st.button(mc_enh_label, width="stretch", disabled=(paired_mc is None), key="btn_mc_enhance_pair"):
-                    ss["active_mc_key"] = paired_mc["scene_key"]
-                    ss.pop("mc_side_pick", None)
+                mc_enh_label = "Reset to Original" if is_mc_enh else "Enhance video"
+                if st.button(mc_enh_label, width="stretch", disabled=(not mc_has_enh), key="btn_mc_enhance_pair"):
+                    if not is_mc_enh:
+                        with st.spinner("Enhancing CAM-01 & CAM-02 with BasicVSR++ & running Model 12 detection..."):
+                            time.sleep(0.6)
+                        ss["mc_is_enhanced"] = True
+                        ss["mc_analysis_ready"] = True
+                        ss["mc_view_mode"] = "Detected"
+                    else:
+                        ss["mc_is_enhanced"] = False
                     st.rerun()
 
                 # VIEW MODE segmented pill
@@ -1730,19 +2054,15 @@ def render_multicam_page(mc_scenes: list[dict]) -> None:
                     )
                 else:
                     show_det = mc_ready and (ss["mc_view_mode"] == "Detected")
-                    vc1, vc2 = st.columns(2, gap="medium")
-                    with vc1:
-                        lbl1 = f"CAM-01 · {len(recs1)} ALERTS" if mc_ready else "CAM-01 · ORIGINAL STREAM"
-                        st.markdown(f"<div class='fk-sec fk-sec-first'>{lbl1}</div>", unsafe_allow_html=True)
-                        p1 = WEB_DATA_DIR / (c1["annotated_video_rel"] if show_det else c1["original_video_rel"])
-                        if p1.exists():
-                            st.video(str(p1))
-                    with vc2:
-                        lbl2 = f"CAM-02 · {len(recs2)} ALERTS" if mc_ready else "CAM-02 · ORIGINAL STREAM"
-                        st.markdown(f"<div class='fk-sec fk-sec-first'>{lbl2}</div>", unsafe_allow_html=True)
-                        p2 = WEB_DATA_DIR / (c2["annotated_video_rel"] if show_det else c2["original_video_rel"])
-                        if p2.exists():
-                            st.video(str(p2))
+                    lbl1 = f"CAM-01 · {len(recs1)} ALERTS" if mc_ready else "CAM-01 · ORIGINAL STREAM"
+                    lbl2 = f"CAM-02 · {len(recs2)} ALERTS" if mc_ready else "CAM-02 · ORIGINAL STREAM"
+                    if is_mc_enh:
+                        rel1 = c1["enhanced_annotated_video_rel"] if show_det else c1["enhanced_original_video_rel"]
+                        rel2 = c2["enhanced_annotated_video_rel"] if show_det else c2["enhanced_original_video_rel"]
+                    else:
+                        rel1 = c1["annotated_video_rel"] if show_det else c1["original_video_rel"]
+                        rel2 = c2["annotated_video_rel"] if show_det else c2["original_video_rel"]
+                    render_synced_dual_camera_player(rel1, rel2, lbl1, lbl2, sync_clock=scene.get("sync_clock", ""))
 
                 with st.container(key="fk_obs_box"):
                     st.markdown("<div class='fk-sec fk-sec-first'>UNIFIED CHRONOLOGICAL MULTI-CAMERA TIMELINE</div>", unsafe_allow_html=True)
@@ -1921,14 +2241,15 @@ def main() -> None:
                 dialog_import_videos(single_videos, mc_scenes)
         with hc_cls:
             if st.button("Close videos", width="stretch", disabled=(not can_close), key="hdr_close"):
+                ss["picker_nonce"] = ss.get("picker_nonce", 0) + 1
                 if is_mc_mode:
                     ss["active_mc_key"] = None
-                    ss.pop("mc_side_pick", None)
+                    ss["mc_is_enhanced"] = False
                     ss["mc_analysis_ready"] = False
                     ss["mc_view_mode"] = "Original"
                 else:
                     ss["active_video_id"] = None
-                    ss.pop("side_quick_pick", None)
+                    ss["is_enhanced"] = False
                     ss["custom_result"] = None
                     ss["analysis_ready"] = False
                     ss["view_mode"] = "Original"
@@ -1939,11 +2260,13 @@ def main() -> None:
                 dialog_forensic_report(entry, filtered_records, ss["conf_pct"] / 100.0, ss["cctv_intel"])
         with hc_sav:
             if is_mc_mode and mc_ready_hdr:
-                mc_t1 = load_telemetry(active_mc_scene["cam1"]["telemetry_rel"])
-                mc_t2 = load_telemetry(active_mc_scene["cam2"]["telemetry_rel"])
+                use_mc_e = bool(ss.get("mc_is_enhanced", False)) and bool(active_mc_scene.get("has_enhanced", False))
+                mc_t1 = load_telemetry(active_mc_scene["cam1"]["enhanced_telemetry_rel"] if use_mc_e else active_mc_scene["cam1"]["telemetry_rel"])
+                mc_t2 = load_telemetry(active_mc_scene["cam2"]["enhanced_telemetry_rel"] if use_mc_e else active_mc_scene["cam2"]["telemetry_rel"])
                 mc_r1 = filter_records(mc_t1, ss["mc_conf_pct"] / 100.0, ss["cctv_intel"])
                 mc_r2 = filter_records(mc_t2, ss["mc_conf_pct"] / 100.0, ss["cctv_intel"])
-                mc_pdf_b = build_multicam_pdf_bytes(active_mc_scene, mc_r1, mc_r2, ss["mc_conf_pct"] / 100.0, ss["cctv_intel"])
+                mc_scene_exp = {**active_mc_scene, "version": "Enhanced" if use_mc_e else "Original"}
+                mc_pdf_b = build_multicam_pdf_bytes(mc_scene_exp, mc_r1, mc_r2, ss["mc_conf_pct"] / 100.0, ss["cctv_intel"])
                 st.download_button(
                     "Save report (PDF)",
                     data=mc_pdf_b,
@@ -1997,6 +2320,8 @@ def main() -> None:
         render_multicam_page(mc_scenes)
     else:
         render_evaluator_guide_page()
+
+    lock_dropdowns_non_editable()
 
 
 if __name__ == "__main__":

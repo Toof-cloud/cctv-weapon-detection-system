@@ -1,0 +1,2998 @@
+{
+  "records_50pct": [
+    {
+      "frame_number": 1,
+      "timestamp_seconds": 0.0,
+      "timestamp_formatted": "00:00.000",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        427,
+        341,
+        474,
+        407
+      ],
+      "norm_box": [
+        0.33359,
+        0.47361,
+        0.37031,
+        0.56528
+      ],
+      "confidence_score": 0.7885,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 1,
+      "timestamp_seconds": 0.0,
+      "timestamp_formatted": "00:00.000",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        281,
+        370,
+        326,
+        459
+      ],
+      "norm_box": [
+        0.21953,
+        0.51389,
+        0.25469,
+        0.6375
+      ],
+      "confidence_score": 0.7183,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 1,
+      "timestamp_seconds": 0.061,
+      "timestamp_formatted": "00:00.061",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        287,
+        377,
+        341,
+        460
+      ],
+      "norm_box": [
+        0.22422,
+        0.52361,
+        0.26641,
+        0.63889
+      ],
+      "confidence_score": 0.9248,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 1,
+      "timestamp_seconds": 0.061,
+      "timestamp_formatted": "00:00.061",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        426,
+        343,
+        473,
+        407
+      ],
+      "norm_box": [
+        0.33281,
+        0.47639,
+        0.36953,
+        0.56528
+      ],
+      "confidence_score": 0.9151,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 2,
+      "timestamp_seconds": 0.122,
+      "timestamp_formatted": "00:00.122",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        422,
+        341,
+        468,
+        408
+      ],
+      "norm_box": [
+        0.32969,
+        0.47361,
+        0.36562,
+        0.56667
+      ],
+      "confidence_score": 0.5866,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 3,
+      "timestamp_seconds": 0.182,
+      "timestamp_formatted": "00:00.182",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        421,
+        337,
+        463,
+        407
+      ],
+      "norm_box": [
+        0.32891,
+        0.46806,
+        0.36172,
+        0.56528
+      ],
+      "confidence_score": 0.7268,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 4,
+      "timestamp_seconds": 0.243,
+      "timestamp_formatted": "00:00.243",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        416,
+        339,
+        457,
+        405
+      ],
+      "norm_box": [
+        0.325,
+        0.47083,
+        0.35703,
+        0.5625
+      ],
+      "confidence_score": 0.9425,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 4,
+      "timestamp_seconds": 0.243,
+      "timestamp_formatted": "00:00.243",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        320,
+        379,
+        394,
+        435
+      ],
+      "norm_box": [
+        0.25,
+        0.52639,
+        0.30781,
+        0.60417
+      ],
+      "confidence_score": 0.7391,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 5,
+      "timestamp_seconds": 0.304,
+      "timestamp_formatted": "00:00.304",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        414,
+        342,
+        453,
+        405
+      ],
+      "norm_box": [
+        0.32344,
+        0.475,
+        0.35391,
+        0.5625
+      ],
+      "confidence_score": 0.911,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 7,
+      "timestamp_seconds": 0.425,
+      "timestamp_formatted": "00:00.425",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        415,
+        336,
+        450,
+        422
+      ],
+      "norm_box": [
+        0.32422,
+        0.46667,
+        0.35156,
+        0.58611
+      ],
+      "confidence_score": 0.8425,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 8,
+      "timestamp_seconds": 0.486,
+      "timestamp_formatted": "00:00.486",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        416,
+        335,
+        452,
+        407
+      ],
+      "norm_box": [
+        0.325,
+        0.46528,
+        0.35313,
+        0.56528
+      ],
+      "confidence_score": 0.6642,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 9,
+      "timestamp_seconds": 0.547,
+      "timestamp_formatted": "00:00.547",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        421,
+        336,
+        457,
+        395
+      ],
+      "norm_box": [
+        0.32891,
+        0.46667,
+        0.35703,
+        0.54861
+      ],
+      "confidence_score": 0.5672,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 10,
+      "timestamp_seconds": 0.608,
+      "timestamp_formatted": "00:00.608",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        420,
+        332,
+        459,
+        395
+      ],
+      "norm_box": [
+        0.32812,
+        0.46111,
+        0.35859,
+        0.54861
+      ],
+      "confidence_score": 0.4153,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 12,
+      "timestamp_seconds": 0.729,
+      "timestamp_formatted": "00:00.729",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        423,
+        336,
+        464,
+        402
+      ],
+      "norm_box": [
+        0.33047,
+        0.46667,
+        0.3625,
+        0.55833
+      ],
+      "confidence_score": 0.411,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 14,
+      "timestamp_seconds": 0.851,
+      "timestamp_formatted": "00:00.851",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        421,
+        341,
+        460,
+        407
+      ],
+      "norm_box": [
+        0.32891,
+        0.47361,
+        0.35938,
+        0.56528
+      ],
+      "confidence_score": 0.6276,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 15,
+      "timestamp_seconds": 0.911,
+      "timestamp_formatted": "00:00.911",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        420,
+        340,
+        459,
+        408
+      ],
+      "norm_box": [
+        0.32812,
+        0.47222,
+        0.35859,
+        0.56667
+      ],
+      "confidence_score": 0.9557,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 16,
+      "timestamp_seconds": 0.972,
+      "timestamp_formatted": "00:00.972",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        420,
+        341,
+        458,
+        409
+      ],
+      "norm_box": [
+        0.32812,
+        0.47361,
+        0.35781,
+        0.56806
+      ],
+      "confidence_score": 0.9708,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 17,
+      "timestamp_seconds": 1.033,
+      "timestamp_formatted": "00:01.033",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        419,
+        340,
+        457,
+        410
+      ],
+      "norm_box": [
+        0.32734,
+        0.47222,
+        0.35703,
+        0.56944
+      ],
+      "confidence_score": 0.9828,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 18,
+      "timestamp_seconds": 1.094,
+      "timestamp_formatted": "00:01.094",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        419,
+        340,
+        457,
+        410
+      ],
+      "norm_box": [
+        0.32734,
+        0.47222,
+        0.35703,
+        0.56944
+      ],
+      "confidence_score": 0.9811,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 19,
+      "timestamp_seconds": 1.155,
+      "timestamp_formatted": "00:01.155",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        421,
+        341,
+        459,
+        409
+      ],
+      "norm_box": [
+        0.32891,
+        0.47361,
+        0.35859,
+        0.56806
+      ],
+      "confidence_score": 0.965,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 20,
+      "timestamp_seconds": 1.215,
+      "timestamp_formatted": "00:01.215",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        421,
+        343,
+        462,
+        408
+      ],
+      "norm_box": [
+        0.32891,
+        0.47639,
+        0.36094,
+        0.56667
+      ],
+      "confidence_score": 0.9785,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 21,
+      "timestamp_seconds": 1.276,
+      "timestamp_formatted": "00:01.276",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        422,
+        345,
+        464,
+        407
+      ],
+      "norm_box": [
+        0.32969,
+        0.47917,
+        0.3625,
+        0.56528
+      ],
+      "confidence_score": 0.931,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 21,
+      "timestamp_seconds": 1.276,
+      "timestamp_formatted": "00:01.276",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        315,
+        380,
+        369,
+        456
+      ],
+      "norm_box": [
+        0.24609,
+        0.52778,
+        0.28828,
+        0.63333
+      ],
+      "confidence_score": 0.723,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 2-frame transient proposal)"
+    },
+    {
+      "frame_number": 22,
+      "timestamp_seconds": 1.337,
+      "timestamp_formatted": "00:01.337",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        423,
+        343,
+        466,
+        405
+      ],
+      "norm_box": [
+        0.33047,
+        0.47639,
+        0.36406,
+        0.5625
+      ],
+      "confidence_score": 0.9698,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 22,
+      "timestamp_seconds": 1.337,
+      "timestamp_formatted": "00:01.337",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        315,
+        380,
+        368,
+        455
+      ],
+      "norm_box": [
+        0.24609,
+        0.52778,
+        0.2875,
+        0.63194
+      ],
+      "confidence_score": 0.7121,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 2-frame transient proposal)"
+    },
+    {
+      "frame_number": 23,
+      "timestamp_seconds": 1.398,
+      "timestamp_formatted": "00:01.398",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        423,
+        342,
+        466,
+        405
+      ],
+      "norm_box": [
+        0.33047,
+        0.475,
+        0.36406,
+        0.5625
+      ],
+      "confidence_score": 0.9742,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 24,
+      "timestamp_seconds": 1.458,
+      "timestamp_formatted": "00:01.458",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        422,
+        342,
+        465,
+        404
+      ],
+      "norm_box": [
+        0.32969,
+        0.475,
+        0.36328,
+        0.56111
+      ],
+      "confidence_score": 0.955,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 25,
+      "timestamp_seconds": 1.519,
+      "timestamp_formatted": "00:01.519",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        422,
+        343,
+        463,
+        407
+      ],
+      "norm_box": [
+        0.32969,
+        0.47639,
+        0.36172,
+        0.56528
+      ],
+      "confidence_score": 0.9477,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 26,
+      "timestamp_seconds": 1.58,
+      "timestamp_formatted": "00:01.580",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        422,
+        341,
+        461,
+        406
+      ],
+      "norm_box": [
+        0.32969,
+        0.47361,
+        0.36016,
+        0.56389
+      ],
+      "confidence_score": 0.9586,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 27,
+      "timestamp_seconds": 1.641,
+      "timestamp_formatted": "00:01.641",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        423,
+        343,
+        460,
+        407
+      ],
+      "norm_box": [
+        0.33047,
+        0.47639,
+        0.35938,
+        0.56528
+      ],
+      "confidence_score": 0.9814,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 28,
+      "timestamp_seconds": 1.701,
+      "timestamp_formatted": "00:01.701",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        422,
+        343,
+        459,
+        407
+      ],
+      "norm_box": [
+        0.32969,
+        0.47639,
+        0.35859,
+        0.56528
+      ],
+      "confidence_score": 0.983,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 29,
+      "timestamp_seconds": 1.762,
+      "timestamp_formatted": "00:01.762",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        423,
+        344,
+        460,
+        408
+      ],
+      "norm_box": [
+        0.33047,
+        0.47778,
+        0.35938,
+        0.56667
+      ],
+      "confidence_score": 0.9859,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 30,
+      "timestamp_seconds": 1.823,
+      "timestamp_formatted": "00:01.823",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        422,
+        343,
+        461,
+        409
+      ],
+      "norm_box": [
+        0.32969,
+        0.47639,
+        0.36016,
+        0.56806
+      ],
+      "confidence_score": 0.9775,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 31,
+      "timestamp_seconds": 1.884,
+      "timestamp_formatted": "00:01.884",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        423,
+        343,
+        464,
+        413
+      ],
+      "norm_box": [
+        0.33047,
+        0.47639,
+        0.3625,
+        0.57361
+      ],
+      "confidence_score": 0.8515,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 32,
+      "timestamp_seconds": 1.944,
+      "timestamp_formatted": "00:01.944",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        424,
+        346,
+        466,
+        411
+      ],
+      "norm_box": [
+        0.33125,
+        0.48056,
+        0.36406,
+        0.57083
+      ],
+      "confidence_score": 0.8329,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 33,
+      "timestamp_seconds": 2.005,
+      "timestamp_formatted": "00:02.005",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        426,
+        347,
+        468,
+        412
+      ],
+      "norm_box": [
+        0.33281,
+        0.48194,
+        0.36562,
+        0.57222
+      ],
+      "confidence_score": 0.9604,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 34,
+      "timestamp_seconds": 2.066,
+      "timestamp_formatted": "00:02.066",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        427,
+        347,
+        469,
+        412
+      ],
+      "norm_box": [
+        0.33359,
+        0.48194,
+        0.36641,
+        0.57222
+      ],
+      "confidence_score": 0.8912,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 35,
+      "timestamp_seconds": 2.127,
+      "timestamp_formatted": "00:02.127",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        426,
+        348,
+        466,
+        416
+      ],
+      "norm_box": [
+        0.33281,
+        0.48333,
+        0.36406,
+        0.57778
+      ],
+      "confidence_score": 0.9204,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 36,
+      "timestamp_seconds": 2.187,
+      "timestamp_formatted": "00:02.187",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        427,
+        349,
+        466,
+        416
+      ],
+      "norm_box": [
+        0.33359,
+        0.48472,
+        0.36406,
+        0.57778
+      ],
+      "confidence_score": 0.7253,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 37,
+      "timestamp_seconds": 2.248,
+      "timestamp_formatted": "00:02.248",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        349,
+        396,
+        412,
+        458
+      ],
+      "norm_box": [
+        0.27266,
+        0.55,
+        0.32188,
+        0.63611
+      ],
+      "confidence_score": 0.8595,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 38,
+      "timestamp_seconds": 2.309,
+      "timestamp_formatted": "00:02.309",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        360,
+        400,
+        417,
+        458
+      ],
+      "norm_box": [
+        0.28125,
+        0.55556,
+        0.32578,
+        0.63611
+      ],
+      "confidence_score": 0.7006,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 39,
+      "timestamp_seconds": 2.37,
+      "timestamp_formatted": "00:02.370",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        365,
+        403,
+        436,
+        461
+      ],
+      "norm_box": [
+        0.28516,
+        0.55972,
+        0.34063,
+        0.64028
+      ],
+      "confidence_score": 0.983,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 40,
+      "timestamp_seconds": 2.431,
+      "timestamp_formatted": "00:02.431",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        350,
+        398,
+        445,
+        468
+      ],
+      "norm_box": [
+        0.27344,
+        0.55278,
+        0.34766,
+        0.65
+      ],
+      "confidence_score": 0.9846,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 41,
+      "timestamp_seconds": 2.491,
+      "timestamp_formatted": "00:02.491",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        356,
+        403,
+        456,
+        476
+      ],
+      "norm_box": [
+        0.27813,
+        0.55972,
+        0.35625,
+        0.66111
+      ],
+      "confidence_score": 0.9951,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 42,
+      "timestamp_seconds": 2.552,
+      "timestamp_formatted": "00:02.552",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        360,
+        409,
+        452,
+        482
+      ],
+      "norm_box": [
+        0.28125,
+        0.56806,
+        0.35313,
+        0.66944
+      ],
+      "confidence_score": 0.9945,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 43,
+      "timestamp_seconds": 2.613,
+      "timestamp_formatted": "00:02.613",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        376,
+        408,
+        446,
+        492
+      ],
+      "norm_box": [
+        0.29375,
+        0.56667,
+        0.34844,
+        0.68333
+      ],
+      "confidence_score": 0.967,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 43,
+      "timestamp_seconds": 2.613,
+      "timestamp_formatted": "00:02.613",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        389,
+        151,
+        428,
+        255
+      ],
+      "norm_box": [
+        0.30391,
+        0.20972,
+        0.33437,
+        0.35417
+      ],
+      "confidence_score": 0.4246,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (42.5% < 50.0%)"
+    },
+    {
+      "frame_number": 45,
+      "timestamp_seconds": 2.734,
+      "timestamp_formatted": "00:02.734",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        379,
+        415,
+        455,
+        541
+      ],
+      "norm_box": [
+        0.29609,
+        0.57639,
+        0.35547,
+        0.75139
+      ],
+      "confidence_score": 0.7924,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 46,
+      "timestamp_seconds": 2.795,
+      "timestamp_formatted": "00:02.795",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        415,
+        151,
+        457,
+        260
+      ],
+      "norm_box": [
+        0.32422,
+        0.20972,
+        0.35703,
+        0.36111
+      ],
+      "confidence_score": 0.6051,
+      "validation_status": "UNPHYSICAL_HANDGUN_ASPECT_RATIO",
+      "rejection_reason": "UNPHYSICAL_HANDGUN_ASPECT_RATIO (AR=0.39 < 0.50 vertical distractor)"
+    },
+    {
+      "frame_number": 46,
+      "timestamp_seconds": 2.795,
+      "timestamp_formatted": "00:02.795",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        375,
+        411,
+        434,
+        509
+      ],
+      "norm_box": [
+        0.29297,
+        0.57083,
+        0.33906,
+        0.70694
+      ],
+      "confidence_score": 0.5869,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 47,
+      "timestamp_seconds": 2.856,
+      "timestamp_formatted": "00:02.856",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        379,
+        414,
+        445,
+        542
+      ],
+      "norm_box": [
+        0.29609,
+        0.575,
+        0.34766,
+        0.75278
+      ],
+      "confidence_score": 0.9652,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 48,
+      "timestamp_seconds": 2.917,
+      "timestamp_formatted": "00:02.917",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        573,
+        375,
+        667,
+        499
+      ],
+      "norm_box": [
+        0.44766,
+        0.52083,
+        0.52109,
+        0.69306
+      ],
+      "confidence_score": 0.3633,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (36.3% < 50.0%)"
+    },
+    {
+      "frame_number": 49,
+      "timestamp_seconds": 2.977,
+      "timestamp_formatted": "00:02.977",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        392,
+        424,
+        441,
+        517
+      ],
+      "norm_box": [
+        0.30625,
+        0.58889,
+        0.34453,
+        0.71806
+      ],
+      "confidence_score": 0.8184,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 51,
+      "timestamp_seconds": 3.099,
+      "timestamp_formatted": "00:03.099",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        466,
+        168,
+        509,
+        283
+      ],
+      "norm_box": [
+        0.36406,
+        0.23333,
+        0.39766,
+        0.39306
+      ],
+      "confidence_score": 0.4975,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (49.8% < 50.0%)"
+    },
+    {
+      "frame_number": 56,
+      "timestamp_seconds": 3.403,
+      "timestamp_formatted": "00:03.403",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        518,
+        510,
+        653,
+        609
+      ],
+      "norm_box": [
+        0.40469,
+        0.70833,
+        0.51016,
+        0.84583
+      ],
+      "confidence_score": 0.9683,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 57,
+      "timestamp_seconds": 3.464,
+      "timestamp_formatted": "00:03.464",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        531,
+        503,
+        700,
+        617
+      ],
+      "norm_box": [
+        0.41484,
+        0.69861,
+        0.54688,
+        0.85694
+      ],
+      "confidence_score": 0.9228,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 58,
+      "timestamp_seconds": 3.524,
+      "timestamp_formatted": "00:03.524",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        561,
+        514,
+        735,
+        613
+      ],
+      "norm_box": [
+        0.43828,
+        0.71389,
+        0.57422,
+        0.85139
+      ],
+      "confidence_score": 0.9618,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 59,
+      "timestamp_seconds": 3.585,
+      "timestamp_formatted": "00:03.585",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        615,
+        541,
+        785,
+        614
+      ],
+      "norm_box": [
+        0.48047,
+        0.75139,
+        0.61328,
+        0.85278
+      ],
+      "confidence_score": 0.9784,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 60,
+      "timestamp_seconds": 3.646,
+      "timestamp_formatted": "00:03.646",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        630,
+        531,
+        803,
+        620
+      ],
+      "norm_box": [
+        0.49219,
+        0.7375,
+        0.62734,
+        0.86111
+      ],
+      "confidence_score": 0.9901,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 61,
+      "timestamp_seconds": 3.707,
+      "timestamp_formatted": "00:03.707",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        664,
+        553,
+        826,
+        647
+      ],
+      "norm_box": [
+        0.51875,
+        0.76806,
+        0.64531,
+        0.89861
+      ],
+      "confidence_score": 0.9871,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 62,
+      "timestamp_seconds": 3.767,
+      "timestamp_formatted": "00:03.767",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        701,
+        578,
+        832,
+        665
+      ],
+      "norm_box": [
+        0.54766,
+        0.80278,
+        0.65,
+        0.92361
+      ],
+      "confidence_score": 0.9952,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 63,
+      "timestamp_seconds": 3.828,
+      "timestamp_formatted": "00:03.828",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        691,
+        583,
+        754,
+        676
+      ],
+      "norm_box": [
+        0.53984,
+        0.80972,
+        0.58906,
+        0.93889
+      ],
+      "confidence_score": 0.7182,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 64,
+      "timestamp_seconds": 3.889,
+      "timestamp_formatted": "00:03.889",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        691,
+        569,
+        790,
+        715
+      ],
+      "norm_box": [
+        0.53984,
+        0.79028,
+        0.61719,
+        0.99306
+      ],
+      "confidence_score": 0.9376,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 68,
+      "timestamp_seconds": 4.132,
+      "timestamp_formatted": "00:04.132",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        701,
+        608,
+        774,
+        681
+      ],
+      "norm_box": [
+        0.54766,
+        0.84444,
+        0.60469,
+        0.94583
+      ],
+      "confidence_score": 0.7331,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 70,
+      "timestamp_seconds": 4.253,
+      "timestamp_formatted": "00:04.253",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        849,
+        252,
+        944,
+        420
+      ],
+      "norm_box": [
+        0.66328,
+        0.35,
+        0.7375,
+        0.58333
+      ],
+      "confidence_score": 0.4748,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (47.5% < 50.0%)"
+    },
+    {
+      "frame_number": 73,
+      "timestamp_seconds": 4.436,
+      "timestamp_formatted": "00:04.436",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        845,
+        651,
+        905,
+        716
+      ],
+      "norm_box": [
+        0.66016,
+        0.90417,
+        0.70703,
+        0.99444
+      ],
+      "confidence_score": 0.3561,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (35.6% < 50.0%)"
+    },
+    {
+      "frame_number": 81,
+      "timestamp_seconds": 4.922,
+      "timestamp_formatted": "00:04.922",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        1220,
+        606,
+        1269,
+        661
+      ],
+      "norm_box": [
+        0.95312,
+        0.84167,
+        0.99141,
+        0.91806
+      ],
+      "confidence_score": 0.9922,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 1-frame transient proposal)"
+    },
+    {
+      "frame_number": 82,
+      "timestamp_seconds": 4.983,
+      "timestamp_formatted": "00:04.983",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        1249,
+        642,
+        1278,
+        702
+      ],
+      "norm_box": [
+        0.97578,
+        0.89167,
+        0.99844,
+        0.975
+      ],
+      "confidence_score": 0.7951,
+      "validation_status": "UNPHYSICAL_HANDGUN_ASPECT_RATIO",
+      "rejection_reason": "UNPHYSICAL_HANDGUN_ASPECT_RATIO (AR=0.48 < 0.50 vertical distractor)"
+    }
+  ],
+  "records_20pct": [
+    {
+      "frame_number": 1,
+      "timestamp_seconds": 0.0,
+      "timestamp_formatted": "00:00.000",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        427,
+        341,
+        474,
+        407
+      ],
+      "norm_box": [
+        0.33359,
+        0.47361,
+        0.37031,
+        0.56528
+      ],
+      "confidence_score": 0.7885,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 1,
+      "timestamp_seconds": 0.0,
+      "timestamp_formatted": "00:00.000",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        281,
+        370,
+        326,
+        459
+      ],
+      "norm_box": [
+        0.21953,
+        0.51389,
+        0.25469,
+        0.6375
+      ],
+      "confidence_score": 0.7183,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 1,
+      "timestamp_seconds": 0.061,
+      "timestamp_formatted": "00:00.061",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        287,
+        377,
+        341,
+        460
+      ],
+      "norm_box": [
+        0.22422,
+        0.52361,
+        0.26641,
+        0.63889
+      ],
+      "confidence_score": 0.9248,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 1,
+      "timestamp_seconds": 0.061,
+      "timestamp_formatted": "00:00.061",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        426,
+        343,
+        473,
+        407
+      ],
+      "norm_box": [
+        0.33281,
+        0.47639,
+        0.36953,
+        0.56528
+      ],
+      "confidence_score": 0.9151,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 2,
+      "timestamp_seconds": 0.122,
+      "timestamp_formatted": "00:00.122",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        422,
+        341,
+        468,
+        408
+      ],
+      "norm_box": [
+        0.32969,
+        0.47361,
+        0.36562,
+        0.56667
+      ],
+      "confidence_score": 0.5866,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 3,
+      "timestamp_seconds": 0.182,
+      "timestamp_formatted": "00:00.182",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        421,
+        337,
+        463,
+        407
+      ],
+      "norm_box": [
+        0.32891,
+        0.46806,
+        0.36172,
+        0.56528
+      ],
+      "confidence_score": 0.7268,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 4,
+      "timestamp_seconds": 0.243,
+      "timestamp_formatted": "00:00.243",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        416,
+        339,
+        457,
+        405
+      ],
+      "norm_box": [
+        0.325,
+        0.47083,
+        0.35703,
+        0.5625
+      ],
+      "confidence_score": 0.9425,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 4,
+      "timestamp_seconds": 0.243,
+      "timestamp_formatted": "00:00.243",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        320,
+        379,
+        394,
+        435
+      ],
+      "norm_box": [
+        0.25,
+        0.52639,
+        0.30781,
+        0.60417
+      ],
+      "confidence_score": 0.7391,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 5,
+      "timestamp_seconds": 0.304,
+      "timestamp_formatted": "00:00.304",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        414,
+        342,
+        453,
+        405
+      ],
+      "norm_box": [
+        0.32344,
+        0.475,
+        0.35391,
+        0.5625
+      ],
+      "confidence_score": 0.911,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 7,
+      "timestamp_seconds": 0.425,
+      "timestamp_formatted": "00:00.425",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        415,
+        336,
+        450,
+        422
+      ],
+      "norm_box": [
+        0.32422,
+        0.46667,
+        0.35156,
+        0.58611
+      ],
+      "confidence_score": 0.8425,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 8,
+      "timestamp_seconds": 0.486,
+      "timestamp_formatted": "00:00.486",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        416,
+        335,
+        452,
+        407
+      ],
+      "norm_box": [
+        0.325,
+        0.46528,
+        0.35313,
+        0.56528
+      ],
+      "confidence_score": 0.6642,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 9,
+      "timestamp_seconds": 0.547,
+      "timestamp_formatted": "00:00.547",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        421,
+        336,
+        457,
+        395
+      ],
+      "norm_box": [
+        0.32891,
+        0.46667,
+        0.35703,
+        0.54861
+      ],
+      "confidence_score": 0.5672,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 10,
+      "timestamp_seconds": 0.608,
+      "timestamp_formatted": "00:00.608",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        420,
+        332,
+        459,
+        395
+      ],
+      "norm_box": [
+        0.32812,
+        0.46111,
+        0.35859,
+        0.54861
+      ],
+      "confidence_score": 0.4153,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 12,
+      "timestamp_seconds": 0.729,
+      "timestamp_formatted": "00:00.729",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        423,
+        336,
+        464,
+        402
+      ],
+      "norm_box": [
+        0.33047,
+        0.46667,
+        0.3625,
+        0.55833
+      ],
+      "confidence_score": 0.411,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 14,
+      "timestamp_seconds": 0.851,
+      "timestamp_formatted": "00:00.851",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        421,
+        341,
+        460,
+        407
+      ],
+      "norm_box": [
+        0.32891,
+        0.47361,
+        0.35938,
+        0.56528
+      ],
+      "confidence_score": 0.6276,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 15,
+      "timestamp_seconds": 0.911,
+      "timestamp_formatted": "00:00.911",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        420,
+        340,
+        459,
+        408
+      ],
+      "norm_box": [
+        0.32812,
+        0.47222,
+        0.35859,
+        0.56667
+      ],
+      "confidence_score": 0.9557,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 16,
+      "timestamp_seconds": 0.972,
+      "timestamp_formatted": "00:00.972",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        420,
+        341,
+        458,
+        409
+      ],
+      "norm_box": [
+        0.32812,
+        0.47361,
+        0.35781,
+        0.56806
+      ],
+      "confidence_score": 0.9708,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 17,
+      "timestamp_seconds": 1.033,
+      "timestamp_formatted": "00:01.033",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        419,
+        340,
+        457,
+        410
+      ],
+      "norm_box": [
+        0.32734,
+        0.47222,
+        0.35703,
+        0.56944
+      ],
+      "confidence_score": 0.9828,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 18,
+      "timestamp_seconds": 1.094,
+      "timestamp_formatted": "00:01.094",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        419,
+        340,
+        457,
+        410
+      ],
+      "norm_box": [
+        0.32734,
+        0.47222,
+        0.35703,
+        0.56944
+      ],
+      "confidence_score": 0.9811,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 19,
+      "timestamp_seconds": 1.155,
+      "timestamp_formatted": "00:01.155",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        421,
+        341,
+        459,
+        409
+      ],
+      "norm_box": [
+        0.32891,
+        0.47361,
+        0.35859,
+        0.56806
+      ],
+      "confidence_score": 0.965,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 20,
+      "timestamp_seconds": 1.215,
+      "timestamp_formatted": "00:01.215",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        421,
+        343,
+        462,
+        408
+      ],
+      "norm_box": [
+        0.32891,
+        0.47639,
+        0.36094,
+        0.56667
+      ],
+      "confidence_score": 0.9785,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 21,
+      "timestamp_seconds": 1.276,
+      "timestamp_formatted": "00:01.276",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        422,
+        345,
+        464,
+        407
+      ],
+      "norm_box": [
+        0.32969,
+        0.47917,
+        0.3625,
+        0.56528
+      ],
+      "confidence_score": 0.931,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 21,
+      "timestamp_seconds": 1.276,
+      "timestamp_formatted": "00:01.276",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        315,
+        380,
+        369,
+        456
+      ],
+      "norm_box": [
+        0.24609,
+        0.52778,
+        0.28828,
+        0.63333
+      ],
+      "confidence_score": 0.723,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 2-frame transient proposal)"
+    },
+    {
+      "frame_number": 22,
+      "timestamp_seconds": 1.337,
+      "timestamp_formatted": "00:01.337",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        423,
+        343,
+        466,
+        405
+      ],
+      "norm_box": [
+        0.33047,
+        0.47639,
+        0.36406,
+        0.5625
+      ],
+      "confidence_score": 0.9698,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 22,
+      "timestamp_seconds": 1.337,
+      "timestamp_formatted": "00:01.337",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        315,
+        380,
+        368,
+        455
+      ],
+      "norm_box": [
+        0.24609,
+        0.52778,
+        0.2875,
+        0.63194
+      ],
+      "confidence_score": 0.7121,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 2-frame transient proposal)"
+    },
+    {
+      "frame_number": 23,
+      "timestamp_seconds": 1.398,
+      "timestamp_formatted": "00:01.398",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        423,
+        342,
+        466,
+        405
+      ],
+      "norm_box": [
+        0.33047,
+        0.475,
+        0.36406,
+        0.5625
+      ],
+      "confidence_score": 0.9742,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 24,
+      "timestamp_seconds": 1.458,
+      "timestamp_formatted": "00:01.458",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        422,
+        342,
+        465,
+        404
+      ],
+      "norm_box": [
+        0.32969,
+        0.475,
+        0.36328,
+        0.56111
+      ],
+      "confidence_score": 0.955,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 25,
+      "timestamp_seconds": 1.519,
+      "timestamp_formatted": "00:01.519",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        422,
+        343,
+        463,
+        407
+      ],
+      "norm_box": [
+        0.32969,
+        0.47639,
+        0.36172,
+        0.56528
+      ],
+      "confidence_score": 0.9477,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 26,
+      "timestamp_seconds": 1.58,
+      "timestamp_formatted": "00:01.580",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        422,
+        341,
+        461,
+        406
+      ],
+      "norm_box": [
+        0.32969,
+        0.47361,
+        0.36016,
+        0.56389
+      ],
+      "confidence_score": 0.9586,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 27,
+      "timestamp_seconds": 1.641,
+      "timestamp_formatted": "00:01.641",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        423,
+        343,
+        460,
+        407
+      ],
+      "norm_box": [
+        0.33047,
+        0.47639,
+        0.35938,
+        0.56528
+      ],
+      "confidence_score": 0.9814,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 28,
+      "timestamp_seconds": 1.701,
+      "timestamp_formatted": "00:01.701",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        422,
+        343,
+        459,
+        407
+      ],
+      "norm_box": [
+        0.32969,
+        0.47639,
+        0.35859,
+        0.56528
+      ],
+      "confidence_score": 0.983,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 29,
+      "timestamp_seconds": 1.762,
+      "timestamp_formatted": "00:01.762",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        423,
+        344,
+        460,
+        408
+      ],
+      "norm_box": [
+        0.33047,
+        0.47778,
+        0.35938,
+        0.56667
+      ],
+      "confidence_score": 0.9859,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 30,
+      "timestamp_seconds": 1.823,
+      "timestamp_formatted": "00:01.823",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        422,
+        343,
+        461,
+        409
+      ],
+      "norm_box": [
+        0.32969,
+        0.47639,
+        0.36016,
+        0.56806
+      ],
+      "confidence_score": 0.9775,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 31,
+      "timestamp_seconds": 1.884,
+      "timestamp_formatted": "00:01.884",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        423,
+        343,
+        464,
+        413
+      ],
+      "norm_box": [
+        0.33047,
+        0.47639,
+        0.3625,
+        0.57361
+      ],
+      "confidence_score": 0.8515,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 32,
+      "timestamp_seconds": 1.944,
+      "timestamp_formatted": "00:01.944",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        424,
+        346,
+        466,
+        411
+      ],
+      "norm_box": [
+        0.33125,
+        0.48056,
+        0.36406,
+        0.57083
+      ],
+      "confidence_score": 0.8329,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 33,
+      "timestamp_seconds": 2.005,
+      "timestamp_formatted": "00:02.005",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        426,
+        347,
+        468,
+        412
+      ],
+      "norm_box": [
+        0.33281,
+        0.48194,
+        0.36562,
+        0.57222
+      ],
+      "confidence_score": 0.9604,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 34,
+      "timestamp_seconds": 2.066,
+      "timestamp_formatted": "00:02.066",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        427,
+        347,
+        469,
+        412
+      ],
+      "norm_box": [
+        0.33359,
+        0.48194,
+        0.36641,
+        0.57222
+      ],
+      "confidence_score": 0.8912,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 35,
+      "timestamp_seconds": 2.127,
+      "timestamp_formatted": "00:02.127",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        426,
+        348,
+        466,
+        416
+      ],
+      "norm_box": [
+        0.33281,
+        0.48333,
+        0.36406,
+        0.57778
+      ],
+      "confidence_score": 0.9204,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 36,
+      "timestamp_seconds": 2.187,
+      "timestamp_formatted": "00:02.187",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        427,
+        349,
+        466,
+        416
+      ],
+      "norm_box": [
+        0.33359,
+        0.48472,
+        0.36406,
+        0.57778
+      ],
+      "confidence_score": 0.7253,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 37,
+      "timestamp_seconds": 2.248,
+      "timestamp_formatted": "00:02.248",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        349,
+        396,
+        412,
+        458
+      ],
+      "norm_box": [
+        0.27266,
+        0.55,
+        0.32188,
+        0.63611
+      ],
+      "confidence_score": 0.8595,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 38,
+      "timestamp_seconds": 2.309,
+      "timestamp_formatted": "00:02.309",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        360,
+        400,
+        417,
+        458
+      ],
+      "norm_box": [
+        0.28125,
+        0.55556,
+        0.32578,
+        0.63611
+      ],
+      "confidence_score": 0.7006,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 39,
+      "timestamp_seconds": 2.37,
+      "timestamp_formatted": "00:02.370",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        365,
+        403,
+        436,
+        461
+      ],
+      "norm_box": [
+        0.28516,
+        0.55972,
+        0.34063,
+        0.64028
+      ],
+      "confidence_score": 0.983,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 40,
+      "timestamp_seconds": 2.431,
+      "timestamp_formatted": "00:02.431",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        350,
+        398,
+        445,
+        468
+      ],
+      "norm_box": [
+        0.27344,
+        0.55278,
+        0.34766,
+        0.65
+      ],
+      "confidence_score": 0.9846,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 41,
+      "timestamp_seconds": 2.491,
+      "timestamp_formatted": "00:02.491",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        356,
+        403,
+        456,
+        476
+      ],
+      "norm_box": [
+        0.27813,
+        0.55972,
+        0.35625,
+        0.66111
+      ],
+      "confidence_score": 0.9951,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 42,
+      "timestamp_seconds": 2.552,
+      "timestamp_formatted": "00:02.552",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        360,
+        409,
+        452,
+        482
+      ],
+      "norm_box": [
+        0.28125,
+        0.56806,
+        0.35313,
+        0.66944
+      ],
+      "confidence_score": 0.9945,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 43,
+      "timestamp_seconds": 2.613,
+      "timestamp_formatted": "00:02.613",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        376,
+        408,
+        446,
+        492
+      ],
+      "norm_box": [
+        0.29375,
+        0.56667,
+        0.34844,
+        0.68333
+      ],
+      "confidence_score": 0.967,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 43,
+      "timestamp_seconds": 2.613,
+      "timestamp_formatted": "00:02.613",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        389,
+        151,
+        428,
+        255
+      ],
+      "norm_box": [
+        0.30391,
+        0.20972,
+        0.33437,
+        0.35417
+      ],
+      "confidence_score": 0.4246,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (42.5% < 50.0%)"
+    },
+    {
+      "frame_number": 45,
+      "timestamp_seconds": 2.734,
+      "timestamp_formatted": "00:02.734",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        379,
+        415,
+        455,
+        541
+      ],
+      "norm_box": [
+        0.29609,
+        0.57639,
+        0.35547,
+        0.75139
+      ],
+      "confidence_score": 0.7924,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 46,
+      "timestamp_seconds": 2.795,
+      "timestamp_formatted": "00:02.795",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        415,
+        151,
+        457,
+        260
+      ],
+      "norm_box": [
+        0.32422,
+        0.20972,
+        0.35703,
+        0.36111
+      ],
+      "confidence_score": 0.6051,
+      "validation_status": "UNPHYSICAL_HANDGUN_ASPECT_RATIO",
+      "rejection_reason": "UNPHYSICAL_HANDGUN_ASPECT_RATIO (AR=0.39 < 0.50 vertical distractor)"
+    },
+    {
+      "frame_number": 46,
+      "timestamp_seconds": 2.795,
+      "timestamp_formatted": "00:02.795",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        375,
+        411,
+        434,
+        509
+      ],
+      "norm_box": [
+        0.29297,
+        0.57083,
+        0.33906,
+        0.70694
+      ],
+      "confidence_score": 0.5869,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 47,
+      "timestamp_seconds": 2.856,
+      "timestamp_formatted": "00:02.856",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        379,
+        414,
+        445,
+        542
+      ],
+      "norm_box": [
+        0.29609,
+        0.575,
+        0.34766,
+        0.75278
+      ],
+      "confidence_score": 0.9652,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 48,
+      "timestamp_seconds": 2.917,
+      "timestamp_formatted": "00:02.917",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        573,
+        375,
+        667,
+        499
+      ],
+      "norm_box": [
+        0.44766,
+        0.52083,
+        0.52109,
+        0.69306
+      ],
+      "confidence_score": 0.3633,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (36.3% < 50.0%)"
+    },
+    {
+      "frame_number": 49,
+      "timestamp_seconds": 2.977,
+      "timestamp_formatted": "00:02.977",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        392,
+        424,
+        441,
+        517
+      ],
+      "norm_box": [
+        0.30625,
+        0.58889,
+        0.34453,
+        0.71806
+      ],
+      "confidence_score": 0.8184,
+      "validation_status": "STATIC_BACKGROUND_TRAP",
+      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+    },
+    {
+      "frame_number": 51,
+      "timestamp_seconds": 3.099,
+      "timestamp_formatted": "00:03.099",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        466,
+        168,
+        509,
+        283
+      ],
+      "norm_box": [
+        0.36406,
+        0.23333,
+        0.39766,
+        0.39306
+      ],
+      "confidence_score": 0.4975,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (49.8% < 50.0%)"
+    },
+    {
+      "frame_number": 56,
+      "timestamp_seconds": 3.403,
+      "timestamp_formatted": "00:03.403",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        518,
+        510,
+        653,
+        609
+      ],
+      "norm_box": [
+        0.40469,
+        0.70833,
+        0.51016,
+        0.84583
+      ],
+      "confidence_score": 0.9683,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 57,
+      "timestamp_seconds": 3.464,
+      "timestamp_formatted": "00:03.464",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        531,
+        503,
+        700,
+        617
+      ],
+      "norm_box": [
+        0.41484,
+        0.69861,
+        0.54688,
+        0.85694
+      ],
+      "confidence_score": 0.9228,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 58,
+      "timestamp_seconds": 3.524,
+      "timestamp_formatted": "00:03.524",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        561,
+        514,
+        735,
+        613
+      ],
+      "norm_box": [
+        0.43828,
+        0.71389,
+        0.57422,
+        0.85139
+      ],
+      "confidence_score": 0.9618,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 59,
+      "timestamp_seconds": 3.585,
+      "timestamp_formatted": "00:03.585",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        615,
+        541,
+        785,
+        614
+      ],
+      "norm_box": [
+        0.48047,
+        0.75139,
+        0.61328,
+        0.85278
+      ],
+      "confidence_score": 0.9784,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 60,
+      "timestamp_seconds": 3.646,
+      "timestamp_formatted": "00:03.646",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        630,
+        531,
+        803,
+        620
+      ],
+      "norm_box": [
+        0.49219,
+        0.7375,
+        0.62734,
+        0.86111
+      ],
+      "confidence_score": 0.9901,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 61,
+      "timestamp_seconds": 3.707,
+      "timestamp_formatted": "00:03.707",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        664,
+        553,
+        826,
+        647
+      ],
+      "norm_box": [
+        0.51875,
+        0.76806,
+        0.64531,
+        0.89861
+      ],
+      "confidence_score": 0.9871,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 62,
+      "timestamp_seconds": 3.767,
+      "timestamp_formatted": "00:03.767",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        701,
+        578,
+        832,
+        665
+      ],
+      "norm_box": [
+        0.54766,
+        0.80278,
+        0.65,
+        0.92361
+      ],
+      "confidence_score": 0.9952,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 63,
+      "timestamp_seconds": 3.828,
+      "timestamp_formatted": "00:03.828",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        691,
+        583,
+        754,
+        676
+      ],
+      "norm_box": [
+        0.53984,
+        0.80972,
+        0.58906,
+        0.93889
+      ],
+      "confidence_score": 0.7182,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 64,
+      "timestamp_seconds": 3.889,
+      "timestamp_formatted": "00:03.889",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        691,
+        569,
+        790,
+        715
+      ],
+      "norm_box": [
+        0.53984,
+        0.79028,
+        0.61719,
+        0.99306
+      ],
+      "confidence_score": 0.9376,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 68,
+      "timestamp_seconds": 4.132,
+      "timestamp_formatted": "00:04.132",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "knife",
+      "bounding_box": [
+        701,
+        608,
+        774,
+        681
+      ],
+      "norm_box": [
+        0.54766,
+        0.84444,
+        0.60469,
+        0.94583
+      ],
+      "confidence_score": 0.7331,
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
+    },
+    {
+      "frame_number": 70,
+      "timestamp_seconds": 4.253,
+      "timestamp_formatted": "00:04.253",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        849,
+        252,
+        944,
+        420
+      ],
+      "norm_box": [
+        0.66328,
+        0.35,
+        0.7375,
+        0.58333
+      ],
+      "confidence_score": 0.4748,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (47.5% < 50.0%)"
+    },
+    {
+      "frame_number": 73,
+      "timestamp_seconds": 4.436,
+      "timestamp_formatted": "00:04.436",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        845,
+        651,
+        905,
+        716
+      ],
+      "norm_box": [
+        0.66016,
+        0.90417,
+        0.70703,
+        0.99444
+      ],
+      "confidence_score": 0.3561,
+      "validation_status": "BELOW_CLASS_THRESHOLD",
+      "rejection_reason": "BELOW_CLASS_THRESHOLD (35.6% < 50.0%)"
+    },
+    {
+      "frame_number": 81,
+      "timestamp_seconds": 4.922,
+      "timestamp_formatted": "00:04.922",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        1220,
+        606,
+        1269,
+        661
+      ],
+      "norm_box": [
+        0.95312,
+        0.84167,
+        0.99141,
+        0.91806
+      ],
+      "confidence_score": 0.9922,
+      "validation_status": "SUPPRESSED_TEMPORAL_FLICKER",
+      "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 1-frame transient proposal)"
+    },
+    {
+      "frame_number": 82,
+      "timestamp_seconds": 4.983,
+      "timestamp_formatted": "00:04.983",
+      "camera_id": "MC01_CAM02_Origi",
+      "object_label": "handgun",
+      "bounding_box": [
+        1249,
+        642,
+        1278,
+        702
+      ],
+      "norm_box": [
+        0.97578,
+        0.89167,
+        0.99844,
+        0.975
+      ],
+      "confidence_score": 0.7951,
+      "validation_status": "UNPHYSICAL_HANDGUN_ASPECT_RATIO",
+      "rejection_reason": "UNPHYSICAL_HANDGUN_ASPECT_RATIO (AR=0.48 < 0.50 vertical distractor)"
+    }
+  ]
+}

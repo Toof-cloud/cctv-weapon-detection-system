@@ -3,43 +3,17 @@
   "default_model": "Model 12 (Final Production SOTA)",
   "single_videos": [
     {
-      "video_id": "HG01_Enhanced",
+      "video_id": "HG01",
       "pair_id": "HG01",
-      "title": "CCTV Handgun 1 \u2014 Store Counter Robbery (230249) [Enhanced]",
-      "category": "Handgun",
-      "version": "Enhanced",
-      "camera_id": "HG01",
-      "source_filename": "HG01_Enhanced.mp4",
-      "sha256": "0a78e26a1ccb57da3a325990d3f7fe8f74de8764880fa73220dbcd52bd64aa31",
-      "orig_meta": {
-        "width": 1920,
-        "height": 1018,
-        "fps": 30.0,
-        "total_frames": 848,
-        "duration_seconds": 28.27,
-        "file_size_mb": 22.04
-      },
-      "web_meta": {
-        "width": 960,
-        "height": 510,
-        "fps": 30.0,
-        "total_frames": 848,
-        "duration_seconds": 28.27,
-        "file_size_mb": 2.03
-      },
-      "original_video_rel": "videos/HG01_Enhanced_original.mp4",
-      "annotated_video_rel": "videos/HG01_Enhanced_annotated.mp4",
-      "telemetry_rel": "telemetry/HG01_Enhanced.json"
-    },
-    {
-      "video_id": "HG01_Original",
-      "pair_id": "HG01",
-      "title": "CCTV Handgun 1 \u2014 Store Counter Robbery (230249) [Original]",
+      "title": "CCTV Handgun 1 \u2014 Store Counter Robbery (230249)",
       "category": "Handgun",
       "version": "Original",
+      "has_enhanced": true,
       "camera_id": "HG01",
       "source_filename": "HG01_Original.mp4",
+      "enhanced_filename": "HG01_Enhanced.mp4",
       "sha256": "67209dbbb7f5f58c33c9a83e7466bffd80223ca6ac4c404639ccff6a4a5a9fbe",
+      "enhanced_sha256": "0a78e26a1ccb57da3a325990d3f7fe8f74de8764880fa73220dbcd52bd64aa31",
       "orig_meta": {
         "width": 1920,
         "height": 1018,
@@ -56,26 +30,32 @@
         "duration_seconds": 28.27,
         "file_size_mb": 2.02
       },
-      "original_video_rel": "videos/HG01_Original_original.mp4",
-      "annotated_video_rel": "videos/HG01_Original_annotated.mp4",
-      "telemetry_rel": "telemetry/HG01_Original.json"
+      "original_video_rel": "videos/HG01_orig_raw.mp4",
+      "annotated_video_rel": "videos/HG01_orig_annot.mp4",
+      "telemetry_rel": "telemetry/HG01_orig.json",
+      "enhanced_original_video_rel": "videos/HG01_enh_raw.mp4",
+      "enhanced_annotated_video_rel": "videos/HG01_enh_annot.mp4",
+      "enhanced_telemetry_rel": "telemetry/HG01_enh.json"
     },
     {
-      "video_id": "HG02_Enhanced",
+      "video_id": "HG02",
       "pair_id": "HG02",
-      "title": "CCTV Handgun 2 \u2014 Retail Counter Armed Suspect (214325) [Enhanced]",
+      "title": "CCTV Handgun 2 \u2014 Retail Counter Armed Suspect (214325)",
       "category": "Handgun",
-      "version": "Enhanced",
+      "version": "Original",
+      "has_enhanced": true,
       "camera_id": "HG02",
-      "source_filename": "Screen Recording 2026-09-10 214325-HANDGUN_56698fa972b3_enhanced.mp4",
-      "sha256": "d2dc6427a575e785c594ee49e306da1fbad02eb1f7497274d6fe103246cb0bf1",
+      "source_filename": "Screen Recording 2026-09-10 214325-HANDGUN.mp4",
+      "enhanced_filename": "Screen Recording 2026-09-10 214325-HANDGUN_56698fa972b3_enhanced.mp4",
+      "sha256": "25ac3bf8a86401e89dc68b3a4f9c585cd7e20c2e7db4a1e6c120474825040b80",
+      "enhanced_sha256": "d2dc6427a575e785c594ee49e306da1fbad02eb1f7497274d6fe103246cb0bf1",
       "orig_meta": {
         "width": 1920,
         "height": 1080,
         "fps": 30.0,
         "total_frames": 171,
         "duration_seconds": 5.7,
-        "file_size_mb": 10.99
+        "file_size_mb": 5.69
       },
       "web_meta": {
         "width": 960,
@@ -83,21 +63,27 @@
         "fps": 30.0,
         "total_frames": 171,
         "duration_seconds": 5.7,
-        "file_size_mb": 0.66
+        "file_size_mb": 0.64
       },
-      "original_video_rel": "videos/HG02_Enhanced_original.mp4",
-      "annotated_video_rel": "videos/HG02_Enhanced_annotated.mp4",
-      "telemetry_rel": "telemetry/HG02_Enhanced.json"
+      "original_video_rel": "videos/HG02_orig_raw.mp4",
+      "annotated_video_rel": "videos/HG02_orig_annot.mp4",
+      "telemetry_rel": "telemetry/HG02_orig.json",
+      "enhanced_original_video_rel": "videos/HG02_enh_raw.mp4",
+      "enhanced_annotated_video_rel": "videos/HG02_enh_annot.mp4",
+      "enhanced_telemetry_rel": "telemetry/HG02_enh.json"
     },
     {
-      "video_id": "HG03_Original",
+      "video_id": "HG03",
       "pair_id": "HG03",
-      "title": "CCTV Handgun 3 \u2014 In-Store Surveillance Handgun [Original]",
+      "title": "CCTV Handgun 3 \u2014 In-Store Surveillance Handgun (213340)",
       "category": "Handgun",
       "version": "Original",
+      "has_enhanced": true,
       "camera_id": "HG03",
-      "source_filename": "Hangun Video - In store.mp4",
+      "source_filename": "HG02_Original.mp4",
+      "enhanced_filename": "HG02_Enhanced.mp4",
       "sha256": "fafdc1b98a23d157a9c4b5788e7ab9255e191310e493d18ea4204087d4913386",
+      "enhanced_sha256": "96299de5b65b004e2d140cc973d0846c66c9ac2cb287eea445903f46b0caef36",
       "orig_meta": {
         "width": 1920,
         "height": 1080,
@@ -114,19 +100,25 @@
         "duration_seconds": 8.03,
         "file_size_mb": 0.48
       },
-      "original_video_rel": "videos/HG03_Original_original.mp4",
-      "annotated_video_rel": "videos/HG03_Original_annotated.mp4",
-      "telemetry_rel": "telemetry/HG03_Original.json"
+      "original_video_rel": "videos/HG03_orig_raw.mp4",
+      "annotated_video_rel": "videos/HG03_orig_annot.mp4",
+      "telemetry_rel": "telemetry/HG03_orig.json",
+      "enhanced_original_video_rel": "videos/HG03_enh_raw.mp4",
+      "enhanced_annotated_video_rel": "videos/HG03_enh_annot.mp4",
+      "enhanced_telemetry_rel": "telemetry/HG03_enh.json"
     },
     {
-      "video_id": "KN01_Original",
+      "video_id": "KN01",
       "pair_id": "KN01",
-      "title": "CCTV Knife 1 \u2014 Corridor & Street Blade Incident (220101) [Original]",
+      "title": "CCTV Knife 1 \u2014 Corridor & Street Blade Incident (220101)",
       "category": "Knife",
       "version": "Original",
+      "has_enhanced": true,
       "camera_id": "KN01",
       "source_filename": "KN02_Original.mp4",
+      "enhanced_filename": "KN02_Enhanced.mp4",
       "sha256": "f7449ac6e292e2ece7572749f18d1d72322c7baceb1255720c52e02b3bf16ade",
+      "enhanced_sha256": "0d07b8c7e232dd1d3aea242f22d48aceeb7113b87b3f801fe603aafa69c8fbbd",
       "orig_meta": {
         "width": 1920,
         "height": 1080,
@@ -143,55 +135,32 @@
         "duration_seconds": 30.9,
         "file_size_mb": 1.62
       },
-      "original_video_rel": "videos/KN01_Original_original.mp4",
-      "annotated_video_rel": "videos/KN01_Original_annotated.mp4",
-      "telemetry_rel": "telemetry/KN01_Original.json"
+      "original_video_rel": "videos/KN01_orig_raw.mp4",
+      "annotated_video_rel": "videos/KN01_orig_annot.mp4",
+      "telemetry_rel": "telemetry/KN01_orig.json",
+      "enhanced_original_video_rel": "videos/KN01_enh_raw.mp4",
+      "enhanced_annotated_video_rel": "videos/KN01_enh_annot.mp4",
+      "enhanced_telemetry_rel": "telemetry/KN01_enh.json"
     },
     {
-      "video_id": "KN01_Enhanced",
-      "pair_id": "KN01",
-      "title": "CCTV Knife 1 \u2014 Corridor & Street Blade Incident (220101) [Enhanced]",
-      "category": "Knife",
-      "version": "Enhanced",
-      "camera_id": "KN01",
-      "source_filename": "KN02_Enhanced.mp4",
-      "sha256": "0d07b8c7e232dd1d3aea242f22d48aceeb7113b87b3f801fe603aafa69c8fbbd",
-      "orig_meta": {
-        "width": 1920,
-        "height": 1080,
-        "fps": 30.0,
-        "total_frames": 927,
-        "duration_seconds": 30.9,
-        "file_size_mb": 35.75
-      },
-      "web_meta": {
-        "width": 960,
-        "height": 540,
-        "fps": 30.0,
-        "total_frames": 927,
-        "duration_seconds": 30.9,
-        "file_size_mb": 1.68
-      },
-      "original_video_rel": "videos/KN01_Enhanced_original.mp4",
-      "annotated_video_rel": "videos/KN01_Enhanced_annotated.mp4",
-      "telemetry_rel": "telemetry/KN01_Enhanced.json"
-    },
-    {
-      "video_id": "KN02_Enhanced",
+      "video_id": "KN02",
       "pair_id": "KN02",
-      "title": "CCTV Knife 2 \u2014 Close-Quarters Blade Threat (220510) [Enhanced]",
+      "title": "CCTV Knife 2 \u2014 Close-Quarters Blade Threat (220510)",
       "category": "Knife",
-      "version": "Enhanced",
+      "version": "Original",
+      "has_enhanced": true,
       "camera_id": "KN02",
-      "source_filename": "Screen Recording 2026-09-10 220510-KNIFE_de569e413ac3_enhanced.mp4",
-      "sha256": "3a92dc6218013382501651d958ca481345c3b451b2465bcd063568e68b95f64b",
+      "source_filename": "Screen Recording 2026-09-10 220510-KNIFE.mp4",
+      "enhanced_filename": "Screen Recording 2026-09-10 220510-KNIFE_de569e413ac3_enhanced.mp4",
+      "sha256": "c3d001dd10bae7c60d2a295010679ea117a292a657c92688e1539786063ef1fc",
+      "enhanced_sha256": "3a92dc6218013382501651d958ca481345c3b451b2465bcd063568e68b95f64b",
       "orig_meta": {
         "width": 1912,
         "height": 1080,
         "fps": 30.0,
         "total_frames": 429,
         "duration_seconds": 14.3,
-        "file_size_mb": 9.07
+        "file_size_mb": 11.84
       },
       "web_meta": {
         "width": 960,
@@ -199,50 +168,27 @@
         "fps": 30.0,
         "total_frames": 429,
         "duration_seconds": 14.3,
-        "file_size_mb": 0.67
+        "file_size_mb": 0.68
       },
-      "original_video_rel": "videos/KN02_Enhanced_original.mp4",
-      "annotated_video_rel": "videos/KN02_Enhanced_annotated.mp4",
-      "telemetry_rel": "telemetry/KN02_Enhanced.json"
+      "original_video_rel": "videos/KN02_orig_raw.mp4",
+      "annotated_video_rel": "videos/KN02_orig_annot.mp4",
+      "telemetry_rel": "telemetry/KN02_orig.json",
+      "enhanced_original_video_rel": "videos/KN02_enh_raw.mp4",
+      "enhanced_annotated_video_rel": "videos/KN02_enh_annot.mp4",
+      "enhanced_telemetry_rel": "telemetry/KN02_enh.json"
     },
     {
-      "video_id": "KN03_Enhanced",
+      "video_id": "KN03",
       "pair_id": "KN03",
-      "title": "CCTV Knife 3 \u2014 Fast Indoor Blade Swing (230047) [Enhanced]",
-      "category": "Knife",
-      "version": "Enhanced",
-      "camera_id": "KN03",
-      "source_filename": "KN01_Enhanced.mp4",
-      "sha256": "062426f56aa4f4f4e00b3a93921507374ef1e21b476d5293fe9b96741365b3b2",
-      "orig_meta": {
-        "width": 1920,
-        "height": 982,
-        "fps": 30.0,
-        "total_frames": 258,
-        "duration_seconds": 8.6,
-        "file_size_mb": 6.05
-      },
-      "web_meta": {
-        "width": 960,
-        "height": 492,
-        "fps": 30.0,
-        "total_frames": 258,
-        "duration_seconds": 8.6,
-        "file_size_mb": 0.39
-      },
-      "original_video_rel": "videos/KN03_Enhanced_original.mp4",
-      "annotated_video_rel": "videos/KN03_Enhanced_annotated.mp4",
-      "telemetry_rel": "telemetry/KN03_Enhanced.json"
-    },
-    {
-      "video_id": "KN03_Original",
-      "pair_id": "KN03",
-      "title": "CCTV Knife 3 \u2014 Fast Indoor Blade Swing (230047) [Original]",
+      "title": "CCTV Knife 3 \u2014 Fast Indoor Blade Swing (230047)",
       "category": "Knife",
       "version": "Original",
+      "has_enhanced": true,
       "camera_id": "KN03",
       "source_filename": "KN01_Original.mp4",
+      "enhanced_filename": "KN01_Enhanced.mp4",
       "sha256": "ba3b8ceb736bfb9d729cdc4a0745f1518b115a6f10cad59c5c77465fa4c4aeca",
+      "enhanced_sha256": "062426f56aa4f4f4e00b3a93921507374ef1e21b476d5293fe9b96741365b3b2",
       "orig_meta": {
         "width": 1920,
         "height": 982,
@@ -259,9 +205,12 @@
         "duration_seconds": 8.6,
         "file_size_mb": 0.38
       },
-      "original_video_rel": "videos/KN03_Original_original.mp4",
-      "annotated_video_rel": "videos/KN03_Original_annotated.mp4",
-      "telemetry_rel": "telemetry/KN03_Original.json"
+      "original_video_rel": "videos/KN03_orig_raw.mp4",
+      "annotated_video_rel": "videos/KN03_orig_annot.mp4",
+      "telemetry_rel": "telemetry/KN03_orig.json",
+      "enhanced_original_video_rel": "videos/KN03_enh_raw.mp4",
+      "enhanced_annotated_video_rel": "videos/KN03_enh_annot.mp4",
+      "enhanced_telemetry_rel": "telemetry/KN03_enh.json"
     },
     {
       "video_id": "NW01",
@@ -269,9 +218,12 @@
       "title": "Non-Weapon 1 \u2014 Convenience Store Customer Interaction (Sample 1)",
       "category": "No-Weapon",
       "version": "Original",
+      "has_enhanced": false,
       "camera_id": "NW01",
       "source_filename": "NW01.mp4",
+      "enhanced_filename": null,
       "sha256": "ded6402794401366dd35d68a1cff2574c4e5084caa19ed998fefb4093f2d14c0",
+      "enhanced_sha256": null,
       "orig_meta": {
         "width": 1920,
         "height": 1080,
@@ -288,9 +240,12 @@
         "duration_seconds": 18.77,
         "file_size_mb": 0.91
       },
-      "original_video_rel": "videos/NW01_original.mp4",
-      "annotated_video_rel": "videos/NW01_annotated.mp4",
-      "telemetry_rel": "telemetry/NW01.json"
+      "original_video_rel": "videos/NW01_orig_raw.mp4",
+      "annotated_video_rel": "videos/NW01_orig_annot.mp4",
+      "telemetry_rel": "telemetry/NW01_orig.json",
+      "enhanced_original_video_rel": null,
+      "enhanced_annotated_video_rel": null,
+      "enhanced_telemetry_rel": null
     },
     {
       "video_id": "NW02",
@@ -298,9 +253,12 @@
       "title": "Non-Weapon 2 \u2014 Convenience Store Counter Drinks & Cups (Sample 2)",
       "category": "No-Weapon",
       "version": "Original",
+      "has_enhanced": false,
       "camera_id": "NW02",
       "source_filename": "NW02.mp4",
+      "enhanced_filename": null,
       "sha256": "8a714625ff74b06b6a9658c58cb587d8c070a76a6fcccd2b902564eb5a47141b",
+      "enhanced_sha256": null,
       "orig_meta": {
         "width": 1920,
         "height": 1080,
@@ -317,9 +275,12 @@
         "duration_seconds": 14.7,
         "file_size_mb": 1.29
       },
-      "original_video_rel": "videos/NW02_original.mp4",
-      "annotated_video_rel": "videos/NW02_annotated.mp4",
-      "telemetry_rel": "telemetry/NW02.json"
+      "original_video_rel": "videos/NW02_orig_raw.mp4",
+      "annotated_video_rel": "videos/NW02_orig_annot.mp4",
+      "telemetry_rel": "telemetry/NW02_orig.json",
+      "enhanced_original_video_rel": null,
+      "enhanced_annotated_video_rel": null,
+      "enhanced_telemetry_rel": null
     },
     {
       "video_id": "NW03",
@@ -327,9 +288,12 @@
       "title": "Non-Weapon 3 \u2014 Indoor Staged Handheld Utensil Distractor (Sample 3)",
       "category": "No-Weapon",
       "version": "Original",
+      "has_enhanced": false,
       "camera_id": "NW03",
       "source_filename": "NW04.mp4",
+      "enhanced_filename": null,
       "sha256": "99ecb10e478bda90b0bae9d519d0bd278f956b2300d0748e16fdbd9923503ee8",
+      "enhanced_sha256": null,
       "orig_meta": {
         "width": 1280,
         "height": 720,
@@ -346,157 +310,112 @@
         "duration_seconds": 10.67,
         "file_size_mb": 0.47
       },
-      "original_video_rel": "videos/NW03_original.mp4",
-      "annotated_video_rel": "videos/NW03_annotated.mp4",
-      "telemetry_rel": "telemetry/NW03.json"
+      "original_video_rel": "videos/NW03_orig_raw.mp4",
+      "annotated_video_rel": "videos/NW03_orig_annot.mp4",
+      "telemetry_rel": "telemetry/NW03_orig.json",
+      "enhanced_original_video_rel": null,
+      "enhanced_annotated_video_rel": null,
+      "enhanced_telemetry_rel": null
     }
   ],
   "multicam_scenes": [
     {
-      "scene_key": "MC_PAIR01_Enhanced",
-      "scene_id": "MC_PAIR01",
-      "title": "Multi-Camera Weapon 1 \u2014 Dual-Knife Transition Scene 007 (CAM 01 & CAM 02) [Enhanced]",
+      "scene_key": "MC01",
+      "scene_id": "MC01",
+      "title": "Multi-Camera Weapon 1 \u2014 Dual-Knife Transition Scene 007 (CAM 01 & CAM 02)",
       "category": "Multi-Camera Knife",
-      "version": "Enhanced",
+      "has_enhanced": true,
+      "sync_clock": "2026-09-12 11:59:04 AM (Wall-Clock Synced)",
       "cam1": {
-        "video_id": "MC_PAIR01_Enhanced_CAM01",
-        "pair_id": "MC_PAIR01",
-        "title": "Multi-Camera Weapon 1 \u2014 Dual-Knife Transition Scene 007 (CAM 01 & CAM 02) [Enhanced] \u2014 CAM-01",
+        "video_id": "MC01_CAM01",
+        "pair_id": "MC01_CAM01",
+        "title": "Multi-Camera Weapon 1 (Scene 007) \u2014 CAM-01",
         "category": "Multi-Camera Knife",
-        "version": "Enhanced",
+        "version": "Original",
+        "has_enhanced": true,
         "camera_id": "CAM-01",
-        "source_filename": "CAM1_SCENE007_enhanced.mp4",
-        "sha256": "055630f46ce51d545a7b637626ada81d2b9b35ac85d4f3ea71ca51abd76a6b3d",
+        "source_filename": "CAM1_SCENE007.mov",
+        "enhanced_filename": "CAM1_SCENE007_enhanced.mp4",
+        "sha256": "9f84ce989f211e2651c28358df5894547a63523c6ca31a0ec082d95afbe4d062",
+        "enhanced_sha256": "055630f46ce51d545a7b637626ada81d2b9b35ac85d4f3ea71ca51abd76a6b3d",
         "orig_meta": {
           "width": 1280,
           "height": 720,
           "fps": 15.016,
           "total_frames": 164,
           "duration_seconds": 10.92,
-          "file_size_mb": 2.35
+          "file_size_mb": 0.36
         },
         "web_meta": {
           "width": 960,
           "height": 540,
-          "fps": 15.016,
-          "total_frames": 164,
-          "duration_seconds": 10.92,
-          "file_size_mb": 0.45
+          "fps": 15.0,
+          "total_frames": 148,
+          "duration_seconds": 9.87,
+          "file_size_mb": 0.39
         },
-        "original_video_rel": "videos/MC_PAIR01_Enhanced_CAM01_original.mp4",
-        "annotated_video_rel": "videos/MC_PAIR01_Enhanced_CAM01_annotated.mp4",
-        "telemetry_rel": "telemetry/MC_PAIR01_Enhanced_CAM01.json"
+        "original_video_rel": "videos/MC01_CAM01_orig_raw.mp4",
+        "annotated_video_rel": "videos/MC01_CAM01_orig_annot.mp4",
+        "telemetry_rel": "telemetry/MC01_CAM01_orig.json",
+        "enhanced_original_video_rel": "videos/MC01_CAM01_enh_raw.mp4",
+        "enhanced_annotated_video_rel": "videos/MC01_CAM01_enh_annot.mp4",
+        "enhanced_telemetry_rel": "telemetry/MC01_CAM01_enh.json"
       },
       "cam2": {
-        "video_id": "MC_PAIR01_Enhanced_CAM02",
-        "pair_id": "MC_PAIR01",
-        "title": "Multi-Camera Weapon 1 \u2014 Dual-Knife Transition Scene 007 (CAM 01 & CAM 02) [Enhanced] \u2014 CAM-02",
+        "video_id": "MC01_CAM02",
+        "pair_id": "MC01_CAM02",
+        "title": "Multi-Camera Weapon 1 (Scene 007) \u2014 CAM-02",
         "category": "Multi-Camera Knife",
-        "version": "Enhanced",
+        "version": "Original",
+        "has_enhanced": true,
         "camera_id": "CAM-02",
-        "source_filename": "CAM2_SCENE007_enhanced.mp4",
-        "sha256": "76b36b19c21a1e439db12e6bdbe4f1c5128addc3b00e64539aba9567f62df173",
+        "source_filename": "CAM2_SCENE007.mp4",
+        "enhanced_filename": "CAM2_SCENE007_enhanced.mp4",
+        "sha256": "0a13414f5f8085949e8db43cc637de0335109bb701bd21e42f874e361fe7abcc",
+        "enhanced_sha256": "76b36b19c21a1e439db12e6bdbe4f1c5128addc3b00e64539aba9567f62df173",
         "orig_meta": {
           "width": 1280,
           "height": 720,
           "fps": 16.704,
           "total_frames": 151,
           "duration_seconds": 9.04,
-          "file_size_mb": 2.66
-        },
-        "web_meta": {
-          "width": 960,
-          "height": 540,
-          "fps": 16.704,
-          "total_frames": 151,
-          "duration_seconds": 9.04,
-          "file_size_mb": 0.59
-        },
-        "original_video_rel": "videos/MC_PAIR01_Enhanced_CAM02_original.mp4",
-        "annotated_video_rel": "videos/MC_PAIR01_Enhanced_CAM02_annotated.mp4",
-        "telemetry_rel": "telemetry/MC_PAIR01_Enhanced_CAM02.json"
-      }
-    },
-    {
-      "scene_key": "MC_PAIR02_Enhanced",
-      "scene_id": "MC_PAIR02",
-      "title": "Multi-Camera Weapon 2 \u2014 Handgun Suspect Transition Scene 012 (CAM 01 & CAM 02) [Enhanced]",
-      "category": "Multi-Camera Handgun",
-      "version": "Enhanced",
-      "cam1": {
-        "video_id": "MC_PAIR02_Enhanced_CAM01",
-        "pair_id": "MC_PAIR02",
-        "title": "Multi-Camera Weapon 2 \u2014 Handgun Suspect Transition Scene 012 (CAM 01 & CAM 02) [Enhanced] \u2014 CAM-01",
-        "category": "Multi-Camera Handgun",
-        "version": "Enhanced",
-        "camera_id": "CAM-01",
-        "source_filename": "MC03_CAM01_Enhanced.mp4",
-        "sha256": "c8e722ba965e2f027a38c1cb003d3df13ca5a35df77950a4701e57def3dcf2ad",
-        "orig_meta": {
-          "width": 1280,
-          "height": 720,
-          "fps": 14.829,
-          "total_frames": 156,
-          "duration_seconds": 10.52,
-          "file_size_mb": 2.15
-        },
-        "web_meta": {
-          "width": 960,
-          "height": 540,
-          "fps": 14.829,
-          "total_frames": 156,
-          "duration_seconds": 10.52,
           "file_size_mb": 0.43
         },
-        "original_video_rel": "videos/MC_PAIR02_Enhanced_CAM01_original.mp4",
-        "annotated_video_rel": "videos/MC_PAIR02_Enhanced_CAM01_annotated.mp4",
-        "telemetry_rel": "telemetry/MC_PAIR02_Enhanced_CAM01.json"
-      },
-      "cam2": {
-        "video_id": "MC_PAIR02_Enhanced_CAM02",
-        "pair_id": "MC_PAIR02",
-        "title": "Multi-Camera Weapon 2 \u2014 Handgun Suspect Transition Scene 012 (CAM 01 & CAM 02) [Enhanced] \u2014 CAM-02",
-        "category": "Multi-Camera Handgun",
-        "version": "Enhanced",
-        "camera_id": "CAM-02",
-        "source_filename": "MC03_CAM02_Enhanced.mp4",
-        "sha256": "a91e517d9a61ffe6dc57cfd12e132149b15ccf882429a258f72d419b433d5f3f",
-        "orig_meta": {
-          "width": 1280,
-          "height": 720,
-          "fps": 16.737,
-          "total_frames": 158,
-          "duration_seconds": 9.44,
-          "file_size_mb": 2.71
-        },
         "web_meta": {
           "width": 960,
           "height": 540,
-          "fps": 16.737,
-          "total_frames": 158,
-          "duration_seconds": 9.44,
-          "file_size_mb": 0.51
+          "fps": 16.63,
+          "total_frames": 151,
+          "duration_seconds": 9.08,
+          "file_size_mb": 0.57
         },
-        "original_video_rel": "videos/MC_PAIR02_Enhanced_CAM02_original.mp4",
-        "annotated_video_rel": "videos/MC_PAIR02_Enhanced_CAM02_annotated.mp4",
-        "telemetry_rel": "telemetry/MC_PAIR02_Enhanced_CAM02.json"
+        "original_video_rel": "videos/MC01_CAM02_orig_raw.mp4",
+        "annotated_video_rel": "videos/MC01_CAM02_orig_annot.mp4",
+        "telemetry_rel": "telemetry/MC01_CAM02_orig.json",
+        "enhanced_original_video_rel": "videos/MC01_CAM02_enh_raw.mp4",
+        "enhanced_annotated_video_rel": "videos/MC01_CAM02_enh_annot.mp4",
+        "enhanced_telemetry_rel": "telemetry/MC01_CAM02_enh.json"
       }
     },
     {
-      "scene_key": "MC_PAIR02_Original",
-      "scene_id": "MC_PAIR02",
-      "title": "Multi-Camera Weapon 2 \u2014 Handgun Suspect Transition Scene 012 (CAM 01 & CAM 02) [Original]",
+      "scene_key": "MC02",
+      "scene_id": "MC02",
+      "title": "Multi-Camera Weapon 2 \u2014 Handgun Suspect Transition Scene 012 (CAM 01 & CAM 02)",
       "category": "Multi-Camera Handgun",
-      "version": "Original",
+      "has_enhanced": true,
+      "sync_clock": "2026-09-12 12:05:22 PM (Wall-Clock Synced)",
       "cam1": {
-        "video_id": "MC_PAIR02_Original_CAM01",
-        "pair_id": "MC_PAIR02",
-        "title": "Multi-Camera Weapon 2 \u2014 Handgun Suspect Transition Scene 012 (CAM 01 & CAM 02) [Original] \u2014 CAM-01",
+        "video_id": "MC02_CAM01",
+        "pair_id": "MC02_CAM01",
+        "title": "Multi-Camera Weapon 2 (Scene 012) \u2014 CAM-01",
         "category": "Multi-Camera Handgun",
         "version": "Original",
+        "has_enhanced": true,
         "camera_id": "CAM-01",
         "source_filename": "MC03_CAM01_Original.mov",
+        "enhanced_filename": "MC03_CAM01_Enhanced.mp4",
         "sha256": "f658ebc4ea20aef37720ab3d2f122f343e95bc3093e2d49bc076e5fcf81f1b4e",
+        "enhanced_sha256": "c8e722ba965e2f027a38c1cb003d3df13ca5a35df77950a4701e57def3dcf2ad",
         "orig_meta": {
           "width": 1280,
           "height": 720,
@@ -513,19 +432,25 @@
           "duration_seconds": 10.53,
           "file_size_mb": 0.38
         },
-        "original_video_rel": "videos/MC_PAIR02_Original_CAM01_original.mp4",
-        "annotated_video_rel": "videos/MC_PAIR02_Original_CAM01_annotated.mp4",
-        "telemetry_rel": "telemetry/MC_PAIR02_Original_CAM01.json"
+        "original_video_rel": "videos/MC02_CAM01_orig_raw.mp4",
+        "annotated_video_rel": "videos/MC02_CAM01_orig_annot.mp4",
+        "telemetry_rel": "telemetry/MC02_CAM01_orig.json",
+        "enhanced_original_video_rel": "videos/MC02_CAM01_enh_raw.mp4",
+        "enhanced_annotated_video_rel": "videos/MC02_CAM01_enh_annot.mp4",
+        "enhanced_telemetry_rel": "telemetry/MC02_CAM01_enh.json"
       },
       "cam2": {
-        "video_id": "MC_PAIR02_Original_CAM02",
-        "pair_id": "MC_PAIR02",
-        "title": "Multi-Camera Weapon 2 \u2014 Handgun Suspect Transition Scene 012 (CAM 01 & CAM 02) [Original] \u2014 CAM-02",
+        "video_id": "MC02_CAM02",
+        "pair_id": "MC02_CAM02",
+        "title": "Multi-Camera Weapon 2 (Scene 012) \u2014 CAM-02",
         "category": "Multi-Camera Handgun",
         "version": "Original",
+        "has_enhanced": true,
         "camera_id": "CAM-02",
         "source_filename": "MC03_CAM02_Original.mp4",
+        "enhanced_filename": "MC03_CAM02_Enhanced.mp4",
         "sha256": "57fdfc5bd529731aaec4b242cfa4b6a1841ffca059152d65c298aebaaeb58e53",
+        "enhanced_sha256": "a91e517d9a61ffe6dc57cfd12e132149b15ccf882429a258f72d419b433d5f3f",
         "orig_meta": {
           "width": 1280,
           "height": 720,
@@ -542,91 +467,33 @@
           "duration_seconds": 9.44,
           "file_size_mb": 0.48
         },
-        "original_video_rel": "videos/MC_PAIR02_Original_CAM02_original.mp4",
-        "annotated_video_rel": "videos/MC_PAIR02_Original_CAM02_annotated.mp4",
-        "telemetry_rel": "telemetry/MC_PAIR02_Original_CAM02.json"
+        "original_video_rel": "videos/MC02_CAM02_orig_raw.mp4",
+        "annotated_video_rel": "videos/MC02_CAM02_orig_annot.mp4",
+        "telemetry_rel": "telemetry/MC02_CAM02_orig.json",
+        "enhanced_original_video_rel": "videos/MC02_CAM02_enh_raw.mp4",
+        "enhanced_annotated_video_rel": "videos/MC02_CAM02_enh_annot.mp4",
+        "enhanced_telemetry_rel": "telemetry/MC02_CAM02_enh.json"
       }
     },
     {
-      "scene_key": "MC_PAIR03_Enhanced",
-      "scene_id": "MC_PAIR03",
-      "title": "Multi-Camera Weapon 3 \u2014 Kitchen Knife Transition Scene 001 (CAM 01 & CAM 02) [Enhanced]",
+      "scene_key": "MC03",
+      "scene_id": "MC03",
+      "title": "Multi-Camera Weapon 3 \u2014 Kitchen Knife Transition Scene 001 (CAM 01 & CAM 02)",
       "category": "Multi-Camera Knife",
-      "version": "Enhanced",
+      "has_enhanced": true,
+      "sync_clock": "2026-09-12 11:48:00 AM (Wall-Clock Synced)",
       "cam1": {
-        "video_id": "MC_PAIR03_Enhanced_CAM01",
-        "pair_id": "MC_PAIR03",
-        "title": "Multi-Camera Weapon 3 \u2014 Kitchen Knife Transition Scene 001 (CAM 01 & CAM 02) [Enhanced] \u2014 CAM-01",
-        "category": "Multi-Camera Knife",
-        "version": "Enhanced",
-        "camera_id": "CAM-01",
-        "source_filename": "MC01_CAM01_Enhanced.mp4",
-        "sha256": "48f63934cdac455c67e0d5488bf4d95781c7ca8872c462a1ec6bd53162fce65f",
-        "orig_meta": {
-          "width": 1280,
-          "height": 720,
-          "fps": 15.0,
-          "total_frames": 135,
-          "duration_seconds": 9.0,
-          "file_size_mb": 1.86
-        },
-        "web_meta": {
-          "width": 960,
-          "height": 540,
-          "fps": 15.0,
-          "total_frames": 135,
-          "duration_seconds": 9.0,
-          "file_size_mb": 0.36
-        },
-        "original_video_rel": "videos/MC_PAIR03_Enhanced_CAM01_original.mp4",
-        "annotated_video_rel": "videos/MC_PAIR03_Enhanced_CAM01_annotated.mp4",
-        "telemetry_rel": "telemetry/MC_PAIR03_Enhanced_CAM01.json"
-      },
-      "cam2": {
-        "video_id": "MC_PAIR03_Enhanced_CAM02",
-        "pair_id": "MC_PAIR03",
-        "title": "Multi-Camera Weapon 3 \u2014 Kitchen Knife Transition Scene 001 (CAM 01 & CAM 02) [Enhanced] \u2014 CAM-02",
-        "category": "Multi-Camera Knife",
-        "version": "Enhanced",
-        "camera_id": "CAM-02",
-        "source_filename": "MC01_CAM02_Enhanced.mp4",
-        "sha256": "0fc7c59c36796974e06405e6e5dbc100e821e653b5cf5f051710efd3f7f30fd8",
-        "orig_meta": {
-          "width": 1280,
-          "height": 720,
-          "fps": 16.457,
-          "total_frames": 131,
-          "duration_seconds": 7.96,
-          "file_size_mb": 1.95
-        },
-        "web_meta": {
-          "width": 960,
-          "height": 540,
-          "fps": 16.457,
-          "total_frames": 131,
-          "duration_seconds": 7.96,
-          "file_size_mb": 0.35
-        },
-        "original_video_rel": "videos/MC_PAIR03_Enhanced_CAM02_original.mp4",
-        "annotated_video_rel": "videos/MC_PAIR03_Enhanced_CAM02_annotated.mp4",
-        "telemetry_rel": "telemetry/MC_PAIR03_Enhanced_CAM02.json"
-      }
-    },
-    {
-      "scene_key": "MC_PAIR03_Original",
-      "scene_id": "MC_PAIR03",
-      "title": "Multi-Camera Weapon 3 \u2014 Kitchen Knife Transition Scene 001 (CAM 01 & CAM 02) [Original]",
-      "category": "Multi-Camera Knife",
-      "version": "Original",
-      "cam1": {
-        "video_id": "MC_PAIR03_Original_CAM01",
-        "pair_id": "MC_PAIR03",
-        "title": "Multi-Camera Weapon 3 \u2014 Kitchen Knife Transition Scene 001 (CAM 01 & CAM 02) [Original] \u2014 CAM-01",
+        "video_id": "MC03_CAM01",
+        "pair_id": "MC03_CAM01",
+        "title": "Multi-Camera Weapon 3 (Scene 001) \u2014 CAM-01",
         "category": "Multi-Camera Knife",
         "version": "Original",
+        "has_enhanced": true,
         "camera_id": "CAM-01",
         "source_filename": "MC01_CAM01_Original.mov",
+        "enhanced_filename": "MC01_CAM01_Enhanced.mp4",
         "sha256": "1bf66047940329ed8ce344229f8470dbedbdd14b17957754c4b548f52bd7d29a",
+        "enhanced_sha256": "48f63934cdac455c67e0d5488bf4d95781c7ca8872c462a1ec6bd53162fce65f",
         "orig_meta": {
           "width": 1280,
           "height": 720,
@@ -643,19 +510,25 @@
           "duration_seconds": 9.0,
           "file_size_mb": 0.32
         },
-        "original_video_rel": "videos/MC_PAIR03_Original_CAM01_original.mp4",
-        "annotated_video_rel": "videos/MC_PAIR03_Original_CAM01_annotated.mp4",
-        "telemetry_rel": "telemetry/MC_PAIR03_Original_CAM01.json"
+        "original_video_rel": "videos/MC03_CAM01_orig_raw.mp4",
+        "annotated_video_rel": "videos/MC03_CAM01_orig_annot.mp4",
+        "telemetry_rel": "telemetry/MC03_CAM01_orig.json",
+        "enhanced_original_video_rel": "videos/MC03_CAM01_enh_raw.mp4",
+        "enhanced_annotated_video_rel": "videos/MC03_CAM01_enh_annot.mp4",
+        "enhanced_telemetry_rel": "telemetry/MC03_CAM01_enh.json"
       },
       "cam2": {
-        "video_id": "MC_PAIR03_Original_CAM02",
-        "pair_id": "MC_PAIR03",
-        "title": "Multi-Camera Weapon 3 \u2014 Kitchen Knife Transition Scene 001 (CAM 01 & CAM 02) [Original] \u2014 CAM-02",
+        "video_id": "MC03_CAM02",
+        "pair_id": "MC03_CAM02",
+        "title": "Multi-Camera Weapon 3 (Scene 001) \u2014 CAM-02",
         "category": "Multi-Camera Knife",
         "version": "Original",
+        "has_enhanced": true,
         "camera_id": "CAM-02",
         "source_filename": "MC01_CAM02_Original.mp4",
+        "enhanced_filename": "MC01_CAM02_Enhanced.mp4",
         "sha256": "ad883d9cc5d7aa06b1211c15c3d19d104bb11590a81e55b65173034525aa2ae7",
+        "enhanced_sha256": "0fc7c59c36796974e06405e6e5dbc100e821e653b5cf5f051710efd3f7f30fd8",
         "orig_meta": {
           "width": 1280,
           "height": 720,
@@ -672,26 +545,33 @@
           "duration_seconds": 7.96,
           "file_size_mb": 0.32
         },
-        "original_video_rel": "videos/MC_PAIR03_Original_CAM02_original.mp4",
-        "annotated_video_rel": "videos/MC_PAIR03_Original_CAM02_annotated.mp4",
-        "telemetry_rel": "telemetry/MC_PAIR03_Original_CAM02.json"
+        "original_video_rel": "videos/MC03_CAM02_orig_raw.mp4",
+        "annotated_video_rel": "videos/MC03_CAM02_orig_annot.mp4",
+        "telemetry_rel": "telemetry/MC03_CAM02_orig.json",
+        "enhanced_original_video_rel": "videos/MC03_CAM02_enh_raw.mp4",
+        "enhanced_annotated_video_rel": "videos/MC03_CAM02_enh_annot.mp4",
+        "enhanced_telemetry_rel": "telemetry/MC03_CAM02_enh.json"
       }
     },
     {
-      "scene_key": "MC_NONWEAPON_Original",
-      "scene_id": "MC_NONWEAPON",
-      "title": "Multi-Camera Non-Weapon \u2014 Staged Smartphone Distractor (CAM 01 & CAM 02) [0 FP]",
+      "scene_key": "MC04",
+      "scene_id": "MC04",
+      "title": "Multi-Camera Non-Weapon \u2014 Staged Smartphone Distractor (CAM 01 & CAM 02)",
       "category": "Multi-Camera No-Weapon",
-      "version": "Original",
+      "has_enhanced": false,
+      "sync_clock": "2026-11-20 12:49:16 PM (Wall-Clock Synced)",
       "cam1": {
-        "video_id": "MC_NONWEAPON_Original_CAM01",
-        "pair_id": "MC_NONWEAPON",
-        "title": "Multi-Camera Non-Weapon \u2014 Staged Smartphone Distractor (CAM 01 & CAM 02) [0 FP] \u2014 CAM-01",
+        "video_id": "MC04_CAM01",
+        "pair_id": "MC04_CAM01",
+        "title": "Multi-Camera Non-Weapon (Smartphone) \u2014 CAM-01",
         "category": "Multi-Camera No-Weapon",
         "version": "Original",
+        "has_enhanced": false,
         "camera_id": "CAM-01",
         "source_filename": "1869451F17C5_20261120124918870_cam0.mp4",
+        "enhanced_filename": null,
         "sha256": "f6af0607f93d0abdc5cf20885ff2c5668d49904797af7d6f1a4280eed63da301",
+        "enhanced_sha256": null,
         "orig_meta": {
           "width": 1280,
           "height": 720,
@@ -708,19 +588,25 @@
           "duration_seconds": 9.44,
           "file_size_mb": 0.55
         },
-        "original_video_rel": "videos/MC_NONWEAPON_Original_CAM01_original.mp4",
-        "annotated_video_rel": "videos/MC_NONWEAPON_Original_CAM01_annotated.mp4",
-        "telemetry_rel": "telemetry/MC_NONWEAPON_Original_CAM01.json"
+        "original_video_rel": "videos/MC04_CAM01_orig_raw.mp4",
+        "annotated_video_rel": "videos/MC04_CAM01_orig_annot.mp4",
+        "telemetry_rel": "telemetry/MC04_CAM01_orig.json",
+        "enhanced_original_video_rel": null,
+        "enhanced_annotated_video_rel": null,
+        "enhanced_telemetry_rel": null
       },
       "cam2": {
-        "video_id": "MC_NONWEAPON_Original_CAM02",
-        "pair_id": "MC_NONWEAPON",
-        "title": "Multi-Camera Non-Weapon \u2014 Staged Smartphone Distractor (CAM 01 & CAM 02) [0 FP] \u2014 CAM-02",
+        "video_id": "MC04_CAM02",
+        "pair_id": "MC04_CAM02",
+        "title": "Multi-Camera Non-Weapon (Smartphone) \u2014 CAM-02",
         "category": "Multi-Camera No-Weapon",
         "version": "Original",
+        "has_enhanced": false,
         "camera_id": "CAM-02",
         "source_filename": "1795150158464_0.mp4",
+        "enhanced_filename": null,
         "sha256": "c58f82b1f8e0fbc47cec553044db056c365ab18ea26cfeda61160511f1822bd8",
+        "enhanced_sha256": null,
         "orig_meta": {
           "width": 1280,
           "height": 720,
@@ -732,14 +618,17 @@
         "web_meta": {
           "width": 960,
           "height": 540,
-          "fps": 16.545,
-          "total_frames": 182,
-          "duration_seconds": 11.0,
-          "file_size_mb": 0.36
+          "fps": 16.6,
+          "total_frames": 166,
+          "duration_seconds": 10.0,
+          "file_size_mb": 0.35
         },
-        "original_video_rel": "videos/MC_NONWEAPON_Original_CAM02_original.mp4",
-        "annotated_video_rel": "videos/MC_NONWEAPON_Original_CAM02_annotated.mp4",
-        "telemetry_rel": "telemetry/MC_NONWEAPON_Original_CAM02.json"
+        "original_video_rel": "videos/MC04_CAM02_orig_raw.mp4",
+        "annotated_video_rel": "videos/MC04_CAM02_orig_annot.mp4",
+        "telemetry_rel": "telemetry/MC04_CAM02_orig.json",
+        "enhanced_original_video_rel": null,
+        "enhanced_annotated_video_rel": null,
+        "enhanced_telemetry_rel": null
       }
     }
   ]
