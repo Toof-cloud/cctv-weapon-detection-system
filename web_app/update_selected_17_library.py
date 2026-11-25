@@ -1,20 +1,10 @@
 """
-Update the FORENSIKADA Web App Prepared Evaluation Library (`web_app/library_data/`)
-from a clean, editable selection list of the 17 chosen videos across the 5 categories:
-  1. 4 CCTV Handgun videos
-  2. 4 CCTV Knife videos
-  3. 3 Staged Multi-Camera weapon pairs (CAM-01 & CAM-02)
-  4. 3 Non-Handgun Staged Dataset videos (plus the synchronized Smartphone Multi-Camera Non-Weapon pair)
-  5. 3 Non-Handgun Convenience Store / Real CCTV videos
-
-How to change or swap any video later:
-  1. Open this file (`web_app/update_selected_17_library.py`)
-  2. Edit `SELECTED_SINGLE_VIDEOS` or `SELECTED_MULTICAM_SCENES` using any `candidate_name`
-     from `outputs/00_GOOGLE_DRIVE_MODEL12_ANNOTATED_VIDEOS_FOR_SELECTION/ALL_CANDIDATES_MODEL12_LEADERBOARD.csv`
-  3. Run:
-       .\.venv\Scripts\python.exe web_app/update_selected_17_library.py
-  4. Push to GitHub (`git add web_app/library_data && git commit -m "Update web videos" && git push`)
-     — Streamlit Community Cloud updates your live 24/7 URL automatically!
+Build the Final FORENSIKADA Web App Prepared Evaluation Library (`web_app/library_data/`):
+  - 3 Single-Cam CCTV Handgun Scenes (HG01 [Enhanced + Original], HG02 [214325], HG03 [InStore Handgun])
+  - 3 Single-Cam CCTV Knife Scenes (KN01 [220101 Original + Enhanced], KN02 [220510], KN03 [230047 Enhanced + Original])
+  - 3 Single-Cam Non-Weapon Scenes (NW01 Convenience Store 1, NW02 Convenience Store 2, NW03 Staged Handheld Distractor — ALL 0 FP / 0 ghost boxes)
+  - 3 Multi-Camera Weapon Pairs (Scene 007 Dual Knives, Scene 012 Handgun, Scene 001 Kitchen Knife — ALL corroborated on CAM-01 & CAM-02)
+  - 1 Multi-Camera Non-Weapon Pair (Nov 20 Pair 05 Smartphone CAM-01 & CAM-02 — 0 FP / 0 ghost boxes)
 """
 from __future__ import annotations
 
@@ -55,10 +45,12 @@ def find_ffmpeg() -> str:
 FFMPEG_BIN = find_ffmpeg()
 
 # ==============================================================================
-# EDIT THIS LIST ANYTIME IF YOUR GROUPMATES WANT TO SWAP ANY OF THE 17 VIDEOS
+# FINAL APPROVED SELECTION:
+#   3 Single-Cam Handgun + 3 Single-Cam Knife + 3 Single-Cam Non-Weapon
+#   + 3 Multi-Camera Weapon Pairs + 1 Multi-Camera Non-Weapon Pair
 # ==============================================================================
 SELECTED_SINGLE_VIDEOS = [
-    # --- 1. 4 CCTV HANDGUN VIDEOS (plus Original counterparts for BasicVSR++ toggle where available) ---
+    # --- 1. 3 CCTV HANDGUN SCENES ---
     {
         "video_id": "HG01_Enhanced",
         "pair_id": "HG01",
@@ -78,60 +70,36 @@ SELECTED_SINGLE_VIDEOS = [
     {
         "video_id": "HG02_Enhanced",
         "pair_id": "HG02",
-        "candidate_name": "HG03_HallwayHandgunDraw_Enhanced",
-        "title": "CCTV Handgun 2 — Indoor Hallway Handgun Draw [Enhanced]",
+        "candidate_name": "CCTV_HG_SR_2026-09-10_214325-HANDGUN_56698fa972b3_",
+        "title": "CCTV Handgun 2 — Retail Counter Armed Suspect (214325) [Enhanced]",
         "category": "Handgun",
         "version": "Enhanced",
     },
     {
-        "video_id": "HG02_Original",
-        "pair_id": "HG02",
-        "candidate_name": "HG03_HallwayHandgunDraw_Original",
-        "title": "CCTV Handgun 2 — Indoor Hallway Handgun Draw [Original]",
-        "category": "Handgun",
-        "version": "Original",
-    },
-    {
-        "video_id": "HG03_Enhanced",
+        "video_id": "HG03_Original",
         "pair_id": "HG03",
-        "candidate_name": "CCTV_HG_SR_2026-09-10_213824-HANDGUN_41c923d345d9_",
-        "title": "CCTV Handgun 3 — Retail Surveillance Armed Suspect (213824) [Enhanced]",
-        "category": "Handgun",
-        "version": "Enhanced",
-    },
-    {
-        "video_id": "HG04_Enhanced",
-        "pair_id": "HG04",
-        "candidate_name": "HG02_213340_StreetHandgun_Enhanced",
-        "title": "CCTV Handgun 4 — Elevated Night Street Surveillance (213340) [Enhanced]",
-        "category": "Handgun",
-        "version": "Enhanced",
-    },
-    {
-        "video_id": "HG04_Original",
-        "pair_id": "HG04",
-        "candidate_name": "HG02_213340_StreetHandgun_Original",
-        "title": "CCTV Handgun 4 — Elevated Night Street Surveillance (213340) [Original]",
+        "candidate_name": "CCTV_HG_InStore_Handgun",
+        "title": "CCTV Handgun 3 — In-Store Surveillance Handgun [Original]",
         "category": "Handgun",
         "version": "Original",
     },
 
-    # --- 2. 4 CCTV KNIFE VIDEOS ---
-    {
-        "video_id": "KN01_Enhanced",
-        "pair_id": "KN01",
-        "candidate_name": "KN02_220101_StreetKnife_Enhanced",
-        "title": "CCTV Knife 1 — Corridor & Street Blade Assault (220101) [Enhanced]",
-        "category": "Knife",
-        "version": "Enhanced",
-    },
+    # --- 2. 3 CCTV KNIFE SCENES ---
     {
         "video_id": "KN01_Original",
         "pair_id": "KN01",
         "candidate_name": "KN02_220101_StreetKnife_Original",
-        "title": "CCTV Knife 1 — Corridor & Street Blade Assault (220101) [Original]",
+        "title": "CCTV Knife 1 — Corridor & Street Blade Incident (220101) [Original]",
         "category": "Knife",
         "version": "Original",
+    },
+    {
+        "video_id": "KN01_Enhanced",
+        "pair_id": "KN01",
+        "candidate_name": "KN02_220101_StreetKnife_Enhanced",
+        "title": "CCTV Knife 1 — Corridor & Street Blade Incident (220101) [Enhanced]",
+        "category": "Knife",
+        "version": "Enhanced",
     },
     {
         "video_id": "KN02_Enhanced",
@@ -157,75 +125,41 @@ SELECTED_SINGLE_VIDEOS = [
         "category": "Knife",
         "version": "Original",
     },
-    {
-        "video_id": "KN04_Enhanced",
-        "pair_id": "KN04",
-        "candidate_name": "CCTV_KN_SR_2026-09-10_215822-KNIFE_b0e9b0697664_en",
-        "title": "CCTV Knife 4 — Overhead Surveillance Knife Detection (215822) [Enhanced]",
-        "category": "Knife",
-        "version": "Enhanced",
-    },
 
-    # --- 3. 3 NON-HANDGUN STAGED DATASET VIDEOS (0 FP) ---
+    # --- 3. 3 SINGLE-CAMERA NON-WEAPON SCENES (ALL 0 FP / 0 GHOST BOXES) ---
     {
-        "video_id": "NW_STAGED_01",
-        "pair_id": "NW_STAGED_01",
-        "candidate_name": "NOV20_Pair05_Smartphone_CAM01",
-        "title": "Non-Handgun Staged 1 — Handheld Smartphone Reflections (CAM-01)",
-        "category": "No-Weapon",
-        "version": "Original",
-    },
-    {
-        "video_id": "NW_STAGED_02",
-        "pair_id": "NW_STAGED_02",
-        "candidate_name": "NOV20_Pair05_Smartphone_CAM02",
-        "title": "Non-Handgun Staged 2 — Handheld Smartphone Reflections (CAM-02)",
-        "category": "No-Weapon",
-        "version": "Original",
-    },
-    {
-        "video_id": "NW_STAGED_03",
-        "pair_id": "NW_STAGED_03",
-        "candidate_name": "NOV20_Pair06_Wallet_CAM02",
-        "title": "Non-Handgun Staged 3 — Dark Folded Wallet Picked Up From Table",
-        "category": "No-Weapon",
-        "version": "Original",
-    },
-
-    # --- 4. 3 NON-HANDGUN CONVENIENCE STORE VIDEOS (0 FP) ---
-    {
-        "video_id": "NW_STORE_01",
-        "pair_id": "NW_STORE_01",
+        "video_id": "NW01",
+        "pair_id": "NW01",
         "candidate_name": "NW01_Store_Customer_Interaction_Sample1",
-        "title": "Non-Handgun Convenience Store 1 — Customer Interaction & Handheld Items",
+        "title": "Non-Weapon 1 — Convenience Store Customer Interaction (Sample 1)",
         "category": "No-Weapon",
         "version": "Original",
     },
     {
-        "video_id": "NW_STORE_02",
-        "pair_id": "NW_STORE_02",
+        "video_id": "NW02",
+        "pair_id": "NW02",
         "candidate_name": "NW02_Convenience_Store_Counter_Sample2",
-        "title": "Non-Handgun Convenience Store 2 — Counter Drinks, Cups & Phones",
+        "title": "Non-Weapon 2 — Convenience Store Counter Drinks & Cups (Sample 2)",
         "category": "No-Weapon",
         "version": "Original",
     },
     {
-        "video_id": "NW_STORE_03",
-        "pair_id": "NW_STORE_03",
-        "candidate_name": "CCTV_NW_StoreCounter_SR_224743",
-        "title": "Non-Handgun Convenience Store 3 — Retail Checkout Counter (224743)",
+        "video_id": "NW03",
+        "pair_id": "NW03",
+        "candidate_name": "NW04_CloseUp_EmptyHand_Sample4",
+        "title": "Non-Weapon 3 — Indoor Staged Handheld Utensil Distractor (Sample 3)",
         "category": "No-Weapon",
         "version": "Original",
     },
 ]
 
-# --- 5. 3 STAGED MULTI-CAMERA WEAPON PAIRS (+ 1 MULTI-CAMERA NON-WEAPON PAIR) ---
+# --- 4. 3 MULTI-CAMERA WEAPON PAIRS + 1 MULTI-CAMERA NON-WEAPON PAIR ---
 SELECTED_MULTICAM_SCENES = [
     {
         "scene_key": "MC_PAIR01_Enhanced",
         "scene_id": "MC_PAIR01",
-        "title": "Multi-Camera Pair 1 — Staged Weapon Transition Scene 007 (CAM 01 & CAM 02) [Enhanced]",
-        "category": "Multi-Camera Weapon",
+        "title": "Multi-Camera Weapon 1 — Dual-Knife Transition Scene 007 (CAM 01 & CAM 02) [Enhanced]",
+        "category": "Multi-Camera Knife",
         "version": "Enhanced",
         "cam1_candidate": "STAGED_SCENE007_CAM1_Enhanced",
         "cam2_candidate": "STAGED_SCENE007_CAM2_Enhanced",
@@ -233,8 +167,8 @@ SELECTED_MULTICAM_SCENES = [
     {
         "scene_key": "MC_PAIR02_Enhanced",
         "scene_id": "MC_PAIR02",
-        "title": "Multi-Camera Pair 2 — Staged Suspect Transition Scene 012 (CAM 01 & CAM 02) [Enhanced]",
-        "category": "Multi-Camera Weapon",
+        "title": "Multi-Camera Weapon 2 — Handgun Suspect Transition Scene 012 (CAM 01 & CAM 02) [Enhanced]",
+        "category": "Multi-Camera Handgun",
         "version": "Enhanced",
         "cam1_candidate": "MC03_SCENE012_Knife_CAM01_Enhanced",
         "cam2_candidate": "MC03_SCENE012_Knife_CAM02_Enhanced",
@@ -242,25 +176,34 @@ SELECTED_MULTICAM_SCENES = [
     {
         "scene_key": "MC_PAIR02_Original",
         "scene_id": "MC_PAIR02",
-        "title": "Multi-Camera Pair 2 — Staged Suspect Transition Scene 012 (CAM 01 & CAM 02) [Original]",
-        "category": "Multi-Camera Weapon",
+        "title": "Multi-Camera Weapon 2 — Handgun Suspect Transition Scene 012 (CAM 01 & CAM 02) [Original]",
+        "category": "Multi-Camera Handgun",
         "version": "Original",
         "cam1_candidate": "MC03_SCENE012_Knife_CAM01_Original",
         "cam2_candidate": "MC03_SCENE012_Knife_CAM02_Original",
     },
     {
+        "scene_key": "MC_PAIR03_Enhanced",
+        "scene_id": "MC_PAIR03",
+        "title": "Multi-Camera Weapon 3 — Kitchen Knife Transition Scene 001 (CAM 01 & CAM 02) [Enhanced]",
+        "category": "Multi-Camera Knife",
+        "version": "Enhanced",
+        "cam1_candidate": "MC01_SCENE004_Handgun_CAM01_Enhanced",
+        "cam2_candidate": "MC01_SCENE004_Handgun_CAM02_Enhanced",
+    },
+    {
         "scene_key": "MC_PAIR03_Original",
         "scene_id": "MC_PAIR03",
-        "title": "Multi-Camera Pair 3 — 1080p Dual-Tapo Kitchen Knife Corroboration (CAM 01 & CAM 02)",
+        "title": "Multi-Camera Weapon 3 — Kitchen Knife Transition Scene 001 (CAM 01 & CAM 02) [Original]",
         "category": "Multi-Camera Knife",
         "version": "Original",
-        "cam1_candidate": "NOV20_Pair08_KitchenKnife_CAM01",
-        "cam2_candidate": "NOV20_Pair08_KitchenKnife_CAM02",
+        "cam1_candidate": "MC01_SCENE004_Handgun_CAM01_Original",
+        "cam2_candidate": "MC01_SCENE004_Handgun_CAM02_Original",
     },
     {
         "scene_key": "MC_NONWEAPON_Original",
         "scene_id": "MC_NONWEAPON",
-        "title": "Multi-Camera Non-Weapon Pair — Staged Smartphone Distractor (CAM 01 & CAM 02) [0 FP]",
+        "title": "Multi-Camera Non-Weapon — Staged Smartphone Distractor (CAM 01 & CAM 02) [0 FP]",
         "category": "Multi-Camera No-Weapon",
         "version": "Original",
         "cam1_candidate": "NOV20_Pair05_Smartphone_CAM01",

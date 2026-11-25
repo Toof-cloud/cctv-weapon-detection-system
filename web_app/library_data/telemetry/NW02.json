@@ -1,11 +1,11 @@
 {
   "entry": {
-    "video_id": "NW_STORE_02",
-    "pair_id": "NW_STORE_02",
-    "title": "Non-Handgun Convenience Store 2 \u2014 Counter Drinks, Cups & Phones",
+    "video_id": "NW02",
+    "pair_id": "NW02",
+    "title": "Non-Weapon 2 \u2014 Convenience Store Counter Drinks & Cups (Sample 2)",
     "category": "No-Weapon",
     "version": "Original",
-    "camera_id": "NW_STORE_02",
+    "camera_id": "NW02",
     "source_filename": "NW02.mp4",
     "sha256": "8a714625ff74b06b6a9658c58cb587d8c070a76a6fcccd2b902564eb5a47141b",
     "orig_meta": {
@@ -24,9 +24,9 @@
       "duration_seconds": 14.7,
       "file_size_mb": 1.29
     },
-    "original_video_rel": "videos/NW_STORE_02_original.mp4",
-    "annotated_video_rel": "videos/NW_STORE_02_annotated.mp4",
-    "telemetry_rel": "telemetry/NW_STORE_02.json"
+    "original_video_rel": "videos/NW02_original.mp4",
+    "annotated_video_rel": "videos/NW02_annotated.mp4",
+    "telemetry_rel": "telemetry/NW02.json"
   },
   "model_name": "Model 12 (Final Production SOTA)",
   "model_checkpoint": "best_weapon_detector_twelfth_model.pth",

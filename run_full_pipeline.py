@@ -436,7 +436,11 @@ def detect_video_with_model(
                     "status": "CONFIRMED_ALERT",
                 })
 
-        if confirmed_by_frame:
+        if confirmed_by_frame or total_detections > 0:
+            if save_detected_frames and detected_frames_dir.exists():
+                for p in detected_frames_dir.glob("*.png"):
+                    p.unlink()
+
             cap_re = cv2.VideoCapture(str(input_file))
             fourcc_re = cv2.VideoWriter_fourcc(*"mp4v")
             temp_output = output_file.parent / f"{output_file.stem}_reconciled_temp.mp4"
@@ -467,12 +471,6 @@ def detect_video_with_model(
                 if output_file.exists():
                     output_file.unlink()
                 temp_output.rename(output_file)
-        else:
-            # If all detections were reconciled as transient flickers (0 confirmed alerts),
-            # remove lingering unconfirmed PNG frames saved during the online pass
-            if save_detected_frames and detected_frames_dir.exists():
-                for p in detected_frames_dir.glob("*.png"):
-                    p.unlink()
 
     # --------------------------------------------------------------------------
     # [9] CSV Report Export & [12] Forensic Reporting (HTML, PDF, JSON)

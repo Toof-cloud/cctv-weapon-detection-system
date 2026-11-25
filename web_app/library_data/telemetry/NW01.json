@@ -1,11 +1,11 @@
 {
   "entry": {
-    "video_id": "NW_STORE_01",
-    "pair_id": "NW_STORE_01",
-    "title": "Non-Handgun Convenience Store 1 \u2014 Customer Interaction & Handheld Items",
+    "video_id": "NW01",
+    "pair_id": "NW01",
+    "title": "Non-Weapon 1 \u2014 Convenience Store Customer Interaction (Sample 1)",
     "category": "No-Weapon",
     "version": "Original",
-    "camera_id": "NW_STORE_01",
+    "camera_id": "NW01",
     "source_filename": "NW01.mp4",
     "sha256": "ded6402794401366dd35d68a1cff2574c4e5084caa19ed998fefb4093f2d14c0",
     "orig_meta": {
@@ -24,9 +24,9 @@
       "duration_seconds": 18.77,
       "file_size_mb": 0.91
     },
-    "original_video_rel": "videos/NW_STORE_01_original.mp4",
-    "annotated_video_rel": "videos/NW_STORE_01_annotated.mp4",
-    "telemetry_rel": "telemetry/NW_STORE_01.json"
+    "original_video_rel": "videos/NW01_original.mp4",
+    "annotated_video_rel": "videos/NW01_annotated.mp4",
+    "telemetry_rel": "telemetry/NW01.json"
   },
   "model_name": "Model 12 (Final Production SOTA)",
   "model_checkpoint": "best_weapon_detector_twelfth_model.pth",
