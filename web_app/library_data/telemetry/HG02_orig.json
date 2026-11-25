@@ -23,50 +23,6 @@
       "rejection_reason": "ANTHROPOMETRIC_SCALE_VIOLATION (height 38.0% > 35.0% of person)"
     },
     {
-      "frame_number": 92,
-      "timestamp_seconds": 3.067,
-      "timestamp_formatted": "00:03.067",
-      "camera_id": "HG02_214325_Original",
-      "object_label": "handgun",
-      "bounding_box": [
-        1428,
-        630,
-        1543,
-        710
-      ],
-      "norm_box": [
-        0.74375,
-        0.58333,
-        0.80365,
-        0.65741
-      ],
-      "confidence_score": 0.4756,
-      "validation_status": "BELOW_CLASS_THRESHOLD",
-      "rejection_reason": "BELOW_CLASS_THRESHOLD (47.6% < 50.0%)"
-    },
-    {
-      "frame_number": 94,
-      "timestamp_seconds": 3.133,
-      "timestamp_formatted": "00:03.133",
-      "camera_id": "HG02_214325_Original",
-      "object_label": "handgun",
-      "bounding_box": [
-        1428,
-        630,
-        1543,
-        709
-      ],
-      "norm_box": [
-        0.74375,
-        0.58333,
-        0.80365,
-        0.65648
-      ],
-      "confidence_score": 0.4928,
-      "validation_status": "BELOW_CLASS_THRESHOLD",
-      "rejection_reason": "BELOW_CLASS_THRESHOLD (49.3% < 50.0%)"
-    },
-    {
       "frame_number": 120,
       "timestamp_seconds": 4.0,
       "timestamp_formatted": "00:04.000",
@@ -111,28 +67,6 @@
       "rejection_reason": "SUPPRESSED_TEMPORAL_FLICKER (Isolated 1-frame transient proposal)"
     },
     {
-      "frame_number": 138,
-      "timestamp_seconds": 4.6,
-      "timestamp_formatted": "00:04.600",
-      "camera_id": "HG02_214325_Original",
-      "object_label": "handgun",
-      "bounding_box": [
-        741,
-        747,
-        908,
-        889
-      ],
-      "norm_box": [
-        0.38594,
-        0.69167,
-        0.47292,
-        0.82315
-      ],
-      "confidence_score": 0.4731,
-      "validation_status": "BELOW_CLASS_THRESHOLD",
-      "rejection_reason": "BELOW_CLASS_THRESHOLD (47.3% < 50.0%)"
-    },
-    {
       "frame_number": 146,
       "timestamp_seconds": 4.867,
       "timestamp_formatted": "00:04.867",
@@ -151,8 +85,8 @@
         0.78333
       ],
       "confidence_score": 0.7475,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 148,
@@ -173,8 +107,8 @@
         0.78519
       ],
       "confidence_score": 0.7949,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 150,
@@ -195,8 +129,8 @@
         0.78704
       ],
       "confidence_score": 0.7365,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 152,
@@ -217,8 +151,8 @@
         0.78981
       ],
       "confidence_score": 0.8086,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 154,
@@ -239,8 +173,8 @@
         0.78796
       ],
       "confidence_score": 0.7077,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 156,
@@ -261,8 +195,8 @@
         0.79352
       ],
       "confidence_score": 0.8576,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 158,
@@ -305,8 +239,8 @@
         0.79074
       ],
       "confidence_score": 0.5064,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 164,
@@ -327,8 +261,8 @@
         0.7713
       ],
       "confidence_score": 0.6843,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 166,
@@ -349,8 +283,8 @@
         0.7713
       ],
       "confidence_score": 0.7064,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 168,
@@ -371,8 +305,8 @@
         0.77315
       ],
       "confidence_score": 0.7712,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 170,
@@ -393,8 +327,8 @@
         0.77315
       ],
       "confidence_score": 0.7726,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     }
   ],
   "records_20pct": [
@@ -549,8 +483,8 @@
         0.78333
       ],
       "confidence_score": 0.7475,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 148,
@@ -571,8 +505,8 @@
         0.78519
       ],
       "confidence_score": 0.7949,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 150,
@@ -593,8 +527,8 @@
         0.78704
       ],
       "confidence_score": 0.7365,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 152,
@@ -615,8 +549,8 @@
         0.78981
       ],
       "confidence_score": 0.8086,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 154,
@@ -637,8 +571,8 @@
         0.78796
       ],
       "confidence_score": 0.7077,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 156,
@@ -659,8 +593,8 @@
         0.79352
       ],
       "confidence_score": 0.8576,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 158,
@@ -703,8 +637,8 @@
         0.79074
       ],
       "confidence_score": 0.5064,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 164,
@@ -725,8 +659,8 @@
         0.7713
       ],
       "confidence_score": 0.6843,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 166,
@@ -747,8 +681,8 @@
         0.7713
       ],
       "confidence_score": 0.7064,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 168,
@@ -769,8 +703,8 @@
         0.77315
       ],
       "confidence_score": 0.7712,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     },
     {
       "frame_number": 170,
@@ -791,8 +725,8 @@
         0.77315
       ],
       "confidence_score": 0.7726,
-      "validation_status": "STATIC_BACKGROUND_TRAP",
-      "rejection_reason": "STATIC_BACKGROUND_TRAP (Stationary environmental fixture)"
+      "validation_status": "VALIDATED_TEMPORAL",
+      "rejection_reason": ""
     }
   ]
 }

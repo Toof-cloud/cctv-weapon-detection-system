@@ -36,7 +36,9 @@
       "telemetry_rel": "telemetry/HG01_orig.json",
       "enhanced_original_video_rel": "videos/HG01_enh_raw.mp4",
       "enhanced_annotated_video_rel": "videos/HG01_enh_annot.mp4",
-      "enhanced_telemetry_rel": "telemetry/HG01_enh.json"
+      "enhanced_telemetry_rel": "telemetry/HG01_enh.json",
+      "no_intel_annotated_video_rel": "videos/HG01_orig_no_intel.mp4",
+      "enhanced_no_intel_annotated_video_rel": "videos/HG01_enh_no_intel.mp4"
     },
     {
       "video_id": "HG02",
@@ -72,7 +74,9 @@
       "telemetry_rel": "telemetry/HG02_orig.json",
       "enhanced_original_video_rel": "videos/HG02_enh_raw.mp4",
       "enhanced_annotated_video_rel": "videos/HG02_enh_annot.mp4",
-      "enhanced_telemetry_rel": "telemetry/HG02_enh.json"
+      "enhanced_telemetry_rel": "telemetry/HG02_enh.json",
+      "no_intel_annotated_video_rel": "videos/HG02_orig_no_intel.mp4",
+      "enhanced_no_intel_annotated_video_rel": "videos/HG02_enh_no_intel.mp4"
     },
     {
       "video_id": "HG03",
@@ -108,7 +112,9 @@
       "telemetry_rel": "telemetry/HG03_orig.json",
       "enhanced_original_video_rel": "videos/HG03_enh_raw.mp4",
       "enhanced_annotated_video_rel": "videos/HG03_enh_annot.mp4",
-      "enhanced_telemetry_rel": "telemetry/HG03_enh.json"
+      "enhanced_telemetry_rel": "telemetry/HG03_enh.json",
+      "no_intel_annotated_video_rel": "videos/HG03_orig_no_intel.mp4",
+      "enhanced_no_intel_annotated_video_rel": "videos/HG03_enh_no_intel.mp4"
     },
     {
       "video_id": "KN01",
@@ -144,7 +150,9 @@
       "telemetry_rel": "telemetry/KN01_orig.json",
       "enhanced_original_video_rel": "videos/KN01_enh_raw.mp4",
       "enhanced_annotated_video_rel": "videos/KN01_enh_annot.mp4",
-      "enhanced_telemetry_rel": "telemetry/KN01_enh.json"
+      "enhanced_telemetry_rel": "telemetry/KN01_enh.json",
+      "no_intel_annotated_video_rel": "videos/KN01_orig_no_intel.mp4",
+      "enhanced_no_intel_annotated_video_rel": "videos/KN01_enh_no_intel.mp4"
     },
     {
       "video_id": "KN02",
@@ -180,7 +188,9 @@
       "telemetry_rel": "telemetry/KN02_orig.json",
       "enhanced_original_video_rel": "videos/KN02_enh_raw.mp4",
       "enhanced_annotated_video_rel": "videos/KN02_enh_annot.mp4",
-      "enhanced_telemetry_rel": "telemetry/KN02_enh.json"
+      "enhanced_telemetry_rel": "telemetry/KN02_enh.json",
+      "no_intel_annotated_video_rel": "videos/KN02_orig_no_intel.mp4",
+      "enhanced_no_intel_annotated_video_rel": "videos/KN02_enh_no_intel.mp4"
     },
     {
       "video_id": "KN03",
@@ -216,7 +226,9 @@
       "telemetry_rel": "telemetry/KN03_orig.json",
       "enhanced_original_video_rel": "videos/KN03_enh_raw.mp4",
       "enhanced_annotated_video_rel": "videos/KN03_enh_annot.mp4",
-      "enhanced_telemetry_rel": "telemetry/KN03_enh.json"
+      "enhanced_telemetry_rel": "telemetry/KN03_enh.json",
+      "no_intel_annotated_video_rel": "videos/KN03_orig_no_intel.mp4",
+      "enhanced_no_intel_annotated_video_rel": "videos/KN03_enh_no_intel.mp4"
     },
     {
       "video_id": "NW01",
@@ -252,7 +264,8 @@
       "telemetry_rel": "telemetry/NW01_orig.json",
       "enhanced_original_video_rel": null,
       "enhanced_annotated_video_rel": null,
-      "enhanced_telemetry_rel": null
+      "enhanced_telemetry_rel": null,
+      "no_intel_annotated_video_rel": "videos/NW01_orig_no_intel.mp4"
     },
     {
       "video_id": "NW02",
@@ -288,7 +301,8 @@
       "telemetry_rel": "telemetry/NW02_orig.json",
       "enhanced_original_video_rel": null,
       "enhanced_annotated_video_rel": null,
-      "enhanced_telemetry_rel": null
+      "enhanced_telemetry_rel": null,
+      "no_intel_annotated_video_rel": "videos/NW02_orig_no_intel.mp4"
     },
     {
       "video_id": "NW03",
@@ -324,7 +338,8 @@
       "telemetry_rel": "telemetry/NW03_orig.json",
       "enhanced_original_video_rel": null,
       "enhanced_annotated_video_rel": null,
-      "enhanced_telemetry_rel": null
+      "enhanced_telemetry_rel": null,
+      "no_intel_annotated_video_rel": "videos/NW03_orig_no_intel.mp4"
     }
   ],
   "multicam_scenes": [

@@ -1459,7 +1459,11 @@ def get_active_single_context(single_videos: list[dict]):
 
     if use_enh:
         orig_mp4 = WEB_DATA_DIR / entry["enhanced_original_video_rel"]
-        annot_mp4 = WEB_DATA_DIR / entry["enhanced_annotated_video_rel"]
+        if not cctv_intel and entry.get("enhanced_no_intel_annotated_video_rel"):
+            no_intel_p = WEB_DATA_DIR / entry["enhanced_no_intel_annotated_video_rel"]
+            annot_mp4 = no_intel_p if no_intel_p.exists() else (WEB_DATA_DIR / entry["enhanced_annotated_video_rel"])
+        else:
+            annot_mp4 = WEB_DATA_DIR / entry["enhanced_annotated_video_rel"]
         telem_rel = entry["enhanced_telemetry_rel"]
         active_entry = {
             **entry,
@@ -1469,7 +1473,11 @@ def get_active_single_context(single_videos: list[dict]):
         }
     else:
         orig_mp4 = WEB_DATA_DIR / entry["original_video_rel"]
-        annot_mp4 = WEB_DATA_DIR / entry["annotated_video_rel"]
+        if not cctv_intel and entry.get("no_intel_annotated_video_rel"):
+            no_intel_p = WEB_DATA_DIR / entry["no_intel_annotated_video_rel"]
+            annot_mp4 = no_intel_p if no_intel_p.exists() else (WEB_DATA_DIR / entry["annotated_video_rel"])
+        else:
+            annot_mp4 = WEB_DATA_DIR / entry["annotated_video_rel"]
         telem_rel = entry["telemetry_rel"]
         active_entry = {**entry, "version": "Original"}
 
@@ -1971,7 +1979,11 @@ def render_single_video_page(single_videos: list[dict], mc_scenes: list[dict], e
                 ws_meta = (
                     "Original evidence"
                     if (entry is None or ss["view_mode"] == "Original")
-                    else "Detected evidence · Model 12"
+                    else (
+                        "Detected evidence · Model 12 (Raw Faster R-CNN Detector)"
+                        if not ss["cctv_intel"]
+                        else "Detected evidence · Model 12 + CCTV Intelligence Layer"
+                    )
                 )
                 st.markdown(
                     f"""

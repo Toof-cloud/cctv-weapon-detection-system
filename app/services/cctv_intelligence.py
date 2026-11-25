@@ -726,7 +726,7 @@ class CCTVIntelligenceFilter:
                         # and horizontally separated from the torso by up to allowed_reach (0.35 * p_h).
                         is_extended_arm_aim = (not is_inside_horizontal) and (min_edge_dist <= allowed_reach) and (cy >= pbox[1] + 0.12 * p_h)
                         effective_min_reach_y = 0.15 if is_extended_arm_aim else self.min_person_reach_y
-                        if ((effective_min_reach_y <= rel_y <= effective_max_reach_y) or is_overhead) and not det.get("is_static", False):
+                        if (effective_min_reach_y <= rel_y <= effective_max_reach_y) or is_overhead:
                             is_held_by_person = True
 
             # Check 3: Spatial person presence & proximity gating
@@ -846,10 +846,10 @@ class CCTVIntelligenceFilter:
                 if det.get("is_static", False):
                     tf = det.get("track_frames", 0)
                     disp = det.get("displacement", 0.0)
-                    if (not is_held_by_person) or (tf >= 7 and disp <= 7.0):
+                    if (not is_held_by_person and not is_adjacent_to_person) or (not is_held_by_person and tf >= 7 and disp <= 7.0):
                         rejection_reason = f"STATIC_BACKGROUND_TRAP ({tf} frames, drift={disp}px)"
                         # Register in persistent exclusion memory for unheld fixtures (e.g. counter POS terminals, railings)
-                        if self.motion_tracker and (not is_adjacent_to_person or not is_held_by_person or (tf >= 7 and disp <= 7.0)):
+                        if self.motion_tracker:
                             self.motion_tracker.register_static_zone(cx, cy, cname)
 
             eval_entry = {
