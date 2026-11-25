@@ -69,14 +69,14 @@ def _logo_data_uri() -> str:
 
 
 @st.cache_data(show_spinner=False)
-def load_library_index() -> dict:
+def load_library_index(_mtime: float = 0.0) -> dict:
     if not INDEX_PATH.exists():
         return {"single_videos": [], "multicam_scenes": []}
     return json.loads(INDEX_PATH.read_text(encoding="utf-8"))
 
 
 @st.cache_data(show_spinner=False)
-def load_telemetry(telem_rel: str) -> dict:
+def load_telemetry(telem_rel: str, _mtime: float = 0.0) -> dict:
     p = WEB_DATA_DIR / telem_rel
     if not p.exists():
         return {"records_50pct": [], "records_20pct": []}
@@ -84,7 +84,7 @@ def load_telemetry(telem_rel: str) -> dict:
 
 
 @st.cache_data(show_spinner=False)
-def _video_data_uri(rel_path: str) -> str:
+def _video_data_uri(rel_path: str, _mtime: float = 0.0) -> str:
     p = WEB_DATA_DIR / rel_path
     if not p.exists():
         return ""
@@ -818,7 +818,7 @@ def inject_exact_desktop_css(dark_mode: bool) -> None:
             align-items: center;
             justify-content: center;
             gap: 14px;
-            pointer-events: all;
+            pointer-events: none !important;
             animation: fk-splash-fade 0.45s ease-out 1.15s forwards;
         }}
         .fk-splash-logo {{
@@ -1384,7 +1384,12 @@ def dialog_forensic_report(entry: dict, filtered_records: list[dict], threshold:
     d2.download_button("Download Detection Log (CSV)", data=csv_bytes, file_name=f"FORENSIKADA_{vid_id}_detections.csv", mime="text/csv", width="stretch")
 
 
+def _close_quick_start() -> None:
+    st.session_state["onboarding_shown"] = True
+
+
 def _activate_sample_clip(vid_id: str) -> None:
+    st.session_state["onboarding_shown"] = True
     st.session_state["custom_result"] = None
     st.session_state["active_video_id"] = vid_id
     st.session_state["is_enhanced"] = False
@@ -1416,12 +1421,12 @@ def dialog_quick_start_guide(single_videos: list[dict]) -> None:
             "Click <b>Import videos</b> in the top header bar (or use the <b>— Choose a CCTV recording —</b> dropdown on the left panel) to select a Handgun, Knife, or Non-Weapon clip.",
         ),
         (
-            "2 · Enhance & Set Threshold",
-            "Click <b>Enhance video</b> on the left panel (when available) to compare Original vs. <b>BasicVSR++</b> Enhanced footage, and adjust the <b>Confidence Threshold</b> slider (default: <b>50%</b>).",
+            "2 · Click Analyze Video",
+            "Click the blue <b>Analyze video</b> button on the left panel to run <b>Model 12 + CCTV Intelligence Layer</b> and view the annotated bounding-box video and summary counts.",
         ),
         (
-            "3 · Click Analyze Video",
-            "Click the blue <b>Analyze video</b> button on the left panel to run <b>Model 12 + CCTV Intelligence Layer</b> and view the annotated bounding-box video and summary counts.",
+            "3 · Click Enhance Video",
+            "Click <b>Enhance video</b> on the left panel to automatically switch the video to the <b>BasicVSR++ Enhanced Annotated</b> stream and compare confidence gains.",
         ),
     ]
     steps_right = [
@@ -1431,7 +1436,7 @@ def dialog_quick_start_guide(single_videos: list[dict]) -> None:
         ),
         (
             "5 · Test Multi-Camera Mode",
-            "Click the <b>Multi-camera</b> tab at the top, select a synchronized <b>CAM-01 & CAM-02</b> pair on the left panel, and click <b>Analyze video</b> to view cross-camera corroboration.",
+            "Click the <b>Multi-camera</b> tab at the top, select a synchronized <b>CAM-01 & CAM-02</b> pair, and click <b>Analyze video</b> or <b>Enhance video</b> for simultaneous synced playback.",
         ),
         (
             "6 · Export Forensic PDF Report",
@@ -1464,15 +1469,17 @@ def dialog_quick_start_guide(single_videos: list[dict]) -> None:
 
     st.caption("Tip: You can re-open this Quick Start Guide anytime by clicking the **?** button in the top-right header bar.")
     b_start, b_demo = st.columns([1.15, 1.0], gap="small")
-    b_start.button("Got it — Start Evaluating", type="primary", width="stretch", key="qs_start_btn")
+    if b_start.button("Got it — Start Evaluating", type="primary", width="stretch", key="qs_start_btn", on_click=_close_quick_start):
+        st.rerun()
     if single_videos:
-        b_demo.button(
+        if b_demo.button(
             "Load Sample Handgun Clip (HG01)",
             width="stretch",
             key="qs_load_hg01",
             on_click=_activate_sample_clip,
             args=(single_videos[0]["video_id"],),
-        )
+        ):
+            st.rerun()
 
 
 @st.dialog("System Settings")
@@ -2185,7 +2192,8 @@ def render_evaluator_guide_page() -> None:
 
 
 def main() -> None:
-    index = load_library_index()
+    idx_mtime = INDEX_PATH.stat().st_mtime if INDEX_PATH.exists() else 0.0
+    index = load_library_index(_mtime=idx_mtime)
     single_videos = index.get("single_videos", [])
     mc_scenes = index.get("multicam_scenes", [])
     init_state(single_videos, mc_scenes)
@@ -2297,8 +2305,8 @@ def main() -> None:
 
     # Automatically show the introductory Quick Start Guide right after the loading screen on initial visit
     if not ss.get("onboarding_shown", False):
-        ss["onboarding_shown"] = True
         dialog_quick_start_guide(single_videos)
+        ss["onboarding_shown"] = True
 
     # ===== 2. EXACT DESKTOP MODE TAB STRIP =====
     with st.container(key="fk_mode_bar"):
