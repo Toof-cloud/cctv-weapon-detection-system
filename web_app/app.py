@@ -95,6 +95,7 @@ def init_state(single_videos: list[dict], mc_scenes: list[dict]) -> None:
     ss.setdefault("active_video_id", None)
     ss.setdefault("analysis_ready", False)
     ss.setdefault("splash_shown", False)
+    ss.setdefault("onboarding_shown", False)
     ss.setdefault("active_mc_key", None)
     ss.setdefault("mc_view_mode", "Original")
     ss.setdefault("mc_conf_pct", 50)
@@ -351,8 +352,6 @@ def inject_exact_desktop_css(dark_mode: bool) -> None:
         }}
         [data-testid="stElementContainer"]:has(style),
         .element-container:has(style),
-        [data-testid="stElementContainer"]:has(.fk-splash-overlay),
-        .element-container:has(.fk-splash-overlay),
         [data-testid="stMarkdownContainer"]:has(style),
         [data-testid="stMarkdown"]:has(style) {{
             display: none !important;
@@ -361,6 +360,14 @@ def inject_exact_desktop_css(dark_mode: bool) -> None:
             margin: 0 !important;
             padding: 0 !important;
             overflow: hidden !important;
+        }}
+        [data-testid="stElementContainer"]:has(.fk-splash-overlay),
+        .element-container:has(.fk-splash-overlay) {{
+            height: 0 !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: visible !important;
         }}
 
         /* ===== EXACT DESKTOP TOP HEADER BAR (#header) ===== */
@@ -771,7 +778,7 @@ def inject_exact_desktop_css(dark_mode: bool) -> None:
         .fk-splash-overlay {{
             position: fixed;
             inset: 0;
-            z-index: 99999;
+            z-index: 9999999;
             background: #0d1c42;
             color-scheme: dark;
             display: flex;
@@ -917,6 +924,7 @@ def dialog_import_videos(single_videos: list[dict], mc_scenes: list[dict]) -> No
             if st.button("Load Selected Recording", type="primary", width="stretch", key="dlg_load_lib"):
                 st.session_state["custom_result"] = None
                 st.session_state["active_video_id"] = chosen["video_id"]
+                st.session_state.pop("side_quick_pick", None)
                 st.session_state["active_mode"] = "Single video"
                 st.session_state["view_mode"] = "Original"
                 st.session_state["analysis_ready"] = False
@@ -933,6 +941,7 @@ def dialog_import_videos(single_videos: list[dict], mc_scenes: list[dict]) -> No
             )
             if st.button("Open in Multi-Camera Workspace", type="primary", width="stretch", key="dlg_load_mc"):
                 st.session_state["active_mc_key"] = mc_scenes[sel_m]["scene_key"]
+                st.session_state.pop("mc_side_pick", None)
                 st.session_state["active_mode"] = "Multi-camera"
                 st.session_state["mc_view_mode"] = "Original"
                 st.session_state["mc_analysis_ready"] = False
@@ -1067,6 +1076,96 @@ def dialog_forensic_report(entry: dict, filtered_records: list[dict], threshold:
     d2.download_button("Download Detection Log (CSV)", data=csv_bytes, file_name=f"FORENSIKADA_{vid_id}_detections.csv", mime="text/csv", width="stretch")
 
 
+def _activate_sample_clip(vid_id: str) -> None:
+    st.session_state["custom_result"] = None
+    st.session_state["active_video_id"] = vid_id
+    st.session_state["side_quick_pick"] = 0
+    st.session_state["active_mode"] = "Single video"
+    st.session_state["view_mode"] = "Original"
+    st.session_state["analysis_ready"] = False
+    st.session_state["selected_obs_idx"] = 0
+
+
+@st.dialog("Welcome to Forensikada · How to Use This System", width="large")
+def dialog_quick_start_guide(single_videos: list[dict]) -> None:
+    st.markdown(
+        """
+        <div style='background:#0d1c42; color:#ffffff; border-radius:10px; padding:12px 16px; margin-bottom:12px;'>
+            <div style='font-size:15px; font-weight:700; letter-spacing:0.4px;'>Quick Start Guide for Evaluators</div>
+            <div style='font-size:12px; color:#c7d7f4; margin-top:3px;'>
+                Follow these 6 simple steps to test Single-Camera Detection, BasicVSR++ Enhancement, Multi-Camera Corroboration, Observation Review, and Forensic PDF Reporting.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    g1, g2 = st.columns(2, gap="small")
+    steps_left = [
+        (
+            "1 · Load a CCTV Video",
+            "Click <b>Import videos</b> in the top header bar (or use the <b>— Choose a CCTV recording —</b> dropdown on the left panel) to select a Handgun, Knife, or Non-Weapon clip.",
+        ),
+        (
+            "2 · Enhance & Set Threshold",
+            "Click <b>Enhance video</b> on the left panel (when available) to compare Original vs. <b>BasicVSR++</b> Enhanced footage, and adjust the <b>Confidence Threshold</b> slider (default: <b>50%</b>).",
+        ),
+        (
+            "3 · Click Analyze Video",
+            "Click the blue <b>Analyze video</b> button on the left panel to run <b>Model 12 + CCTV Intelligence Layer</b> and view the annotated bounding-box video and summary counts.",
+        ),
+    ]
+    steps_right = [
+        (
+            "4 · Review Frame Detections",
+            "Click any row in the <b>DETECTED OBJECTS</b> table (or click <b>Observation review</b>) to inspect the exact frame and mark it as <b>Accept</b>, <b>Reject</b>, or <b>Uncertain</b>.",
+        ),
+        (
+            "5 · Test Multi-Camera Mode",
+            "Click the <b>Multi-camera</b> tab at the top, select a synchronized <b>CAM-01 & CAM-02</b> pair on the left panel, and click <b>Analyze video</b> to view cross-camera corroboration.",
+        ),
+        (
+            "6 · Export Forensic PDF Report",
+            "Click <b>Forensic report</b> or <b>Save report (PDF)</b> in the top header bar to preview and download the SHA-256 Forensic Incident Report and CSV log.",
+        ),
+    ]
+
+    with g1:
+        for title, body in steps_left:
+            st.markdown(
+                f"""
+                <div class='fk-evidence-card' style='margin-bottom:8px; min-height:92px;'>
+                    <div class='fk-evidence-title' style='color:#22396f;'>{title}</div>
+                    <div class='fk-muted' style='margin-top:4px; line-height:1.42;'>{body}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+    with g2:
+        for title, body in steps_right:
+            st.markdown(
+                f"""
+                <div class='fk-evidence-card' style='margin-bottom:8px; min-height:92px;'>
+                    <div class='fk-evidence-title' style='color:#22396f;'>{title}</div>
+                    <div class='fk-muted' style='margin-top:4px; line-height:1.42;'>{body}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    st.caption("Tip: You can re-open this Quick Start Guide anytime by clicking the **?** button in the top-right header bar.")
+    b_start, b_demo = st.columns([1.15, 1.0], gap="small")
+    b_start.button("Got it — Start Evaluating", type="primary", width="stretch", key="qs_start_btn")
+    if single_videos:
+        b_demo.button(
+            "Load Sample Handgun Clip (HG01)",
+            width="stretch",
+            key="qs_load_hg01",
+            on_click=_activate_sample_clip,
+            args=(single_videos[0]["video_id"],),
+        )
+
+
 @st.dialog("System Settings")
 def dialog_settings() -> None:
     st.markdown("<div class='fk-sec fk-sec-first'>APPEARANCE</div>", unsafe_allow_html=True)
@@ -1173,6 +1272,7 @@ def render_single_video_page(single_videos: list[dict], mc_scenes: list[dict], e
                 enh_btn_label = "Switch to Original" if (is_enh and paired_entry) else "Enhance video"
                 if st.button(enh_btn_label, width="stretch", disabled=(paired_entry is None), key="btn_enhance_pair"):
                     ss["active_video_id"] = paired_entry["video_id"]
+                    ss.pop("side_quick_pick", None)
                     ss["selected_obs_idx"] = 0
                     st.rerun()
 
@@ -1527,6 +1627,7 @@ def render_multicam_page(mc_scenes: list[dict]) -> None:
                 mc_enh_label = "Switch to Original" if (is_mc_enh and paired_mc) else "Enhance video"
                 if st.button(mc_enh_label, width="stretch", disabled=(paired_mc is None), key="btn_mc_enhance_pair"):
                     ss["active_mc_key"] = paired_mc["scene_key"]
+                    ss.pop("mc_side_pick", None)
                     st.rerun()
 
                 # VIEW MODE segmented pill
@@ -1799,7 +1900,7 @@ def main() -> None:
 
     # ===== 1. EXACT DESKTOP TOP HEADER BAR =====
     with st.container(key="fk_header_bar"):
-        hc_brand, hc_imp, hc_cls, hc_rep, hc_sav, hc_set = st.columns([3.3, 1.05, 0.95, 1.05, 1.25, 0.42], gap="small")
+        hc_brand, hc_imp, hc_cls, hc_rep, hc_sav, hc_hlp, hc_set = st.columns([3.1, 1.05, 0.95, 1.05, 1.25, 0.40, 0.40], gap="small")
         with hc_brand:
             logo_uri = _logo_data_uri()
             logo_html = f"<img class='fk-brand-logo' src='{logo_uri}' alt='Forensikada' />" if logo_uri else ""
@@ -1822,10 +1923,12 @@ def main() -> None:
             if st.button("Close videos", width="stretch", disabled=(not can_close), key="hdr_close"):
                 if is_mc_mode:
                     ss["active_mc_key"] = None
+                    ss.pop("mc_side_pick", None)
                     ss["mc_analysis_ready"] = False
                     ss["mc_view_mode"] = "Original"
                 else:
                     ss["active_video_id"] = None
+                    ss.pop("side_quick_pick", None)
                     ss["custom_result"] = None
                     ss["analysis_ready"] = False
                     ss["view_mode"] = "Original"
@@ -1862,9 +1965,17 @@ def main() -> None:
                 )
             else:
                 st.button("Save video + report", width="stretch", disabled=True, key="hdr_save_dis")
+        with hc_hlp:
+            if st.button("?", width="stretch", key="hdr_help", help="How to use Forensikada"):
+                dialog_quick_start_guide(single_videos)
         with hc_set:
             if st.button("⚙", width="stretch", key="hdr_settings", help="System settings"):
                 dialog_settings()
+
+    # Automatically show the introductory Quick Start Guide right after the loading screen on initial visit
+    if not ss.get("onboarding_shown", False):
+        ss["onboarding_shown"] = True
+        dialog_quick_start_guide(single_videos)
 
     # ===== 2. EXACT DESKTOP MODE TAB STRIP =====
     with st.container(key="fk_mode_bar"):
