@@ -95,9 +95,10 @@ def init_state(single_videos: list[dict], mc_scenes: list[dict]) -> None:
     ss.setdefault("active_video_id", None)
     ss.setdefault("analysis_ready", False)
     ss.setdefault("splash_shown", False)
-    ss.setdefault("active_mc_key", mc_scenes[0]["scene_key"] if mc_scenes else None)
-    ss.setdefault("mc_view_mode", "Detected")
+    ss.setdefault("active_mc_key", None)
+    ss.setdefault("mc_view_mode", "Original")
     ss.setdefault("mc_conf_pct", 50)
+    ss.setdefault("mc_analysis_ready", False)
 
 
 def filter_records(telem: dict, threshold: float, cctv_intel_enabled: bool) -> list[dict]:
@@ -933,6 +934,8 @@ def dialog_import_videos(single_videos: list[dict], mc_scenes: list[dict]) -> No
             if st.button("Open in Multi-Camera Workspace", type="primary", width="stretch", key="dlg_load_mc"):
                 st.session_state["active_mc_key"] = mc_scenes[sel_m]["scene_key"]
                 st.session_state["active_mode"] = "Multi-camera"
+                st.session_state["mc_view_mode"] = "Original"
+                st.session_state["mc_analysis_ready"] = False
                 st.rerun()
 
     with t_up:
@@ -1421,61 +1424,123 @@ def render_multicam_page(mc_scenes: list[dict]) -> None:
         st.warning("No multi-camera scenes indexed yet.")
         return
 
-    scene = next((s for s in mc_scenes if s["scene_key"] == ss.get("active_mc_key")), mc_scenes[0])
-    c1, c2 = scene["cam1"], scene["cam2"]
+    active_key = ss.get("active_mc_key")
+    scene = next((s for s in mc_scenes if s["scene_key"] == active_key), None) if active_key else None
+    mc_ready = bool(ss.get("mc_analysis_ready", False)) and (scene is not None)
     mc_thresh = ss["mc_conf_pct"] / 100.0
     mc_intel = ss["cctv_intel"]
 
-    t1 = load_telemetry(c1["telemetry_rel"])
-    t2 = load_telemetry(c2["telemetry_rel"])
-    recs1 = filter_records(t1, mc_thresh, mc_intel)
-    recs2 = filter_records(t2, mc_thresh, mc_intel)
-    combined = sorted(
-        [{**r, "camera": "CAM-01"} for r in recs1] + [{**r, "camera": "CAM-02"} for r in recs2],
-        key=lambda x: (x["timestamp_seconds"], x["camera"]),
-    )
+    paired_mc = None
+    if scene is not None:
+        c1, c2 = scene["cam1"], scene["cam2"]
+        alt_ver = "Enhanced" if scene.get("version", "Original") == "Original" else "Original"
+        paired_mc = next(
+            (s for s in mc_scenes if s.get("scene_id") == scene.get("scene_id") and s.get("version") == alt_ver),
+            None,
+        )
+        if mc_ready:
+            t1 = load_telemetry(c1["telemetry_rel"])
+            t2 = load_telemetry(c2["telemetry_rel"])
+            recs1 = filter_records(t1, mc_thresh, mc_intel)
+            recs2 = filter_records(t2, mc_thresh, mc_intel)
+            combined = sorted(
+                [{**r, "camera": "CAM-01"} for r in recs1] + [{**r, "camera": "CAM-02"} for r in recs2],
+                key=lambda x: (x["timestamp_seconds"], x["camera"]),
+            )
+        else:
+            recs1, recs2, combined = [], [], []
+    else:
+        c1, c2 = None, None
+        recs1, recs2, combined = [], [], []
 
     with st.container(key="fk_body_wrap"):
         col_side, col_work, col_sum = st.columns([0.92, 2.30, 1.02], gap="small")
 
+        # ---------- LEFT: sidePanel ----------
         with col_side:
             with st.container(key="fk_side_panel"):
                 st.markdown("<div class='fk-sec fk-sec-first'>CAMERA SOURCES</div>", unsafe_allow_html=True)
-                keys = [s["scene_key"] for s in mc_scenes]
-                sel_i = st.selectbox(
-                    "Multi-Camera Pair",
-                    range(len(mc_scenes)),
-                    index=keys.index(scene["scene_key"]),
-                    format_func=lambda i: mc_scenes[i]["title"],
-                    label_visibility="collapsed",
-                    key="mc_side_pick",
-                )
-                if mc_scenes[sel_i]["scene_key"] != scene["scene_key"]:
-                    ss["active_mc_key"] = mc_scenes[sel_i]["scene_key"]
-                    st.rerun()
-
-                for cam_lbl, info in [("CAM-01", c1), ("CAM-02", c2)]:
-                    om = info["orig_meta"]
+                if scene is not None:
+                    for cam_lbl, info in [("CAM-01", c1), ("CAM-02", c2)]:
+                        om = info["orig_meta"]
+                        st.markdown(
+                            f"""
+                            <div class='fk-evidence-card'>
+                                <div class='fk-evidence-title'>{cam_lbl} · {info['source_filename']}</div>
+                                <div class='fk-muted'>{om['width']}×{om['height']} · {om['fps']} fps · {om['duration_seconds']}s</div>
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                else:
                     st.markdown(
-                        f"""
+                        """
                         <div class='fk-evidence-card'>
-                            <div class='fk-evidence-title'>{cam_lbl} · {info['source_filename']}</div>
-                            <div class='fk-muted'>{om['width']}×{om['height']} · {om['fps']} fps · {om['duration_seconds']}s</div>
+                            <div class='fk-evidence-title'>No camera pair selected</div>
+                            <div class='fk-muted'>Import or choose synchronized CAM-01 & CAM-02 streams</div>
                         </div>
                         """,
                         unsafe_allow_html=True,
                     )
 
+                keys = [s["scene_key"] for s in mc_scenes]
+                mc_opts = [-1] + list(range(len(mc_scenes)))
+                cur_mc_idx = (keys.index(scene["scene_key"]) + 1) if (scene and scene["scene_key"] in keys) else 0
+                picked_mc = st.selectbox(
+                    "Multi-Camera Pair",
+                    mc_opts,
+                    index=cur_mc_idx,
+                    format_func=lambda idx: "— Choose a CAM-01 & CAM-02 scene —" if idx == -1 else mc_scenes[idx]["title"],
+                    label_visibility="collapsed",
+                    key="mc_side_pick",
+                )
+                if picked_mc != -1 and (scene is None or mc_scenes[picked_mc]["scene_key"] != scene["scene_key"]):
+                    ss["active_mc_key"] = mc_scenes[picked_mc]["scene_key"]
+                    ss["mc_view_mode"] = "Original"
+                    ss["mc_analysis_ready"] = False
+                    st.rerun()
+                elif picked_mc == -1 and scene is not None:
+                    ss["active_mc_key"] = None
+                    ss["mc_view_mode"] = "Original"
+                    ss["mc_analysis_ready"] = False
+                    st.rerun()
+
+                # Enhancement (BasicVSR++) card matching Single Video
+                is_mc_enh = bool(scene and scene.get("version") == "Enhanced")
+                mc_enh_sub = (
+                    "BasicVSR++ super-resolution active."
+                    if is_mc_enh
+                    else ("BasicVSR++ enhanced pair available." if paired_mc else "Import a camera pair to enhance it.")
+                )
+                st.markdown(
+                    f"""
+                    <div class='fk-enh-card'>
+                        <div class='fk-enh-top'>
+                            <span class='fk-enh-title'>Enhancement</span>
+                            <span class='fk-enh-badge'>BasicVSR++</span>
+                        </div>
+                        <div class='fk-muted'>{mc_enh_sub}</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+                mc_enh_label = "Switch to Original" if (is_mc_enh and paired_mc) else "Enhance video"
+                if st.button(mc_enh_label, width="stretch", disabled=(paired_mc is None), key="btn_mc_enhance_pair"):
+                    ss["active_mc_key"] = paired_mc["scene_key"]
+                    st.rerun()
+
+                # VIEW MODE segmented pill
                 st.markdown("<div class='fk-sec'>VIEW MODE</div>", unsafe_allow_html=True)
                 with st.container(key="fk_mc_toggle_box"):
                     m1, m2 = st.columns(2, gap="small")
-                    if m1.button("Original", type=("primary" if ss["mc_view_mode"] == "Original" else "secondary"), width="stretch", key="mc_vm_orig"):
+                    if m1.button("Original", type=("primary" if ss["mc_view_mode"] == "Original" else "secondary"), width="stretch", disabled=(scene is None), key="mc_vm_orig"):
                         ss["mc_view_mode"] = "Original"
                         st.rerun()
-                    if m2.button("Detected", type=("primary" if ss["mc_view_mode"] == "Detected" else "secondary"), width="stretch", key="mc_vm_det"):
+                    if m2.button("Detected", type=("primary" if (ss["mc_view_mode"] == "Detected" and mc_ready) else "secondary"), width="stretch", disabled=(scene is None or not mc_ready), key="mc_vm_det"):
                         ss["mc_view_mode"] = "Detected"
                         st.rerun()
 
+                # CONFIDENCE THRESHOLD
                 st.markdown(
                     f"""
                     <div style='display:flex; justify-content:space-between; align-items:center; margin:12px 0 2px 0;'>
@@ -1490,35 +1555,97 @@ def render_multicam_page(mc_scenes: list[dict]) -> None:
                     ss["mc_conf_pct"] = new_mc_c
                     st.rerun()
 
-                st.markdown("<div class='fk-sec' style='margin-top:16px;'>TRAINED MODEL</div>", unsafe_allow_html=True)
-                st.markdown("<div class='fk-muted'>Model 12 (Production Video SOTA)<br/>Multi-Camera Corroboration</div>", unsafe_allow_html=True)
+                # Analyze video button + CCTV Intelligence toggle (identical to Single Video)
+                mc_analyze_type = "primary" if (scene is not None and not mc_ready) else "secondary"
+                if st.button("Analyze video", type=mc_analyze_type, width="stretch", disabled=(scene is None), key="btn_mc_analyze"):
+                    with st.spinner(f"Analyzing CAM-01 & CAM-02 streams at {ss['mc_conf_pct']}% threshold..."):
+                        time.sleep(0.65)
+                    ss["mc_analysis_ready"] = True
+                    ss["mc_view_mode"] = "Detected"
+                    st.rerun()
 
-        with col_work:
-            with st.container(key="fk_workspace_panel"):
+                new_mc_intel = st.toggle("CCTV Intelligence Layer", value=ss["cctv_intel"], key="mc_side_intel_toggle")
+                if new_mc_intel != ss["cctv_intel"]:
+                    ss["cctv_intel"] = new_mc_intel
+                    st.rerun()
+
+                # ANALYSIS STATUS
+                st.markdown("<div class='fk-sec'>ANALYSIS STATUS</div>", unsafe_allow_html=True)
+                if scene is None:
+                    mc_st_title = "Ready for detection"
+                    mc_st_detail = "Choose or import a CAM-01 & CAM-02 scene to begin."
+                elif not mc_ready:
+                    mc_st_title = "Streams loaded"
+                    mc_st_detail = f"Set threshold ({ss['mc_conf_pct']}%), then click Analyze video."
+                else:
+                    mc_st_title = "Analysis complete"
+                    mc_st_detail = f"{len(combined)} observation(s) at {ss['mc_conf_pct']}% · {'CCTV Intel ON' if ss['cctv_intel'] else 'Raw Detector'}"
                 st.markdown(
                     f"""
-                    <div class='fk-ws-heading'>
-                        <span class='fk-ws-title'>MULTI-CAMERA WORKSPACE · {scene['title'].upper()}</span>
-                        <span class='fk-muted'>{'Detected evidence' if ss['mc_view_mode'] == 'Detected' else 'Original evidence'}</span>
+                    <div class='fk-status-card'>
+                        <div class='fk-status-title'>{mc_st_title}</div>
+                        <div class='fk-muted'>{mc_st_detail}</div>
                     </div>
                     """,
                     unsafe_allow_html=True,
                 )
-                vc1, vc2 = st.columns(2, gap="medium")
-                with vc1:
-                    st.markdown(f"<div class='fk-sec fk-sec-first'>CAM-01 · {len(recs1)} ALERTS</div>", unsafe_allow_html=True)
-                    p1 = WEB_DATA_DIR / (c1["annotated_video_rel"] if ss["mc_view_mode"] == "Detected" else c1["original_video_rel"])
-                    if p1.exists():
-                        st.video(str(p1))
-                with vc2:
-                    st.markdown(f"<div class='fk-sec fk-sec-first'>CAM-02 · {len(recs2)} ALERTS</div>", unsafe_allow_html=True)
-                    p2 = WEB_DATA_DIR / (c2["annotated_video_rel"] if ss["mc_view_mode"] == "Detected" else c2["original_video_rel"])
-                    if p2.exists():
-                        st.video(str(p2))
+
+                st.markdown("<div class='fk-sec' style='margin-top:20px;'>TRAINED MODEL</div>", unsafe_allow_html=True)
+                st.markdown("<div class='fk-muted'>Model 12 (Production Video SOTA)<br/>Multi-Camera Corroboration<br/>best_weapon_detector_twelfth_model.pth</div>", unsafe_allow_html=True)
+
+        # ---------- CENTER: workspace ----------
+        with col_work:
+            with st.container(key="fk_workspace_panel"):
+                mc_ws_meta = (
+                    "Original evidence"
+                    if (scene is None or not mc_ready or ss["mc_view_mode"] == "Original")
+                    else "Detected evidence · Model 12"
+                )
+                mc_ws_heading = (
+                    f"MULTI-CAMERA WORKSPACE · {scene['title'].upper()}"
+                    if scene is not None
+                    else "MULTI-CAMERA WEAPON DETECTION"
+                )
+                st.markdown(
+                    f"""
+                    <div class='fk-ws-heading'>
+                        <span class='fk-ws-title'>{mc_ws_heading}</span>
+                        <span class='fk-muted'>{mc_ws_meta}</span>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+                if scene is None:
+                    st.markdown(
+                        """
+                        <div class='fk-empty-canvas'>
+                            <div class='fk-ec-main'>Choose or import a Multi-Camera scene to begin</div>
+                            <div class='fk-ec-sub'>Synchronized CAM-01 & CAM-02 CCTV streams</div>
+                            <div class='fk-ec-sub'>Enhance if needed, then click Analyze video</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    show_det = mc_ready and (ss["mc_view_mode"] == "Detected")
+                    vc1, vc2 = st.columns(2, gap="medium")
+                    with vc1:
+                        lbl1 = f"CAM-01 · {len(recs1)} ALERTS" if mc_ready else "CAM-01 · ORIGINAL STREAM"
+                        st.markdown(f"<div class='fk-sec fk-sec-first'>{lbl1}</div>", unsafe_allow_html=True)
+                        p1 = WEB_DATA_DIR / (c1["annotated_video_rel"] if show_det else c1["original_video_rel"])
+                        if p1.exists():
+                            st.video(str(p1))
+                    with vc2:
+                        lbl2 = f"CAM-02 · {len(recs2)} ALERTS" if mc_ready else "CAM-02 · ORIGINAL STREAM"
+                        st.markdown(f"<div class='fk-sec fk-sec-first'>{lbl2}</div>", unsafe_allow_html=True)
+                        p2 = WEB_DATA_DIR / (c2["annotated_video_rel"] if show_det else c2["original_video_rel"])
+                        if p2.exists():
+                            st.video(str(p2))
 
                 with st.container(key="fk_obs_box"):
                     st.markdown("<div class='fk-sec fk-sec-first'>UNIFIED CHRONOLOGICAL MULTI-CAMERA TIMELINE</div>", unsafe_allow_html=True)
-                    if combined:
+                    if mc_ready and combined:
                         df_mc = pd.DataFrame([
                             {
                                 "Time": r["timestamp_formatted"],
@@ -1531,38 +1658,59 @@ def render_multicam_page(mc_scenes: list[dict]) -> None:
                         ])
                         st.dataframe(df_mc, width="stretch", hide_index=True, height=205)
                     else:
-                        st.dataframe(pd.DataFrame(columns=["Time", "Camera", "Object", "Confidence", "Frame"]), width="stretch", hide_index=True, height=150)
+                        st.dataframe(pd.DataFrame(columns=["Time", "Camera", "Object", "Confidence", "Frame"]), width="stretch", hide_index=True, height=160)
 
+                st.markdown(
+                    """
+                    <div style='display:flex; justify-content:space-between; align-items:center; margin-top:8px;'>
+                        <span class='fk-safety-note'>Automated multi-camera detections require human review.</span>
+                        <span class='fk-muted'>CAM-01 + CAM-02 Synchronized Corroboration</span>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+        # ---------- RIGHT: summaryPanel ----------
         with col_sum:
             with st.container(key="fk_summary_panel"):
                 st.markdown("<div class='fk-sec fk-sec-first'>DETECTION SUMMARY</div>", unsafe_allow_html=True)
                 hg_mc = sum(1 for r in combined if r["object_label"] == "handgun")
                 kn_mc = sum(1 for r in combined if r["object_label"] == "knife")
+                tot_mc_txt = str(len(combined)) if mc_ready else "—"
+                hg_mc_txt = str(hg_mc) if mc_ready else "—"
+                kn_mc_txt = str(kn_mc) if mc_ready else "—"
+
                 st.markdown(
                     f"""
                     <div class='fk-metrics-row'>
-                        <div class='fk-metric-card'><div class='fk-metric-num'>{len(combined)}</div><div class='fk-metric-lbl'>DETECTIONS</div></div>
-                        <div class='fk-metric-card'><div class='fk-metric-num'>{hg_mc}</div><div class='fk-metric-lbl'>HANDGUNS</div></div>
-                        <div class='fk-metric-card'><div class='fk-metric-num'>{kn_mc}</div><div class='fk-metric-lbl'>KNIVES</div></div>
+                        <div class='fk-metric-card'><div class='fk-metric-num'>{tot_mc_txt}</div><div class='fk-metric-lbl'>DETECTIONS</div></div>
+                        <div class='fk-metric-card'><div class='fk-metric-num'>{hg_mc_txt}</div><div class='fk-metric-lbl'>HANDGUNS</div></div>
+                        <div class='fk-metric-card'><div class='fk-metric-num'>{kn_mc_txt}</div><div class='fk-metric-lbl'>KNIVES</div></div>
                     </div>
                     """,
                     unsafe_allow_html=True,
                 )
-                corroborated = len(recs1) > 0 and len(recs2) > 0
-                st.markdown(
-                    f"""
-                    <div class='fk-status-card'>
-                        <div class='fk-status-title'>{'Dual-Camera Corroborated' if corroborated else 'Single-Angle / Clean Scene'}</div>
-                        <div class='fk-muted'>CAM-01: {len(recs1)} alerts · CAM-02: {len(recs2)} alerts</div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-                st.markdown("<div class='fk-sec'>FORENSIC EXPORT</div>", unsafe_allow_html=True)
-                mc_pdf = build_multicam_pdf_bytes(scene, recs1, recs2, mc_thresh, mc_intel)
-                mc_csv = pd.DataFrame(combined).to_csv(index=False).encode("utf-8") if combined else b"camera,timestamp_formatted,frame_number,object_label,confidence_score\n"
-                st.download_button("Multi-Camera PDF Report", data=mc_pdf, file_name=f"FORENSIKADA_{scene['scene_key']}_multicam.pdf", mime="application/pdf", type="primary", width="stretch")
-                st.download_button("Combined Timeline (CSV)", data=mc_csv, file_name=f"FORENSIKADA_{scene['scene_key']}_combined.csv", mime="text/csv", width="stretch")
+
+                if scene is None:
+                    st.markdown("<div class='fk-muted' style='margin-bottom:14px;'>Import or select a Multi-Camera scene, choose a confidence threshold, then click Analyze video.</div>", unsafe_allow_html=True)
+                elif not mc_ready:
+                    st.markdown(f"<div class='fk-muted' style='margin-bottom:14px;'>Synchronized streams loaded. Adjust the confidence threshold (<b>{ss['mc_conf_pct']}%</b>) and click <b>Analyze video</b> to run cross-camera corroboration.</div>", unsafe_allow_html=True)
+                else:
+                    corroborated = len(recs1) > 0 and len(recs2) > 0
+                    st.markdown(
+                        f"""
+                        <div class='fk-status-card'>
+                            <div class='fk-status-title'>{'Dual-Camera Corroborated' if corroborated else 'Clean Non-Weapon / Single-Angle Scene'}</div>
+                            <div class='fk-muted'>CAM-01: {len(recs1)} alerts · CAM-02: {len(recs2)} alerts</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                    st.markdown("<div class='fk-sec'>FORENSIC EXPORT</div>", unsafe_allow_html=True)
+                    mc_pdf = build_multicam_pdf_bytes(scene, recs1, recs2, mc_thresh, mc_intel)
+                    mc_csv = pd.DataFrame(combined).to_csv(index=False).encode("utf-8") if combined else b"camera,timestamp_formatted,frame_number,object_label,confidence_score\n"
+                    st.download_button("Multi-Camera PDF Report", data=mc_pdf, file_name=f"FORENSIKADA_{scene['scene_key']}_multicam.pdf", mime="application/pdf", type="primary", width="stretch")
+                    st.download_button("Combined Timeline (CSV)", data=mc_csv, file_name=f"FORENSIKADA_{scene['scene_key']}_combined.csv", mime="text/csv", width="stretch")
 
 
 def render_evaluator_guide_page() -> None:
@@ -1644,6 +1792,11 @@ def main() -> None:
     entry, orig_mp4, annot_mp4, filtered_records, paired_entry = get_active_single_context(single_videos)
     analysis_ready = bool(ss.get("analysis_ready", False))
 
+    is_mc_mode = (ss["active_mode"] == "Multi-camera")
+    active_mc_scene = next((s for s in mc_scenes if s["scene_key"] == ss.get("active_mc_key")), None) if ss.get("active_mc_key") else None
+    mc_ready_hdr = bool(ss.get("mc_analysis_ready", False)) and (active_mc_scene is not None)
+    can_close = (active_mc_scene is not None) if is_mc_mode else (entry is not None)
+
     # ===== 1. EXACT DESKTOP TOP HEADER BAR =====
     with st.container(key="fk_header_bar"):
         hc_brand, hc_imp, hc_cls, hc_rep, hc_sav, hc_set = st.columns([3.3, 1.05, 0.95, 1.05, 1.25, 0.42], gap="small")
@@ -1666,18 +1819,37 @@ def main() -> None:
             if st.button("Import videos", type="primary", width="stretch", key="hdr_import"):
                 dialog_import_videos(single_videos, mc_scenes)
         with hc_cls:
-            if st.button("Close videos", width="stretch", disabled=(entry is None), key="hdr_close"):
-                ss["active_video_id"] = None
-                ss["custom_result"] = None
-                ss["analysis_ready"] = False
-                ss["view_mode"] = "Original"
-                ss["selected_obs_idx"] = 0
+            if st.button("Close videos", width="stretch", disabled=(not can_close), key="hdr_close"):
+                if is_mc_mode:
+                    ss["active_mc_key"] = None
+                    ss["mc_analysis_ready"] = False
+                    ss["mc_view_mode"] = "Original"
+                else:
+                    ss["active_video_id"] = None
+                    ss["custom_result"] = None
+                    ss["analysis_ready"] = False
+                    ss["view_mode"] = "Original"
+                    ss["selected_obs_idx"] = 0
                 st.rerun()
         with hc_rep:
-            if st.button("Forensic report", width="stretch", disabled=(entry is None or not analysis_ready), key="hdr_report"):
+            if st.button("Forensic report", width="stretch", disabled=(entry is None or not analysis_ready or is_mc_mode), key="hdr_report"):
                 dialog_forensic_report(entry, filtered_records, ss["conf_pct"] / 100.0, ss["cctv_intel"])
         with hc_sav:
-            if entry is not None and analysis_ready:
+            if is_mc_mode and mc_ready_hdr:
+                mc_t1 = load_telemetry(active_mc_scene["cam1"]["telemetry_rel"])
+                mc_t2 = load_telemetry(active_mc_scene["cam2"]["telemetry_rel"])
+                mc_r1 = filter_records(mc_t1, ss["mc_conf_pct"] / 100.0, ss["cctv_intel"])
+                mc_r2 = filter_records(mc_t2, ss["mc_conf_pct"] / 100.0, ss["cctv_intel"])
+                mc_pdf_b = build_multicam_pdf_bytes(active_mc_scene, mc_r1, mc_r2, ss["mc_conf_pct"] / 100.0, ss["cctv_intel"])
+                st.download_button(
+                    "Save report (PDF)",
+                    data=mc_pdf_b,
+                    file_name=f"FORENSIKADA_{active_mc_scene['scene_key']}_multicam.pdf",
+                    mime="application/pdf",
+                    width="stretch",
+                    key="hdr_mc_save_dl",
+                )
+            elif (not is_mc_mode) and entry is not None and analysis_ready:
                 vid_reviews = ss["reviews"].setdefault(entry["video_id"], {})
                 pdf_b = build_single_video_pdf_bytes(entry, filtered_records, ss["conf_pct"] / 100.0, ss["cctv_intel"], vid_reviews)
                 st.download_button(
