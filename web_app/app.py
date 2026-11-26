@@ -799,6 +799,18 @@ def inject_exact_desktop_css(dark_mode: bool) -> None:
             border-radius: 6px;
             overflow: hidden;
         }}
+        [data-testid="stImage"],
+        [data-testid="stImage"] > div {{
+            width: 100% !important;
+            max-width: 100% !important;
+        }}
+        [data-testid="stImage"] img {{
+            width: 100% !important;
+            max-width: 100% !important;
+            height: auto !important;
+            border-radius: 8px !important;
+            display: block !important;
+        }}
         code {{
             background: transparent !important;
             color: {text_muted} !important;
@@ -1594,7 +1606,7 @@ def dialog_observation_review(entry: dict, orig_mp4: Path, filtered_records: lis
         if orig_mp4 and orig_mp4.exists():
             frame_rgb = extract_annotated_frame_rgb(orig_mp4, rec["frame_number"], rec["norm_box"], rec["object_label"], rec["confidence_score"])
             if frame_rgb is not None:
-                st.image(frame_rgb, caption=f"Frame {rec['frame_number']} ({rec['timestamp_formatted']}) · Box {rec['bounding_box']}", width="stretch")
+                st.image(frame_rgb, caption=f"Frame {rec['frame_number']} ({rec['timestamp_formatted']}) · Box {rec['bounding_box']}", use_container_width=True)
 
     with c_ctrl:
         st.markdown(
@@ -1884,13 +1896,15 @@ def render_single_video_page(single_videos: list[dict], mc_scenes: list[dict], e
                 enh_btn_label = "Reset to Original" if is_enh else "Enhance video"
                 if st.button(enh_btn_label, width="stretch", disabled=(not has_enh), key="btn_enhance_pair"):
                     if not is_enh:
-                        with st.spinner("Enhancing footage with BasicVSR++ & running Model 12 detection..."):
+                        with st.spinner("Enhancing footage with BasicVSR++..."):
                             time.sleep(0.6)
                         ss["is_enhanced"] = True
-                        ss["analysis_ready"] = True
-                        ss["view_mode"] = "Detected"
+                        ss["analysis_ready"] = False
+                        ss["view_mode"] = "Original"
                     else:
                         ss["is_enhanced"] = False
+                        ss["analysis_ready"] = False
+                        ss["view_mode"] = "Original"
                     ss["selected_obs_idx"] = 0
                     st.rerun()
 
@@ -2120,7 +2134,7 @@ def render_single_video_page(single_videos: list[dict], mc_scenes: list[dict], e
                         if orig_mp4 is not None and orig_mp4.exists():
                             frame_rgb = extract_annotated_frame_rgb(orig_mp4, rec["frame_number"], rec["norm_box"], rec["object_label"], rec["confidence_score"])
                             if frame_rgb is not None:
-                                st.image(frame_rgb, width="stretch")
+                                st.image(frame_rgb, use_container_width=True)
 
                         b1, b2, b3 = st.columns(3, gap="small")
                         now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")

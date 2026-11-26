@@ -593,7 +593,7 @@
       "category": "Multi-Camera No-Weapon",
       "has_enhanced": false,
       "matching_window_seconds": 1.5,
-      "sync_clock": "CAM-01 offset 0.000 s \u00b7 CAM-02 offset 0.000 s",
+      "sync_clock": "CAM-01 offset +1.900 s \u00b7 CAM-02 offset 0.000 s",
       "cam1": {
         "video_id": "MC04_CAM01",
         "pair_id": "MC04_CAM01",
@@ -602,7 +602,7 @@
         "version": "Original",
         "has_enhanced": false,
         "camera_id": "CAM-01",
-        "offset_seconds": 0.0,
+        "offset_seconds": 1.9,
         "source_filename": "1869451F17C5_20261120124918870_cam0.mp4",
         "enhanced_filename": null,
         "sha256": "f6af0607f93d0abdc5cf20885ff2c5668d49904797af7d6f1a4280eed63da301",
